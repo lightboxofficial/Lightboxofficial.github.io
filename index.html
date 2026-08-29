@@ -87,8 +87,8 @@
 
         /* 头像放大 */
         .avatar-item {
-            width: 135px;
-            height: 135px;
+            width: 125px;
+            height: 125px;
             border-radius: 18px;
             overflow: hidden;
             background-color: #111111;
@@ -126,6 +126,7 @@
             text-align: center;
             cursor: pointer;
             user-select: none;
+            text-decoration: none;
         }
 
         .btn-solid-white:active {
@@ -144,6 +145,7 @@
             text-align: center;
             cursor: pointer;
             user-select: none;
+            text-decoration: none;
         }
 
         .btn-outline-white:active {
@@ -182,7 +184,7 @@
     </div>
 
     <div class="card-list">
-        <!-- 仅保留自我介绍头像卡片，内容完全不变 -->
+        <!-- 仅保留自我介绍头像卡片，按钮改为a链接指向百度 -->
         <div class="card profile-big-card">
             <div class="avatar-group">
                 <div class="avatar-item avatar-1"></div>
@@ -190,12 +192,12 @@
             </div>
 
             <div class="btn-group-col">
-                <div class="btn-solid-white">测试+</div>
-                <div class="btn-outline-white">测试文本</div>
+                <a class="btn-solid-white" href="https://www.baidu.com">测试+</a>
+                <a class="btn-outline-white" href="https://www.baidu.com">测试文本</a>
             </div>
 
             <div class="profile-desc">
-                回退版本：保留磨砂玻璃完整效果。华为content://本地打开按钮会变暗，WPS、电脑浏览器打开全部测试正常。
+                回退版本：保留磨砂玻璃完整效果。华为content://本地打开按钮会变暗，WPS、电脑浏览器打开完全正常。
             </div>
         </div>
     </div>
