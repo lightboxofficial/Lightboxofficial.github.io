@@ -211,10 +211,16 @@
             width: 100%;
             height: 100%;
             font-family: Consolas, monospace;
-            font-size: 0.45rem;
+            font-size: 0.52rem;
             color: #c5c9d1;
             overflow-y: auto;
             line-height: 2.15;
+            /* 隐藏滚动条，保留滚动能力，安卓平板兼容 */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .update-log-wrap::-webkit-scrollbar {
+            display: none;
         }
 
         footer {
