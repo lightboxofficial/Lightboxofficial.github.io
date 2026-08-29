@@ -10,18 +10,19 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: #e5e7eb;
             min-height: 100vh;
             background-color: #050608;
+        /* ========== 修改这里替换你的背景图片路径 ========== */
             background-image: url("/bg-cover.jpg");
             background-repeat: no-repeat;
             background-position: center;
             background-size: cover;
+        /* 固定背景，滚动页面背景不会滑动 */
+            background-attachment: fixed;
         }
-
         body::before {
             content: "";
             position: fixed;
@@ -30,7 +31,6 @@
             pointer-events: none;
             z-index: 0;
         }
-
         .container {
             position: relative;
             z-index: 1;
@@ -38,30 +38,25 @@
             margin: 0 auto;
             padding: 60px 24px;
         }
-
         .hero {
             text-align: center;
             margin-bottom: 36px;
         }
-
         .hero h1 {
             font-size: 2.7rem;
             color: #f5f7fa;
             margin-bottom: 12px;
         }
-
         .hero .subtitle {
             font-size: 1.2rem;
             color: #9aa0ac;
         }
-
         .card-list {
             display: flex;
             flex-direction: column;
             gap: 21px;
         }
-
-        /* 放大后的自我介绍主卡片，原尺寸1.5倍 */
+        /* 卡片基础样式，统一尺寸 */
         .card {
             position: relative;
             backdrop-filter: blur(12px);
@@ -69,23 +64,21 @@
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 21px;
             padding: 21px 24px;
-            height: 144px;
+            height: 160px;
         }
 
+        /* 头像卡片布局 */
         .profile-big-card {
             display: flex;
             gap: 21px;
             align-items: stretch;
             height: 100%;
         }
-
         .avatar-group {
             display: flex;
             gap: 9px;
             flex-shrink: 0;
         }
-
-        /* 头像放大 */
         .avatar-item {
             width: 120px;
             height: 120px;
@@ -96,24 +89,19 @@
             background-position: center;
             background-size: cover;
         }
-
         .avatar-item.avatar-1 {
             background-image: url("/avatar1.jpg");
         }
-
         .avatar-item.avatar-2 {
             background-image: url("/avatar2.jpg");
         }
-
         .btn-group-col {
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            height: 105px;
+            height: 120px;
             justify-content: space-between;
         }
-
-        /* 按钮放大 */
         .btn-solid-white {
             isolation: isolate;
             padding: 0 18px;
@@ -128,11 +116,9 @@
             user-select: none;
             text-decoration: none;
         }
-
         .btn-solid-white:active {
             background: #ececec !important;
         }
-
         .btn-outline-white {
             isolation: isolate;
             padding: 0 18px;
@@ -147,15 +133,12 @@
             user-select: none;
             text-decoration: none;
         }
-
         .btn-outline-white:active {
             background: rgba(255,255,255,0.07) !important;
         }
-
-        /* 描述文案放大，隐藏滚动条 */
         .profile-desc {
             flex: 1;
-            height: 105px;
+            height: 120px;
             color: #cfd3da;
             line-height: 1.55;
             font-size: 1.1rem;
@@ -166,6 +149,57 @@
         }
         .profile-desc::-webkit-scrollbar {
             display: none;
+        }
+
+        /* ========== 新增：单元项目卡片样式 ========== */
+        .unit-card-inner {
+            display: flex;
+            gap:21px;
+            align-items: stretch;
+            height:100%;
+        }
+        .unit-img {
+            width:160px;
+            flex-shrink:0;
+            height:100%;
+            border-radius:16px;
+            background-color:#111;
+            background-image:url("/picture1.jpg");
+            background-size:cover;
+            background-position:center;
+        }
+        .unit-text {
+            flex:1;
+            height:100%;
+            overflow-y:auto;
+            padding-right:8px;
+            color:#cfd3da;
+            font-size:1.1rem;
+            line-height:1.55;
+            scrollbar-width:none;
+            -ms-overflow-style:none;
+        }
+        .unit-text::-webkit-scrollbar{
+            display:none;
+        }
+        .unit-btn-wrap {
+            flex-shrink:0;
+            display:flex;
+            align-items:center;
+        }
+        .unit-long-btn {
+            isolation:isolate;
+            padding: 0 22px;
+            line-height:52px;
+            background:#ffffff;
+            color:#000;
+            text-decoration:none;
+            border-radius:10px;
+            font-size:1.1rem;
+            white-space:nowrap;
+        }
+        .unit-long-btn:active{
+            background:#ececec;
         }
 
         footer {
@@ -182,26 +216,36 @@
         <h1>NoTificians</h1>
         <p class="subtitle">手机本地测试版本</p>
     </div>
-
     <div class="card-list">
-        <!-- 仅保留自我介绍头像卡片，按钮改为a链接指向百度 -->
+        <!-- 自我介绍头像卡片 -->
         <div class="card profile-big-card">
             <div class="avatar-group">
                 <div class="avatar-item avatar-1"></div>
                 <div class="avatar-item avatar-2"></div>
             </div>
-
             <div class="btn-group-col">
-                <a class="btn-solid-white" href="https://space.bilibili.com/3546714772343354">+看看我的B站</a>
-                <a class="btn-outline-white" href="https://chat.neboer.site/">了解我们社区</a>
+                <a class="btn-solid-white" href="https://space.bilibili.com/3546714772343354" target="_blank">+看看我的B站</a>
+                <a class="btn-outline-white" href="https://chat.neboer.site/" target="_blank">了解我们社区</a>
             </div>
-
             <div class="profile-desc">
                 我是NoTificians无闻,目前（2026/08/29）还是一个小小的准初二牲，胸有大志却胸无大志，虽然本身没什么实力但是也不怎么低调，神秘嘉豪了属于是，我喜欢编程，略懂C++,PYTHON以及图形化，也喜欢二次元，同样喜欢写作和音乐，喜爱小约翰可汗，更详细的简介看我github去罢（bushi）这是我的个人站点哦
             </div>
         </div>
-    </div>
 
+        <!-- 新增：单元项目卡片 -->
+        <div class="card">
+            <div class="unit-card-inner">
+                <div class="unit-img"></div>
+                <div class="unit-text">
+                    卡片格式实例，这里放项目介绍测试文案。可以写项目简介、功能特点、开发进度等内容。当文字内容超出容器高度时可以上下滑动浏览，不会显示滚动条。测试文本：本单元卡片与上方头像卡片尺寸完全对等，采用统一磨砂玻璃UI，左侧展示图片，中间放置长文本，最右侧放置长条跳转按钮。可以用来展示项目、作品、工具链接。
+                </div>
+                <div class="unit-btn-wrap">
+                    <a class="unit-long-btn" href="https://www.baidu.com" target="_blank">前往查看</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
     <footer>© 2026 Test Mobile</footer>
 </div>
 </body>
