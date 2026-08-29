@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobile‑Test‑Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #e5e7eb;
+            min-height: 100vh;
+            background-color: #050608;
+            background-image: url("/bg-cover.jpg");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.72));
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 40px 16px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: 1.8rem;
+            color: #f5f7fa;
+            margin-bottom: 8px;
+        }
+
+        .hero .subtitle {
+            font-size: 0.85rem;
+            color: #9aa0ac;
+        }
+
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .card {
+            position: relative;
+            backdrop-filter: blur(12px);
+            background-color: rgba(18,20,24,0.48);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 14px 16px;
+            height: 96px;
+        }
+
+        .profile-big-card {
+            display: flex;
+            gap: 14px;
+            align-items: stretch;
+            height: 100%;
+        }
+
+        .avatar-group {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .avatar-item {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #111111;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+        }
+
+        .avatar-item.avatar-1 {
+            background-image: url("/avatar1.jpg");
+        }
+
+        .avatar-item.avatar-2 {
+            background-image: url("/avatar2.jpg");
+        }
+
+        .btn-group-col {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            height: 70px;
+            justify-content: space-between;
+        }
+
+        .btn-solid-white {
+            isolation: isolate;
+            padding: 0 12px;
+            line-height: 31px;
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .btn-solid-white:active {
+            background: #ececec !important;
+        }
+
+        .btn-outline-white {
+            isolation: isolate;
+            padding: 0 12px;
+            line-height: 31px;
+            background: transparent !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 6px;
+            font-size: 0.82rem;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .btn-outline-white:active {
+            background: rgba(255,255,255,0.07) !important;
+        }
+
+        .profile-desc {
+            flex: 1;
+            height: 70px;
+            color: #cfd3da;
+            line-height: 1.42;
+            font-size: 0.78rem;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .dashboard-card {
+            position: relative;
+            backdrop-filter: blur(12px);
+            background-color: rgba(18,20,24,0.48);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 14px 16px;
+            height: 96px;
+        }
+
+        .dashboard-inner {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dashboard-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .dash-btn-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .dash-emoji {
+            font-size: 15px;
+            user-select: none;
+        }
+
+        .dash-link-btn {
+            padding: 4px 6px;
+            background: #ffffff;
+            color: #000000;
+            text-decoration: none;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.66rem;
+            white-space: nowrap;
+        }
+
+        .dash-link-btn:active {
+            background: #ececec;
+        }
+
+        .update-log-wrap {
+            width: 100%;
+            height: 100%;
+            font-family: Consolas, monospace;
+            font-size: 0.52rem;
+            color: #c5c9d1;
+            overflow-y: auto;
+            line-height: 2.15;
+        }
+
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1>NoTificians</h1>
+        <p class="subtitle">手机本地测试版本</p>
+    </div>
+
+    <div class="card-list">
+        <div class="card profile-big-card">
+            <div class="avatar-group">
+                <div class="avatar-item avatar-1"></div>
+                <div class="avatar-item avatar-2"></div>
+            </div>
+
+            <div class="btn-group-col">
+                <div class="btn-solid-white">测试+</div>
+                <div class="btn-outline-white">测试文本</div>
+            </div>
+
+            <div class="profile-desc">
+                回退版本：保留磨砂玻璃完整效果。华为content://本地打开按钮会变暗，WPS、电脑浏览器打开完全正常。
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-inner">
+                <div class="dashboard-col">
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">✨</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">🔥</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                </div>
+
+                <div class="dashboard-col">
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">⚡</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">💎</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                </div>
+
+                <div class="dashboard-col">
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">🚀</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">📌</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                </div>
+
+                <div class="dashboard-col">
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">🎯</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">🔧</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                </div>
+
+                <div class="dashboard-col">
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">📁</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">🌐</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                </div>
+
+                <div class="dashboard-col">
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">📎</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">🔖</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                </div>
+
+                <div class="dashboard-col">
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">🗂️</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">📊</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                </div>
+
+                <div class="dashboard-col">
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">🔍</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">💡</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                </div>
+
+                <div class="dashboard-col">
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">🛠️</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                    <div class="dash-btn-item">
+                        <span class="dash-emoji">📜</span>
+                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="update-log-wrap">
+<span>🟢</span> 新增功能🧩：完整搭建统一磨砂卡片UI体系、可自定义的仪表板多列按钮组件、带滚动能力的更新日志容器，完成页面基础组件库的首轮搭建工作<br>
+<span>🟡</span> 已知缺陷⚠️：华为WebView在content://本地协议下backdrop‑filter滤镜异常压低按钮亮度，超小屏幕设备多列按钮组件发生横向挤压文字重叠，均属于浏览器底层兼容层面问题<br>
+<span>🔵</span> 性能优化📈：统一全部卡片的内边距圆角尺寸参数，精细调整日志模块字体与行高，优化isolation隔离渲染层级，减少异常渲染碎片提升整体页面渲染稳定性<br>
+<span>🔴</span> 待处理项🛠️：补充本地文件模式JS异常捕获输出模块，增加滤镜失效降级样式预案，完善从极小屏到大屏多档位屏幕尺寸的完整适配兜底逻辑
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-inner"></div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-inner"></div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-inner"></div>
+        </div>
+    </div>
+
+    <footer>© 2026 Test Mobile</footer>
+</div>
+</body>
+</html>
