@@ -34,60 +34,62 @@
         .container {
             position: relative;
             z-index: 1;
-            max-width: 920px;
+            max-width: 1380px;
             margin: 0 auto;
-            padding: 40px 16px;
+            padding: 60px 24px;
         }
 
         .hero {
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 36px;
         }
 
         .hero h1 {
-            font-size: 1.8rem;
+            font-size: 2.7rem;
             color: #f5f7fa;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
         .hero .subtitle {
-            font-size: 0.85rem;
+            font-size: 1.2rem;
             color: #9aa0ac;
         }
 
         .card-list {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 21px;
         }
 
+        /* 放大后的自我介绍主卡片，原尺寸1.5倍 */
         .card {
             position: relative;
             backdrop-filter: blur(12px);
             background-color: rgba(18,20,24,0.48);
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 14px;
-            padding: 14px 16px;
-            height: 96px;
+            border-radius: 21px;
+            padding: 21px 24px;
+            height: 144px;
         }
 
         .profile-big-card {
             display: flex;
-            gap: 14px;
+            gap: 21px;
             align-items: stretch;
             height: 100%;
         }
 
         .avatar-group {
             display: flex;
-            gap: 6px;
+            gap: 9px;
             flex-shrink: 0;
         }
 
+        /* 头像放大 */
         .avatar-item {
-            width: 70px;
-            height: 70px;
-            border-radius: 12px;
+            width: 105px;
+            height: 105px;
+            border-radius: 18px;
             overflow: hidden;
             background-color: #111111;
             background-repeat: no-repeat;
@@ -107,19 +109,20 @@
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            height: 70px;
+            height: 105px;
             justify-content: space-between;
         }
 
+        /* 按钮放大 */
         .btn-solid-white {
             isolation: isolate;
-            padding: 0 12px;
-            line-height: 31px;
+            padding: 0 18px;
+            line-height: 46px;
             background: #ffffff !important;
             color: #000000 !important;
             border: none;
-            border-radius: 6px;
-            font-size: 0.82rem;
+            border-radius: 9px;
+            font-size: 1.2rem;
             text-align: center;
             cursor: pointer;
             user-select: none;
@@ -131,13 +134,13 @@
 
         .btn-outline-white {
             isolation: isolate;
-            padding: 0 12px;
-            line-height: 31px;
+            padding: 0 18px;
+            line-height: 46px;
             background: transparent !important;
             color: #ffffff !important;
             border: 1px solid rgba(255,255,255,0.8);
-            border-radius: 6px;
-            font-size: 0.82rem;
+            border-radius: 9px;
+            font-size: 1.2rem;
             text-align: center;
             cursor: pointer;
             user-select: none;
@@ -147,87 +150,27 @@
             background: rgba(255,255,255,0.07) !important;
         }
 
+        /* 描述文案放大，隐藏滚动条 */
         .profile-desc {
             flex: 1;
-            height: 70px;
+            height: 105px;
             color: #cfd3da;
-            line-height: 1.42;
-            font-size: 0.78rem;
+            line-height: 1.55;
+            font-size: 1.1rem;
             overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .dashboard-card {
-            position: relative;
-            backdrop-filter: blur(12px);
-            background-color: rgba(18,20,24,0.48);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 14px;
-            padding: 14px 16px;
-            height: 96px;
-        }
-
-        .dashboard-inner {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .dashboard-col {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .dash-btn-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .dash-emoji {
-            font-size: 15px;
-            user-select: none;
-        }
-
-        .dash-link-btn {
-            padding: 4px 6px;
-            background: #ffffff;
-            color: #000000;
-            text-decoration: none;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 0.66rem;
-            white-space: nowrap;
-        }
-
-        .dash-link-btn:active {
-            background: #ececec;
-        }
-
-        .update-log-wrap {
-            width: 100%;
-            height: 100%;
-            font-family: Consolas, monospace;
-            font-size: 1.0rem;
-            color: #c5c9d1;
-            overflow-y: auto;
-            line-height: 2.15;
-            /* 隐藏滚动条，保留滚动能力，安卓平板兼容 */
+            padding-right: 8px;
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
-        .update-log-wrap::-webkit-scrollbar {
+        .profile-desc::-webkit-scrollbar {
             display: none;
         }
 
         footer {
-            margin-top: 60px;
+            margin-top: 80px;
             text-align: center;
             color: #6b7280;
-            font-size: 0.8rem;
+            font-size: 1.1rem;
         }
     </style>
 </head>
@@ -239,6 +182,7 @@
     </div>
 
     <div class="card-list">
+        <!-- 仅保留自我介绍头像卡片，内容完全不变 -->
         <div class="card profile-big-card">
             <div class="avatar-group">
                 <div class="avatar-item avatar-1"></div>
@@ -253,130 +197,6 @@
             <div class="profile-desc">
                 回退版本：保留磨砂玻璃完整效果。华为content://本地打开按钮会变暗，WPS、电脑浏览器打开完全正常。
             </div>
-        </div>
-
-        <div class="dashboard-card">
-            <div class="dashboard-inner">
-                <div class="dashboard-col">
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">🅱️</span>
-                        <a class="dash-link-btn" href="https://space.bilibili.com/3546714772343354">我的B站</a>
-                    </div>
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">🔥</span>
-                        <a class="dash-link-btn" href="https://www.ccw.site/student/67ab30be4b57da1266f86d75">我的CCW</a>
-                    </div>
-                </div>
-
-                <div class="dashboard-col">
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">⚡</span>
-                        <a class="dash-link-btn" href="https://github.com/lightboxofficial">我的G站</a>
-                    </div>
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">💎</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                </div>
-
-                <div class="dashboard-col">
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">🚀</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">📌</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                </div>
-
-                <div class="dashboard-col">
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">🎯</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">🔧</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                </div>
-
-                <div class="dashboard-col">
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">📁</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">🌐</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                </div>
-
-                <div class="dashboard-col">
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">📎</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">🔖</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                </div>
-
-                <div class="dashboard-col">
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">🗂️</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">📊</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                </div>
-
-                <div class="dashboard-col">
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">🔍</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">💡</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                </div>
-
-                <div class="dashboard-col">
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">🛠️</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                    <div class="dash-btn-item">
-                        <span class="dash-emoji">📜</span>
-                        <a class="dash-link-btn" href="https://www.baidu.com">测试文案</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="dashboard-card">
-            <div class="update-log-wrap">
-<span>🟢</span> 新增功能🧩：完整搭建统一磨砂卡片UI体系、可自定义的仪表板多列按钮组件、带滚动能力的更新日志容器，完成页面基础组件库的首轮搭建工作<br>
-<span>🟡</span> 已知缺陷⚠️：华为WebView在content://本地协议下backdrop‑filter滤镜异常压低按钮亮度，超小屏幕设备多列按钮组件发生横向挤压文字重叠，均属于浏览器底层兼容层面问题<br>
-<span>🔵</span> 性能优化📈：统一全部卡片的内边距圆角尺寸参数，精细调整日志模块字体与行高，优化isolation隔离渲染层级，减少异常渲染碎片提升整体页面渲染稳定性<br>
-<span>🔴</span> 待处理项🛠️：补充本地文件模式JS异常捕获输出模块，增加滤镜失效降级样式预案，完善从极小屏到大屏多档位屏幕尺寸的完整适配兜底逻辑
-            </div>
-        </div>
-
-        <div class="dashboard-card">
-            <div class="dashboard-inner"></div>
-        </div>
-
-        <div class="dashboard-card">
-            <div class="dashboard-inner"></div>
-        </div>
-
-        <div class="dashboard-card">
-            <div class="dashboard-inner"></div>
         </div>
     </div>
 
