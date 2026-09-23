@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NoTificians无闻小站-求索无止境,何处是归途</title>
+<title>我的站点</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{
@@ -16,8 +16,6 @@ html,body{
   padding-bottom: 80px;
   font-family: system-ui, sans-serif;
 }
-
-/*浮岛部分*/
 .island{
   position:fixed;
   bottom:20px;
@@ -32,32 +30,24 @@ html,body{
   gap:8px;
   color:#fff;
 }
-
-/* 中间主浮岛,也就是我们要做的导航栏 */
 .island-main{
   left:50%;
   transform:translateX(-50%);
   width: 500px;
   justify-content: center;
 }
-
-/* 左侧浮岛,可以用来喝报看茶水*/
 .island-left{
   left: 20px;
   width:250px;
   justify-content:flex-start;
   padding-left:16px;
 }
-
-/* 右侧浮岛,做个登录罢 */
 .island-right{
   right: 20px;
   width:250px;
   justify-content:flex-end;
   padding-right:16px;
 }
-
-/* 通用图标按钮风格 */
 .icon-btn{
   width:auto;
   height:auto;
@@ -83,8 +73,6 @@ html,body{
   height:20px;
   stroke:rgba(255,255,255,0.75);
 }
-
-/* 弹出小框：非线性回弹动画(依旧从编程猫学的) */
 .info-popup{
   position:fixed;
   left:36px;
@@ -150,8 +138,6 @@ html,body{
   font-size:13px;
   line-height:1.5;
 }
-
-/* 点赞行 */
 .like-row{
   display:flex;
   align-items:center;
@@ -189,8 +175,6 @@ html,body{
   font-size:13px;
   opacity:0.8;
 }
-
-/* Toast 提示：非线性动画 */
 .toast{
   position:fixed;
   top:30px;
@@ -212,8 +196,6 @@ html,body{
   opacity:1;
   transform:translateX(-50%) translateY(0);
 }
-
-/* 窄屏堆叠 */
 @media (max-width:720px){
   .island{
     position:static;
@@ -237,7 +219,6 @@ html,body{
 </style>
 </head>
 <body>
-
 <div class="island-container">
   <div class="island island-left">
     <button class="icon-btn" id="albumBtn" title="壁纸信息">
@@ -247,18 +228,18 @@ html,body{
         <polyline points="21 15 16 10 5 21"></polyline>
       </svg>
     </button>
+    <button class="icon-btn" id="settingsBtn" title="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
   </div>
-
   <div class="island island-main">
-    <!-- 中间主导航 -->
   </div>
-
   <div class="island island-right">
-    <!-- 右侧功能区 -->
   </div>
 </div>
-
-<!-- 弹出小框 -->
 <div class="info-popup" id="infoPopup">
   <div class="info-popup-header">
     <span>喜欢吗？</span>
@@ -271,6 +252,10 @@ html,body{
   <div class="info-item">
     <div class="info-label">拍摄者</div>
     <div class="info-value" id="picAuthor">加载中...</div>
+  </div>
+  <div class="info-item">
+    <div class="info-label">来源</div>
+    <div class="info-value">必应每日壁纸</div>
   </div>
   <div class="like-row">
     <button class="like-btn" id="likeBtn">
@@ -290,20 +275,16 @@ html,body{
     </button>
   </div>
 </div>
-
-<!-- Toast 提示 -->
 <div class="toast" id="toast">链接已复制</div>
-
 <script>
-let currentPicInfo = { desc:'', author:'', link:'' };
-
+let currentPicInfo = { desc:'', author:'', link:'', picId:'' };
+const API_BASE = "https://like-api2.lightboxofficial.workers.dev";
 async function setBingBg(){
   try{
     const resp = await fetch("https://bing.biturl.top/");
     const img = await resp.json();
     const imgUrl = img.url + "&_t=" + Date.now();
     document.body.style.backgroundImage = `url(${imgUrl})`;
-
     const copyright = img.copyright || '';
     const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
     if(match){
@@ -314,73 +295,62 @@ async function setBingBg(){
       currentPicInfo.author = '';
     }
     currentPicInfo.link = img.copyright_link || '';
-
+    currentPicInfo.picId = img.start_date || 'default';
     document.getElementById('picDesc').textContent = currentPicInfo.desc || '暂无';
     document.getElementById('picAuthor').textContent = currentPicInfo.author || '暂无';
+    // 新图片加载后重新拉点赞数
+    liked = localStorage.getItem('bing_liked_' + currentPicInfo.picId) === '1';
+    loadLikeCount();
   }catch(e){
     console.error("获取壁纸失败",e);
     document.body.style.backgroundImage = `url(https://picsum.photos/id/1018/1920/1080)`;
   }
 }
-
-// 弹窗开关
 const albumBtn = document.getElementById('albumBtn');
 const infoPopup = document.getElementById('infoPopup');
 const closeBtn = document.getElementById('closeBtn');
-
-// 点赞功能（后端KV存储，本地记录用户状态，马上做统计）
 const likeBtn = document.getElementById('likeBtn');
 const likeCountEl = document.getElementById('likeCount');
 let liked = localStorage.getItem('bing_liked') === '1';
 let likeCount = 0;
 let apiOnline = false;
-
-// 页面加载时从后端拉点赞数
 async function loadLikeCount(){
+  if(!currentPicInfo.picId) return;
   try{
-    const res = await fetch('/api/like');
+    const res = await fetch(`${API_BASE}?picid=${currentPicInfo.picId}`);
     const data = await res.json();
     likeCount = data.count;
     apiOnline = true;
   }catch(e){
-    // 后端不可用，降级本地
-    likeCount = parseInt(localStorage.getItem('bing_likeCount') || '128', 10);
+    likeCount = parseInt(localStorage.getItem('bing_likeCount_' + currentPicInfo.picId) || '0', 10);
   }
   renderLike();
 }
-
 function renderLike(){
   likeBtn.classList.toggle('liked', liked);
   likeCountEl.textContent = likeCount;
 }
-
 likeBtn.addEventListener('click', async function(e){
   e.stopPropagation();
   liked = !liked;
-  localStorage.setItem('bing_liked', liked ? '1' : '0');
-
+  localStorage.setItem('bing_liked_' + currentPicInfo.picId, liked ? '1' : '0');
   if(apiOnline){
-    // 调用后端
     try{
       const method = liked ? 'POST' : 'DELETE';
-      const res = await fetch('/api/like', { method });
+      const res = await fetch(`${API_BASE}?picid=${currentPicInfo.picId}`, { method });
       const data = await res.json();
       likeCount = data.count;
     }catch(e){
-      // 降级本地计数
       likeCount += liked ? 1 : -1;
-      localStorage.setItem('bing_likeCount', likeCount);
+      localStorage.setItem('bing_likeCount_' + currentPicInfo.picId, likeCount);
     }
   }else{
-    // 纯本地模式
     likeCount += liked ? 1 : -1;
-    localStorage.setItem('bing_likeCount', likeCount);
+    localStorage.setItem('bing_likeCount_' + currentPicInfo.picId, likeCount);
   }
   renderLike();
 });
-
 loadLikeCount();
-
 albumBtn.addEventListener('click', function(e){
   e.stopPropagation();
   infoPopup.classList.toggle('show');
@@ -394,19 +364,15 @@ document.addEventListener('click', function(e){
     infoPopup.classList.remove('show');
   }
 });
-
-// 分享功能：复制链接 + toast
 const shareBtn = document.getElementById('shareBtn');
 const toast = document.getElementById('toast');
 let toastTimer;
-
 shareBtn.addEventListener('click', async function(e){
   e.stopPropagation();
   const shareUrl = currentPicInfo.link || window.location.href;
   try{
     await navigator.clipboard.writeText(shareUrl);
   }catch(err){
-    // 降级方案
     const input = document.createElement('input');
     input.value = shareUrl;
     document.body.appendChild(input);
@@ -414,17 +380,14 @@ shareBtn.addEventListener('click', async function(e){
     document.execCommand('copy');
     document.body.removeChild(input);
   }
-  // 显示toast
   toast.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function(){
     toast.classList.remove('show');
   }, 2000);
 });
-
 setBingBg();
 setInterval(setBingBg, 10*60*1000);
 </script>
-
 </body>
 </html>
