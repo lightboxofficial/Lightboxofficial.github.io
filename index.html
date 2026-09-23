@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoTificians无闻小站-以二元论的宽容</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{
@@ -16,7 +17,7 @@ html,body{
   font-family: system-ui, sans-serif;
 }
 
-/* 通用浮岛 */
+/*浮岛部分*/
 .island{
   position:fixed;
   bottom:20px;
@@ -32,7 +33,7 @@ html,body{
   color:#fff;
 }
 
-/* 中间主浮岛 */
+/* 中间主浮岛,也就是我们要做的导航栏 */
 .island-main{
   left:50%;
   transform:translateX(-50%);
@@ -40,7 +41,7 @@ html,body{
   justify-content: center;
 }
 
-/* 左侧浮岛 */
+/* 左侧浮岛,可以用来喝报看茶水*/
 .island-left{
   left: 20px;
   width:250px;
@@ -48,7 +49,7 @@ html,body{
   padding-left:16px;
 }
 
-/* 右侧浮岛 */
+/* 右侧浮岛,做个登录罢 */
 .island-right{
   right: 20px;
   width:250px;
@@ -56,7 +57,7 @@ html,body{
   padding-right:16px;
 }
 
-/* 通用图标按钮：纯图标，无背景无边框 */
+/* 通用图标按钮风格 */
 .icon-btn{
   width:auto;
   height:auto;
@@ -83,7 +84,7 @@ html,body{
   stroke:rgba(255,255,255,0.75);
 }
 
-/* 弹出小框：非线性回弹动画 */
+/* 弹出小框：非线性回弹动画(依旧从编程猫学的) */
 .info-popup{
   position:fixed;
   left:36px;
@@ -327,7 +328,7 @@ const albumBtn = document.getElementById('albumBtn');
 const infoPopup = document.getElementById('infoPopup');
 const closeBtn = document.getElementById('closeBtn');
 
-// 点赞功能（后端KV存储 + 本地记录用户状态）
+// 点赞功能（后端KV存储，本地记录用户状态，马上做统计）
 const likeBtn = document.getElementById('likeBtn');
 const likeCountEl = document.getElementById('likeCount');
 let liked = localStorage.getItem('bing_liked') === '1';
