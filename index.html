@@ -1,274 +1,429 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mobile‑Test‑Page</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            color: #e5e7eb;
-            min-height: 100vh;
-            background-color: #050608;
-        /* ========== 修改这里替换你的背景图片路径 ========== */
-            background-image: url("/bg-cover.jpg");
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-        /* 固定背景，滚动页面背景不会滑动 */
-            background-attachment: fixed;
-        }
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.72));
-            pointer-events: none;
-            z-index: 0;
-        }
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1380px;
-            margin: 0 auto;
-            padding: 60px 24px;
-        }
-        .hero {
-            text-align: center;
-            margin-bottom: 36px;
-        }
-        .hero h1 {
-            font-size: 2.7rem;
-            color: #f5f7fa;
-            margin-bottom: 12px;
-        }
-        .hero .subtitle {
-            font-size: 1.2rem;
-            color: #9aa0ac;
-        }
-        .card-list {
-            display: flex;
-            flex-direction: column;
-            gap: 21px;
-        }
-        /* 卡片基础样式，统一尺寸 */
-        .card {
-            position: relative;
-            backdrop-filter: blur(12px);
-            background-color: rgba(18,20,24,0.48);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 21px;
-            padding: 21px 24px;
-            height: 160px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{
+  width:100%;
+  height:100%;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+  padding-bottom: 80px;
+  font-family: system-ui, sans-serif;
+}
 
-        /* 头像卡片布局 */
-        .profile-big-card {
-            display: flex;
-            gap: 21px;
-            align-items: stretch;
-            height: 100%;
-        }
-        .avatar-group {
-            display: flex;
-            gap: 9px;
-            flex-shrink: 0;
-        }
-        .avatar-item {
-            width: 120px;
-            height: 120px;
-            border-radius: 18px;
-            overflow: hidden;
-            background-color: #111111;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-        }
-        .avatar-item.avatar-1 {
-            background-image: url("/avatar1.jpg");
-        }
-        .avatar-item.avatar-2 {
-            background-image: url("/avatar2.jpg");
-        }
-        .btn-group-col {
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            height: 120px;
-            justify-content: space-between;
-        }
-        .btn-solid-white {
-            isolation: isolate;
-            padding: 0 18px;
-            line-height: 46px;
-            background: #ffffff !important;
-            color: #000000 !important;
-            border: none;
-            border-radius: 9px;
-            font-size: 1.2rem;
-            text-align: center;
-            cursor: pointer;
-            user-select: none;
-            text-decoration: none;
-        }
-        .btn-solid-white:active {
-            background: #ececec !important;
-        }
-        .btn-outline-white {
-            isolation: isolate;
-            padding: 0 18px;
-            line-height: 46px;
-            background: transparent !important;
-            color: #ffffff !important;
-            border: 1px solid rgba(255,255,255,0.8);
-            border-radius: 9px;
-            font-size: 1.2rem;
-            text-align: center;
-            cursor: pointer;
-            user-select: none;
-            text-decoration: none;
-        }
-        .btn-outline-white:active {
-            background: rgba(255,255,255,0.07) !important;
-        }
-        .profile-desc {
-            flex: 1;
-            height: 120px;
-            color: #cfd3da;
-            line-height: 1.55;
-            font-size: 1.1rem;
-            overflow-y: auto;
-            padding-right: 8px;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        .profile-desc::-webkit-scrollbar {
-            display: none;
-        }
+/* 通用浮岛 */
+.island{
+  position:fixed;
+  bottom:20px;
+  background:rgba(0,0,0,0.45);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  height: 45px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#fff;
+}
 
-        /* ========== 新增：单元项目卡片样式 ========== */
-        .unit-card-inner {
-            display: flex;
-            gap:21px;
-            align-items: stretch;
-            height:100%;
-        }
-        .unit-img01 {
-            width:160px;
-            flex-shrink:0;
-            height:100%;
-            border-radius:16px;
-            background-color:#111;
-            background-image:url("/picture1.jpg");
-            background-size:cover;
-            background-position:center;
-        }
-        .unit-img02 {
-            width:160px;
-            flex-shrink:0;
-            height:100%;
-            border-radius:16px;
-            background-color:#111;
-            background-image:url("/picture2.jpg");
-            background-size:cover;
-            background-position:center;
-        }
-        .unit-text {
-            flex:1;
-            height:100%;
-            overflow-y:auto;
-            padding-right:8px;
-            color:#cfd3da;
-            font-size:1.1rem;
-            line-height:1.55;
-            scrollbar-width:none;
-            -ms-overflow-style:none;
-        }
-        .unit-text::-webkit-scrollbar{
-            display:none;
-        }
-        .unit-btn-wrap {
-            flex-shrink:0;
-            display:flex;
-            align-items:center;
-        }
-        .unit-long-btn {
-            isolation:isolate;
-            padding: 0 22px;
-            line-height:52px;
-            background:#ffffff;
-            color:#000;
-            text-decoration:none;
-            border-radius:10px;
-            font-size:1.1rem;
-            white-space:nowrap;
-        }
-        .unit-long-btn:active{
-            background:#ececec;
-        }
+/* 中间主浮岛 */
+.island-main{
+  left:50%;
+  transform:translateX(-50%);
+  width: 500px;
+  justify-content: center;
+}
 
-        footer {
-            margin-top: 80px;
-            text-align: center;
-            color: #6b7280;
-            font-size: 1.1rem;
-        }
-    </style>
+/* 左侧浮岛 */
+.island-left{
+  left: 20px;
+  width:250px;
+  justify-content:flex-start;
+  padding-left:16px;
+}
+
+/* 右侧浮岛 */
+.island-right{
+  right: 20px;
+  width:250px;
+  justify-content:flex-end;
+  padding-right:16px;
+}
+
+/* 通用图标按钮：纯图标，无背景无边框 */
+.icon-btn{
+  width:auto;
+  height:auto;
+  border-radius:0;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px;
+  transition:opacity 0.2s, transform 0.15s;
+  flex-shrink:0;
+}
+.icon-btn:hover{
+  opacity:0.7;
+}
+.icon-btn:active{
+  transform:scale(0.92);
+}
+.icon-btn svg{
+  width:20px;
+  height:20px;
+  stroke:rgba(255,255,255,0.75);
+}
+
+/* 弹出小框：非线性回弹动画 */
+.info-popup{
+  position:fixed;
+  left:36px;
+  bottom:80px;
+  width:280px;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter: blur(14px);
+  border-radius:14px;
+  padding:16px;
+  color:#fff;
+  box-shadow:0 8px 32px rgba(0,0,0,0.35);
+  z-index:999;
+  opacity:0;
+  transform:scale(0.85) translateY(10px);
+  transform-origin:bottom left;
+  transition:opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+              transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events:none;
+}
+.info-popup.show{
+  opacity:1;
+  transform:scale(1) translateY(0);
+  pointer-events:auto;
+}
+.info-popup-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+  font-size:15px;
+  font-weight:600;
+}
+.info-popup .close-btn{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:none;
+  background:rgba(255,255,255,0.18);
+  color:#fff;
+  cursor:pointer;
+  font-size:13px;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background 0.2s;
+}
+.info-popup .close-btn:hover{
+  background:rgba(255,255,255,0.35);
+}
+.info-item{
+  margin-bottom:10px;
+}
+.info-item:last-child{
+  margin-bottom:0;
+}
+.info-label{
+  font-size:12px;
+  opacity:0.55;
+  margin-bottom:3px;
+}
+.info-value{
+  font-size:13px;
+  line-height:1.5;
+}
+
+/* 点赞行 */
+.like-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,0.15);
+}
+.like-btn{
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:4px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform 0.15s;
+}
+.like-btn:active{
+  transform:scale(0.85);
+}
+.like-btn svg{
+  width:18px;
+  height:18px;
+  fill:none;
+  stroke:rgba(255,255,255,0.6);
+  stroke-width:2;
+  transition:fill 0.2s, stroke 0.2s;
+}
+.like-btn.liked svg{
+  fill:#ffffff;
+  stroke:#ffffff;
+}
+.like-count{
+  font-size:13px;
+  opacity:0.8;
+}
+
+/* Toast 提示：非线性动画 */
+.toast{
+  position:fixed;
+  top:30px;
+  left:50%;
+  transform:translateX(-50%) translateY(-20px);
+  background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(10px);
+  color:#fff;
+  padding:10px 20px;
+  border-radius:20px;
+  font-size:14px;
+  z-index:9999;
+  opacity:0;
+  transition:opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events:none;
+}
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* 窄屏堆叠 */
+@media (max-width:720px){
+  .island{
+    position:static;
+    width: calc(100% - 40px) !important;
+    margin:8px auto;
+  }
+  .island-container{
+    position:fixed;
+    bottom:16px;
+    left:0;
+    right:0;
+    display:flex;
+    flex-direction:column;
+  }
+  .info-popup{
+    left:20px;
+    right:20px;
+    width:auto;
+  }
+}
+</style>
 </head>
 <body>
-<div class="container">
-    <div class="hero">
-        <h1>NoTificians</h1>
-        <p class="subtitle">NoTificians无闻小站</p>
-    </div>
-    <div class="card-list">
-        <!-- 自我介绍头像卡片 -->
-        <div class="card profile-big-card">
-            <div class="avatar-group">
-                <div class="avatar-item avatar-1"></div>
-                <div class="avatar-item avatar-2"></div>
-            </div>
-            <div class="btn-group-col">
-                <a class="btn-solid-white" href="https://space.bilibili.com/3546714772343354" target="_blank">+看看我的B站</a>
-                <a class="btn-outline-white" href="https://chat.neboer.site/" target="_blank">了解我们社区</a>
-            </div>
-            <div class="profile-desc">
-                我是NoTificians无闻,目前（2026/08/29）还是一个小小的准初二牲，胸有大志却胸无大志，虽然本身没什么实力但是也不怎么低调，神秘嘉豪了属于是，我喜欢编程，略懂C++,PYTHON以及图形化，也喜欢二次元，同样喜欢写作和音乐，喜爱小约翰可汗，更详细的简介看我github去罢（bushi）这是我的个人站点哦
-            </div>
-        </div>
 
-        <!-- 新增：单元项目卡片 -->
-        <div class="card">
-            <div class="unit-card-inner">
-                <div class="unit-img01"></div>
-                <div class="unit-text">
-                    卡片格式实例，这里放项目介绍测试文案。可以写项目简介、功能特点、开发进度等内容。当文字内容超出容器高度时可以上下滑动浏览，不会显示滚动条。测试文本：本单元卡片与上方头像卡片尺寸完全对等，采用统一磨砂玻璃UI，左侧展示图片，中间放置长文本，最右侧放置长条跳转按钮。可以用来展示项目、作品、工具链接。
-                </div>
-                <div class="unit-btn-wrap">
-                    <a class="unit-long-btn" href="https://www.baidu.com" target="_blank">前往查看</a>
-                </div>
-            </div>
-        </div>
+<div class="island-container">
+  <div class="island island-left">
+    <button class="icon-btn" id="albumBtn" title="壁纸信息">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+        <polyline points="21 15 16 10 5 21"></polyline>
+      </svg>
+    </button>
+  </div>
 
-        <div class="card">
-            <div class="unit-card-inner">
-                <div class="unit-img02"></div>
-                <div class="unit-text">
-                    以下文本搬运自我来自github的自我介绍:📣 lightboxofficial的GitHub个人主页📣 ✨ 我是谁？✨ 大家好，我是lightboxofficial——一个在江苏徐州“苟且偷生”的代码打工人（误）小学牲（真），B站野生UP主，编程猫の佛系选手。 虽然“胸无大志”，但“胸（怀）有大志”——毕竟我的梦想是成为“躺着也能把钱赚了”的卷王之王（划掉）咸鱼之王！🌚 🌿 我的地盘🌿 GitHub：本仓库主要存放我那些“看似有用实则摸鱼”的代码，欢迎围观，但别指望能直接拿来拯救世界（除非你想毁灭它）。 B站：https://space.bilibili.com/3546714772343354?spm_id_from=333.788.0.0 —— 偶尔更新一些“技术向鬼畜”和“摸鱼教程”，粉丝没有全靠同行衬托，求关注。 编程猫：https://shequ.codemao.cn/user/7984238 —— 别问，问就是“少儿编程从入门到入土”。🐾 ⚠️ 重要声明⚠️ 本仓库代码可能存在大量“魔法注释”和“祖传代码”，使用前请自备护目镜和防毒面具。 若发现任何BUG，请温柔地告诉我，我会用“下次一定改”的真诚眼神凝视你。 合作？没问题！只要你不介意我的“拖延症晚期”和“需求变更强迫症”。 🔥 我的技能树🔥 熟练掌握：Ctrl+C / V，摸鱼大法，以及“假装在工作的表情管理”。 略懂：Python（写脚本）、c++（花式杂耍）、前端（调样式到眼瞎）。 终极奥义：用30行代码实现别人100行功能——然后花200行修复它。😂 💡 人生信条💡 “代码写得好，不如PPT做得骚；技术强不强，关键看头发掉得多不多。” （温馨提示：本人头发茂密，可能是个假程序员🌝） 🌙 联系我🌙 邮箱：[lightboxofficial@163.com] [lightboxofficial@outlook.com] [regeditblock@outlook.com]（别问，问就是没有） 微信：[13815309423]（加好友请备注“GitHub有缘人”） QQ:3896653459 或者直接私信B站/编程猫——虽然我可能三天后才回…… 📸 最后の彩蛋📸 如果你看到这里还没走，说明你也是个“细节怪”！送你一个专属成就：“真爱粉の凝视”！✨ 快来和我一起——在代码的世界里，做一个快乐的咸鱼吧！🐟📌 更新日志📌 [2025.5.25]：初始版本发布，并立下“绝不咕咕”的Flag（有效期：1天）
-                </div>
-                <div class="unit-btn-wrap">
-                    <a class="unit-long-btn" href="https://github.com/lightboxofficial" target="_blank">前往查看</a>
-                </div>
-            </div>
-        </div>
+  <div class="island island-main">
+    <!-- 中间主导航 -->
+  </div>
 
-    </div>
-    <footer>© 2026 NoTificians无闻个人网站，托管于githubpages的静态页面</footer>
+  <div class="island island-right">
+    <!-- 右侧功能区 -->
+  </div>
 </div>
+
+<!-- 弹出小框 -->
+<div class="info-popup" id="infoPopup">
+  <div class="info-popup-header">
+    <span>喜欢吗？</span>
+    <button class="close-btn" id="closeBtn">✕</button>
+  </div>
+  <div class="info-item">
+    <div class="info-label">地区 / 场景</div>
+    <div class="info-value" id="picDesc">加载中...</div>
+  </div>
+  <div class="info-item">
+    <div class="info-label">拍摄者</div>
+    <div class="info-value" id="picAuthor">加载中...</div>
+  </div>
+  <div class="like-row">
+    <button class="like-btn" id="likeBtn">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+    </button>
+    <span class="like-count" id="likeCount">0</span>
+    <button class="like-btn" id="shareBtn" style="margin-left:auto" title="分享必应链接">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px">
+        <circle cx="18" cy="5" r="3"></circle>
+        <circle cx="6" cy="12" r="3"></circle>
+        <circle cx="18" cy="19" r="3"></circle>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- Toast 提示 -->
+<div class="toast" id="toast">链接已复制</div>
+
+<script>
+let currentPicInfo = { desc:'', author:'', link:'' };
+
+async function setBingBg(){
+  try{
+    const resp = await fetch("https://bing.biturl.top/");
+    const img = await resp.json();
+    const imgUrl = img.url + "&_t=" + Date.now();
+    document.body.style.backgroundImage = `url(${imgUrl})`;
+
+    const copyright = img.copyright || '';
+    const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
+    if(match){
+      currentPicInfo.desc = match[1];
+      currentPicInfo.author = match[2];
+    }else{
+      currentPicInfo.desc = copyright;
+      currentPicInfo.author = '';
+    }
+    currentPicInfo.link = img.copyright_link || '';
+
+    document.getElementById('picDesc').textContent = currentPicInfo.desc || '暂无';
+    document.getElementById('picAuthor').textContent = currentPicInfo.author || '暂无';
+  }catch(e){
+    console.error("获取壁纸失败",e);
+    document.body.style.backgroundImage = `url(https://picsum.photos/id/1018/1920/1080)`;
+  }
+}
+
+// 弹窗开关
+const albumBtn = document.getElementById('albumBtn');
+const infoPopup = document.getElementById('infoPopup');
+const closeBtn = document.getElementById('closeBtn');
+
+// 点赞功能（后端KV存储 + 本地记录用户状态）
+const likeBtn = document.getElementById('likeBtn');
+const likeCountEl = document.getElementById('likeCount');
+let liked = localStorage.getItem('bing_liked') === '1';
+let likeCount = 0;
+let apiOnline = false;
+
+// 页面加载时从后端拉点赞数
+async function loadLikeCount(){
+  try{
+    const res = await fetch('/api/like');
+    const data = await res.json();
+    likeCount = data.count;
+    apiOnline = true;
+  }catch(e){
+    // 后端不可用，降级本地
+    likeCount = parseInt(localStorage.getItem('bing_likeCount') || '128', 10);
+  }
+  renderLike();
+}
+
+function renderLike(){
+  likeBtn.classList.toggle('liked', liked);
+  likeCountEl.textContent = likeCount;
+}
+
+likeBtn.addEventListener('click', async function(e){
+  e.stopPropagation();
+  liked = !liked;
+  localStorage.setItem('bing_liked', liked ? '1' : '0');
+
+  if(apiOnline){
+    // 调用后端
+    try{
+      const method = liked ? 'POST' : 'DELETE';
+      const res = await fetch('/api/like', { method });
+      const data = await res.json();
+      likeCount = data.count;
+    }catch(e){
+      // 降级本地计数
+      likeCount += liked ? 1 : -1;
+      localStorage.setItem('bing_likeCount', likeCount);
+    }
+  }else{
+    // 纯本地模式
+    likeCount += liked ? 1 : -1;
+    localStorage.setItem('bing_likeCount', likeCount);
+  }
+  renderLike();
+});
+
+loadLikeCount();
+
+albumBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  infoPopup.classList.toggle('show');
+});
+closeBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  infoPopup.classList.remove('show');
+});
+document.addEventListener('click', function(e){
+  if(!infoPopup.contains(e.target) && !albumBtn.contains(e.target)){
+    infoPopup.classList.remove('show');
+  }
+});
+
+// 分享功能：复制链接 + toast
+const shareBtn = document.getElementById('shareBtn');
+const toast = document.getElementById('toast');
+let toastTimer;
+
+shareBtn.addEventListener('click', async function(e){
+  e.stopPropagation();
+  const shareUrl = currentPicInfo.link || window.location.href;
+  try{
+    await navigator.clipboard.writeText(shareUrl);
+  }catch(err){
+    // 降级方案
+    const input = document.createElement('input');
+    input.value = shareUrl;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+  }
+  // 显示toast
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){
+    toast.classList.remove('show');
+  }, 2000);
+});
+
+setBingBg();
+setInterval(setBingBg, 10*60*1000);
+</script>
+
 </body>
 </html>
