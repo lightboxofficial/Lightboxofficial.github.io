@@ -215,6 +215,258 @@ html,body{
     right:20px;
     width:auto;
   }
+  .bookmark-popup,.edit-popup{
+    left:20px;
+    right:20px;
+    width:auto;
+  }
+}
+
+/* ===== 收藏夹弹窗 ===== */
+.popup{
+  position:fixed;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter: blur(14px);
+  border-radius:14px;
+  padding:16px;
+  color:#fff;
+  box-shadow:0 8px 32px rgba(0,0,0,0.35);
+  z-index:1000;
+  opacity:0;
+  transform:scale(0.85) translateY(10px);
+  transition:opacity 0.25s cubic-bezier(0.34,1.56,0.64,1),
+              transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events:none;
+}
+.popup.show{
+  opacity:1;
+  transform:scale(1) translateY(0);
+  pointer-events:auto;
+}
+.popup-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+  font-size:15px;
+  font-weight:600;
+}
+.popup-close{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:none;
+  background:rgba(255,255,255,0.18);
+  color:#fff;
+  cursor:pointer;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background 0.2s;
+}
+.popup-close:hover{
+  background:rgba(255,255,255,0.35);
+}
+
+/* 收藏夹主弹窗 */
+.bookmark-popup{
+  left:36px;
+  bottom:80px;
+  width:300px;
+  max-height:400px;
+  display:flex;
+  flex-direction:column;
+}
+.search-box{
+  width:100%;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:8px;
+  padding:8px 12px;
+  color:#fff;
+  font-size:13px;
+  outline:none;
+  margin-bottom:12px;
+  box-sizing:border-box;
+}
+.search-box::placeholder{
+  opacity:0.5;
+}
+.search-box:focus{
+  background:rgba(255,255,255,0.18);
+}
+.bookmark-list{
+  flex:1;
+  overflow-y:auto;
+  margin-bottom:12px;
+  min-height:60px;
+  max-height:200px;
+}
+.bookmark-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background 0.15s;
+}
+.bookmark-item:hover{
+  background:rgba(255,255,255,0.1);
+}
+.bookmark-item img{
+  width:18px;
+  height:18px;
+  border-radius:4px;
+  flex-shrink:0;
+}
+.bookmark-item .bm-name{
+  font-size:13px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.add-btn{
+  flex:1;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  background:rgba(255,255,255,0.15);
+  color:#fff;
+  font-size:14px;
+  cursor:pointer;
+  transition:background 0.2s;
+}
+.add-btn:hover{
+  background:rgba(255,255,255,0.25);
+}
+.btn-row{
+  display:flex;
+  gap:8px;
+}
+
+/* 文件夹样式 */
+.folder-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background 0.15s;
+}
+.folder-item:hover{
+  background:rgba(255,255,255,0.1);
+}
+.folder-item .folder-icon{
+  font-size:16px;
+  flex-shrink:0;
+}
+.folder-item .folder-name{
+  font-size:13px;
+  font-weight:500;
+}
+.folder-children{
+  padding-left:24px;
+}
+.folder-children.hidden{
+  display:none;
+}
+
+/* 右键菜单 */
+.context-menu{
+  position:fixed;
+  background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(12px);
+  border-radius:8px;
+  padding:6px 0;
+  min-width:100px;
+  z-index:2000;
+  display:none;
+  box-shadow:0 4px 16px rgba(0,0,0,0.4);
+}
+.context-menu.show{
+  display:block;
+}
+.context-item{
+  padding:8px 16px;
+  font-size:13px;
+  color:#fff;
+  cursor:pointer;
+  transition:background 0.15s;
+}
+.context-item:hover{
+  background:rgba(255,255,255,0.15);
+}
+
+/* 文件夹弹窗 */
+.folder-popup{
+  left:50%;
+  bottom:50%;
+  transform:translateX(-50%) translateY(50%) scale(0.85);
+  width:280px;
+}
+.folder-popup.show{
+  transform:translateX(-50%) translateY(50%) scale(1);
+}
+.confirm-popup{
+  left:50%;
+  bottom:50%;
+  transform:translateX(-50%) translateY(50%) scale(0.85);
+  width:280px;
+}
+.confirm-popup.show{
+  transform:translateX(-50%) translateY(50%) scale(1);
+}
+
+/* 编辑弹窗 */
+.edit-popup{
+  left:50%;
+  bottom:50%;
+  transform:translateX(-50%) translateY(50%) scale(0.85);
+  width:300px;
+}
+.edit-popup.show{
+  transform:translateX(-50%) translateY(50%) scale(1);
+}
+.form-group{
+  margin-bottom:12px;
+}
+.form-group label{
+  display:block;
+  font-size:12px;
+  opacity:0.6;
+  margin-bottom:4px;
+}
+.form-group input{
+  width:100%;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:8px;
+  padding:8px 12px;
+  color:#fff;
+  font-size:13px;
+  outline:none;
+  box-sizing:border-box;
+}
+.form-group input:focus{
+  background:rgba(255,255,255,0.18);
+}
+.confirm-btn{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  background:#fff;
+  color:#000;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:opacity 0.2s;
+}
+.confirm-btn:hover{
+  opacity:0.85;
 }
 </style>
 </head>
@@ -232,6 +484,11 @@ html,body{
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="3"></circle>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
+    <button class="icon-btn" id="bookmarkBtn" title="收藏夹">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
       </svg>
     </button>
   </div>
@@ -276,9 +533,79 @@ html,body{
   </div>
 </div>
 <div class="toast" id="toast">链接已复制</div>
+
+<!-- 收藏夹弹窗 -->
+<div class="popup bookmark-popup" id="bookmarkPopup">
+  <div class="popup-header">
+    <span>收藏夹</span>
+    <button class="popup-close" id="bookmarkClose">✕</button>
+  </div>
+  <input type="text" class="search-box" id="bookmarkSearch" placeholder="搜索收藏...">
+  <div class="bookmark-list" id="bookmarkList"></div>
+  <div class="btn-row">
+    <button class="add-btn" id="addBookmarkBtn">+ 添加</button>
+    <button class="add-btn folder-btn" id="addFolderBtn">+ 文件夹</button>
+  </div>
+</div>
+
+<!-- 添加/编辑收藏弹窗 -->
+<div class="popup edit-popup" id="editPopup">
+  <div class="popup-header">
+    <span id="editTitle">添加收藏</span>
+    <button class="popup-close" id="editClose">✕</button>
+  </div>
+  <div class="form-group">
+    <label>名称</label>
+    <input type="text" id="editName" placeholder="例如：GitHub">
+  </div>
+  <div class="form-group">
+    <label>网址</label>
+    <input type="text" id="editUrl" placeholder="https://github.com">
+  </div>
+  <div class="form-group">
+    <label>所属文件夹</label>
+    <select id="editFolder" class="search-box" style="margin-bottom:0">
+      <option value="">（根目录）</option>
+    </select>
+  </div>
+  <button class="confirm-btn" id="editConfirm">确认</button>
+</div>
+
+<!-- 文件夹命名弹窗 -->
+<div class="popup folder-popup" id="folderPopup">
+  <div class="popup-header">
+    <span>新建文件夹</span>
+    <button class="popup-close" id="folderClose">✕</button>
+  </div>
+  <div class="form-group">
+    <label>文件夹名称</label>
+    <input type="text" id="folderName" placeholder="例如：工作">
+  </div>
+  <button class="confirm-btn" id="folderConfirm">确认</button>
+</div>
+
+<!-- 右键菜单 -->
+<div class="context-menu" id="contextMenu">
+  <div class="context-item" id="ctxEdit">编辑</div>
+  <div class="context-item" id="ctxDelete" style="color:#ff6b6b">删除</div>
+</div>
+
+<!-- 删除确认弹窗 -->
+<div class="popup confirm-popup" id="confirmPopup">
+  <div class="popup-header">
+    <span>确认删除</span>
+    <button class="popup-close" id="confirmCancel">✕</button>
+  </div>
+  <div style="font-size:14px;margin:12px 0 16px;opacity:0.9" id="confirmMsg">确定要删除吗？</div>
+  <div style="display:flex;gap:8px">
+    <button class="confirm-btn" id="confirmOk" style="background:#ff6b6b">删除</button>
+    <button class="add-btn" id="confirmNo">取消</button>
+  </div>
+</div>
 <script>
 let currentPicInfo = { desc:'', author:'', link:'', picId:'' };
-const API_BASE = "https://like-api2.lightboxofficial.workers.dev";
+// 后端先放一边，所有数据走浏览器缓存，后面接后端时把缓存上传即可
+const API_BASE = "https://like-api2.lightboxofficial.workers.dev"; // 暂时不用，先存着
 async function setBingBg(){
   try{
     const resp = await fetch("https://bing.biturl.top/");
@@ -388,6 +715,329 @@ shareBtn.addEventListener('click', async function(e){
 });
 setBingBg();
 setInterval(setBingBg, 10*60*1000);
+
+// ===== 收藏夹功能 =====
+const bookmarkBtn = document.getElementById('bookmarkBtn');
+const bookmarkPopup = document.getElementById('bookmarkPopup');
+const bookmarkClose = document.getElementById('bookmarkClose');
+const bookmarkSearch = document.getElementById('bookmarkSearch');
+const bookmarkList = document.getElementById('bookmarkList');
+const addBookmarkBtn = document.getElementById('addBookmarkBtn');
+const addFolderBtn = document.getElementById('addFolderBtn');
+const editPopup = document.getElementById('editPopup');
+const editClose = document.getElementById('editClose');
+const editName = document.getElementById('editName');
+const editUrl = document.getElementById('editUrl');
+const editFolder = document.getElementById('editFolder');
+const editConfirm = document.getElementById('editConfirm');
+const editTitle = document.getElementById('editTitle');
+const folderPopup = document.getElementById('folderPopup');
+const folderClose = document.getElementById('folderClose');
+const folderName = document.getElementById('folderName');
+const folderConfirm = document.getElementById('folderConfirm');
+const contextMenu = document.getElementById('contextMenu');
+const ctxEdit = document.getElementById('ctxEdit');
+const ctxDelete = document.getElementById('ctxDelete');
+const confirmPopup = document.getElementById('confirmPopup');
+const confirmMsg = document.getElementById('confirmMsg');
+const confirmOk = document.getElementById('confirmOk');
+const confirmCancel = document.getElementById('confirmCancel');
+const confirmNo = document.getElementById('confirmNo');
+
+// 数据结构：{ type:'folder', name, children:[] } 或 { type:'item', name, url, folderId }
+let bookmarks = JSON.parse(localStorage.getItem('my_bookmarks') || '[]');
+let collapsedFolders = JSON.parse(localStorage.getItem('collapsed_folders') || '[]');
+let editTarget = null;
+let editIsFolder = false;
+let ctxTarget = null;
+let ctxIsFolder = false;
+
+function saveBookmarks(){
+  localStorage.setItem('my_bookmarks', JSON.stringify(bookmarks));
+}
+function saveCollapsed(){
+  localStorage.setItem('collapsed_folders', JSON.stringify(collapsedFolders));
+}
+
+function getFavicon(url){
+  try{
+    const domain = new URL(url).hostname;
+    return `https://${domain}/favicon.ico`;
+  }catch(e){
+    return '';
+  }
+}
+
+function getAllFolders(items){
+  let result = [];
+  items.forEach(item => {
+    if(item.type === 'folder'){
+      result.push(item);
+      result = result.concat(getAllFolders(item.children || []));
+    }
+  });
+  return result;
+}
+
+function updateFolderSelect(){
+  const folders = getAllFolders(bookmarks);
+  editFolder.innerHTML = '<option value="">（根目录）</option>';
+  folders.forEach((f, i) => {
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = f.name;
+    editFolder.appendChild(opt);
+  });
+}
+
+function findItem(items, name, url){
+  for(let i = 0; i < items.length; i++){
+    const item = items[i];
+    if(item.type === 'item' && item.name === name && item.url === url) return { items, index: i };
+    if(item.type === 'folder'){
+      const found = findItem(item.children || [], name, url);
+      if(found) return found;
+    }
+  }
+  return null;
+}
+
+function findFolder(items, name){
+  for(let i = 0; i < items.length; i++){
+    if(items[i].type === 'folder' && items[i].name === name) return { items, index: i };
+    if(items[i].type === 'folder'){
+      const found = findFolder(items[i].children || [], name);
+      if(found) return found;
+    }
+  }
+  return null;
+}
+
+function renderBookmarks(filter = ''){
+  bookmarkList.innerHTML = '';
+  renderItems(bookmarks, bookmarkList, filter);
+}
+
+function renderItems(items, container, filter){
+  items.forEach((item, idx) => {
+    if(item.type === 'folder'){
+      const isCollapsed = collapsedFolders.includes(item.name);
+      const folderEl = document.createElement('div');
+      folderEl.className = 'folder-item';
+      folderEl.innerHTML = `
+        <span class="folder-icon">${isCollapsed ? '📁' : '📂'}</span>
+        <span class="folder-name">${item.name}</span>
+      `;
+      folderEl.onclick = (e) => {
+        e.stopPropagation();
+        if(isCollapsed){
+          collapsedFolders = collapsedFolders.filter(n => n !== item.name);
+        }else{
+          collapsedFolders.push(item.name);
+        }
+        saveCollapsed();
+        renderBookmarks(bookmarkSearch.value);
+      };
+      folderEl.oncontextmenu = (e) => {
+        e.preventDefault();
+        ctxTarget = { items, index: idx };
+        ctxIsFolder = true;
+        showContextMenu(e.clientX, e.clientY);
+      };
+      container.appendChild(folderEl);
+      if(!isCollapsed){
+        const childEl = document.createElement('div');
+        childEl.className = 'folder-children';
+        renderItems(item.children || [], childEl, filter);
+        container.appendChild(childEl);
+      }
+    }else{
+      // 过滤
+      if(filter && !item.name.toLowerCase().includes(filter.toLowerCase()) && !item.url.toLowerCase().includes(filter.toLowerCase())){
+        return;
+      }
+      const itemEl = document.createElement('div');
+      itemEl.className = 'bookmark-item';
+      itemEl.innerHTML = `
+        <img src="${getFavicon(item.url)}" onerror="this.style.display='none'">
+        <span class="bm-name">${item.name}</span>
+      `;
+      itemEl.onclick = () => window.open(item.url, '_blank');
+      itemEl.oncontextmenu = (e) => {
+        e.preventDefault();
+        ctxTarget = { items, index: idx };
+        ctxIsFolder = false;
+        showContextMenu(e.clientX, e.clientY);
+      };
+      container.appendChild(itemEl);
+    }
+  });
+}
+
+function showContextMenu(x, y){
+  contextMenu.style.left = x + 'px';
+  contextMenu.style.top = y + 'px';
+  contextMenu.classList.add('show');
+}
+function hideContextMenu(){
+  contextMenu.classList.remove('show');
+}
+contextMenu.addEventListener('contextmenu', (e) => e.preventDefault());
+
+ctxEdit.onclick = (e) => {
+  e.stopPropagation();
+  hideContextMenu();
+  if(!ctxTarget) return;
+  const item = ctxTarget.items[ctxTarget.index];
+  if(ctxIsFolder){
+    editIsFolder = true;
+    editTarget = item;
+    editTitle.textContent = '重命名文件夹';
+    editName.value = item.name;
+    editUrl.parentElement.style.display = 'none';
+    editFolder.parentElement.style.display = 'none';
+  }else{
+    editIsFolder = false;
+    editTitle.textContent = '编辑收藏';
+    editName.value = item.name;
+    editUrl.value = item.url;
+    editUrl.parentElement.style.display = '';
+    editFolder.parentElement.style.display = '';
+  }
+  editPopup.classList.add('show');
+};
+
+ctxDelete.onclick = (e) => {
+  e.stopPropagation();
+  hideContextMenu();
+  if(!ctxTarget) return;
+  const item = ctxTarget.items[ctxTarget.index];
+  if(!item) return;
+  confirmMsg.textContent = `确定删除"${item.name}"？`;
+  confirmPopup.classList.add('show');
+};
+
+confirmOk.onclick = (e) => {
+  e.stopPropagation();
+  if(!ctxTarget) return;
+  ctxTarget.items.splice(ctxTarget.index, 1);
+  saveBookmarks();
+  renderBookmarks(bookmarkSearch.value);
+  confirmPopup.classList.remove('show');
+};
+
+confirmCancel.onclick = (e) => {
+  e.stopPropagation();
+  confirmPopup.classList.remove('show');
+};
+
+confirmNo.onclick = (e) => {
+  e.stopPropagation();
+  confirmPopup.classList.remove('show');
+};
+bookmarkBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  updateFolderSelect();
+  renderBookmarks(bookmarkSearch.value);
+  bookmarkPopup.classList.toggle('show');
+});
+bookmarkClose.addEventListener('click', (e) => {
+  e.stopPropagation();
+  bookmarkPopup.classList.remove('show');
+});
+bookmarkSearch.addEventListener('input', () => {
+  renderBookmarks(bookmarkSearch.value);
+});
+
+addBookmarkBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  editTarget = null;
+  editIsFolder = false;
+  editTitle.textContent = '添加收藏';
+  editName.value = '';
+  editUrl.value = '';
+  editUrl.parentElement.style.display = '';
+  editFolder.parentElement.style.display = '';
+  updateFolderSelect();
+  editPopup.classList.add('show');
+});
+
+addFolderBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  folderName.value = '';
+  folderPopup.classList.add('show');
+});
+
+editClose.addEventListener('click', (e) => {
+  e.stopPropagation();
+  editPopup.classList.remove('show');
+});
+
+editConfirm.addEventListener('click', () => {
+  const name = editName.value.trim();
+  if(!name) return;
+  if(editIsFolder){
+    // 重命名文件夹
+    if(editTarget){
+      const found = findFolder(bookmarks, editTarget.name);
+      if(found) found.items[found.index].name = name;
+    }else{
+      bookmarks.push({ type:'folder', name, children:[] });
+    }
+  }else{
+    let url = editUrl.value.trim();
+    if(!url) return;
+    if(!url.startsWith('http')) url = 'https://' + url;
+    const folderIdx = parseInt(editFolder.value);
+    const newItem = { type:'item', name, url };
+    if(!isNaN(folderIdx) && folderIdx >= 0){
+      const folders = getAllFolders(bookmarks);
+      if(folders[folderIdx]){
+        folders[folderIdx].children.push(newItem);
+      }else{
+        bookmarks.push(newItem);
+      }
+    }else{
+      bookmarks.push(newItem);
+    }
+  }
+  saveBookmarks();
+  renderBookmarks(bookmarkSearch.value);
+  editPopup.classList.remove('show');
+});
+
+folderClose.addEventListener('click', (e) => {
+  e.stopPropagation();
+  folderPopup.classList.remove('show');
+});
+
+folderConfirm.addEventListener('click', () => {
+  const name = folderName.value.trim();
+  if(!name) return;
+  bookmarks.push({ type:'folder', name, children:[] });
+  saveBookmarks();
+  renderBookmarks(bookmarkSearch.value);
+  folderPopup.classList.remove('show');
+});
+
+// 点击弹窗外部关闭
+document.addEventListener('click', (e) => {
+  if(!bookmarkPopup.contains(e.target) && !bookmarkBtn.contains(e.target)){
+    bookmarkPopup.classList.remove('show');
+  }
+  if(!editPopup.contains(e.target)){
+    editPopup.classList.remove('show');
+  }
+  if(!folderPopup.contains(e.target)){
+    folderPopup.classList.remove('show');
+  }
+  if(!confirmPopup.contains(e.target)){
+    confirmPopup.classList.remove('show');
+  }
+  if(!contextMenu.contains(e.target)){
+    hideContextMenu();
+  }
+});
 </script>
 </body>
 </html>
