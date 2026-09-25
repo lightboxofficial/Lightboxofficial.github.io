@@ -89,7 +89,7 @@ html,body{
   transform:scale(0.85) translateY(10px);
   transform-origin:bottom left;
   transition:opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-              transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events:none;
 }
 .info-popup.show{
@@ -189,7 +189,7 @@ html,body{
   z-index:9999;
   opacity:0;
   transition:opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-              transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events:none;
 }
 .toast.show{
@@ -221,7 +221,6 @@ html,body{
     width:auto;
   }
 }
-
 /* ===== 收藏夹弹窗 ===== */
 .popup{
   position:fixed;
@@ -235,7 +234,7 @@ html,body{
   opacity:0;
   transform:scale(0.85) translateY(10px);
   transition:opacity 0.25s cubic-bezier(0.34,1.56,0.64,1),
-              transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
   pointer-events:none;
 }
 .popup.show{
@@ -268,7 +267,6 @@ html,body{
 .popup-close:hover{
   background:rgba(255,255,255,0.35);
 }
-
 /* 收藏夹主弹窗 */
 .bookmark-popup{
   left:36px;
@@ -345,7 +343,6 @@ html,body{
   display:flex;
   gap:8px;
 }
-
 /* 文件夹样式 */
 .folder-item{
   display:flex;
@@ -373,7 +370,6 @@ html,body{
 .folder-children.hidden{
   display:none;
 }
-
 /* 右键菜单 */
 .context-menu{
   position:fixed;
@@ -399,7 +395,6 @@ html,body{
 .context-item:hover{
   background:rgba(255,255,255,0.15);
 }
-
 /* 文件夹弹窗 */
 .folder-popup{
   left:50%;
@@ -419,7 +414,6 @@ html,body{
 .confirm-popup.show{
   transform:translateX(-50%) translateY(50%) scale(1);
 }
-
 /* 编辑弹窗 */
 .edit-popup{
   left:50%;
@@ -468,6 +462,132 @@ html,body{
 .confirm-btn:hover{
   opacity:0.85;
 }
+
+/* ===== 日历弹窗（新增，不影响原有样式） ===== */
+.calendar-popup{
+  left:36px;
+  bottom:80px;
+  width:300px;
+}
+.cal-time{
+  text-align:center;
+  margin-bottom:12px;
+  padding-bottom:10px;
+  border-bottom:1px solid rgba(255,255,255,0.12);
+}
+.cal-time-hm{
+  font-size:28px;
+  font-weight:600;
+  letter-spacing:1px;
+}
+.cal-time-date{
+  font-size:12px;
+  opacity:0.6;
+  margin-top:2px;
+}
+.cal-nav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+.cal-nav button{
+  width:26px;
+  height:26px;
+  border-radius:6px;
+  border:none;
+  background:rgba(255,255,255,0.12);
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.cal-nav button:hover{
+  background:rgba(255,255,255,0.22);
+}
+.cal-title{
+  font-size:14px;
+  font-weight:500;
+}
+.cal-week{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  text-align:center;
+  font-size:11px;
+  opacity:0.5;
+  margin-bottom:4px;
+}
+.cal-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:2px;
+}
+.cal-day{
+  aspect-ratio:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:background 0.15s;
+  position:relative;
+}
+.cal-day:hover{
+  background:rgba(255,255,255,0.12);
+}
+.cal-day.today{
+  background:rgba(255,255,255,0.25);
+  font-weight:600;
+}
+.cal-day.other{
+  opacity:0.3;
+}
+.cal-day.has-note::after{
+  content:'';
+  position:absolute;
+  bottom:2px;
+  left:50%;
+  transform:translateX(-50%);
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:#ffd700;
+}
+.cal-note{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,0.12);
+}
+.cal-note input,.cal-note textarea{
+  width:100%;
+  background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:6px;
+  padding:6px 8px;
+  color:#fff;
+  font-size:12px;
+  outline:none;
+  box-sizing:border-box;
+  margin-bottom:6px;
+}
+.cal-note textarea{
+  resize:none;
+  height:50px;
+}
+.cal-note button{
+  width:100%;
+  padding:7px;
+  border-radius:6px;
+  border:none;
+  background:rgba(255,255,255,0.9);
+  color:#000;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+}
 </style>
 </head>
 <body>
@@ -489,6 +609,15 @@ html,body{
     <button class="icon-btn" id="bookmarkBtn" title="收藏夹">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <!-- 新增：日历图标 -->
+    <button class="icon-btn" id="calendarBtn" title="日历">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
       </svg>
     </button>
   </div>
@@ -533,7 +662,6 @@ html,body{
   </div>
 </div>
 <div class="toast" id="toast">链接已复制</div>
-
 <!-- 收藏夹弹窗 -->
 <div class="popup bookmark-popup" id="bookmarkPopup">
   <div class="popup-header">
@@ -547,7 +675,6 @@ html,body{
     <button class="add-btn folder-btn" id="addFolderBtn">+ 文件夹</button>
   </div>
 </div>
-
 <!-- 添加/编辑收藏弹窗 -->
 <div class="popup edit-popup" id="editPopup">
   <div class="popup-header">
@@ -570,7 +697,6 @@ html,body{
   </div>
   <button class="confirm-btn" id="editConfirm">确认</button>
 </div>
-
 <!-- 文件夹命名弹窗 -->
 <div class="popup folder-popup" id="folderPopup">
   <div class="popup-header">
@@ -583,13 +709,11 @@ html,body{
   </div>
   <button class="confirm-btn" id="folderConfirm">确认</button>
 </div>
-
 <!-- 右键菜单 -->
 <div class="context-menu" id="contextMenu">
   <div class="context-item" id="ctxEdit">编辑</div>
   <div class="context-item" id="ctxDelete" style="color:#ff6b6b">删除</div>
 </div>
-
 <!-- 删除确认弹窗 -->
 <div class="popup confirm-popup" id="confirmPopup">
   <div class="popup-header">
@@ -600,6 +724,31 @@ html,body{
   <div style="display:flex;gap:8px">
     <button class="confirm-btn" id="confirmOk" style="background:#ff6b6b">删除</button>
     <button class="add-btn" id="confirmNo">取消</button>
+  </div>
+</div>
+<!-- 日历弹窗（新增） -->
+<div class="popup calendar-popup" id="calendarPopup">
+  <div class="popup-header">
+    <span>日历</span>
+    <button class="popup-close" id="calendarClose">✕</button>
+  </div>
+  <div class="cal-time">
+    <div class="cal-time-hm" id="calTime">--:--</div>
+    <div class="cal-time-date" id="calDate">加载中...</div>
+  </div>
+  <div class="cal-nav">
+    <button id="calPrev">‹</button>
+    <span class="cal-title" id="calTitle">--</span>
+    <button id="calNext">›</button>
+  </div>
+  <div class="cal-week">
+    <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+  <div class="cal-note">
+    <input type="text" id="calNoteDate" placeholder="选择日期" readonly>
+    <textarea id="calNoteInput" placeholder="写点什么..."></textarea>
+    <button id="calNoteSave">保存便签</button>
   </div>
 </div>
 <script>
@@ -715,7 +864,6 @@ shareBtn.addEventListener('click', async function(e){
 });
 setBingBg();
 setInterval(setBingBg, 10*60*1000);
-
 // ===== 收藏夹功能 =====
 const bookmarkBtn = document.getElementById('bookmarkBtn');
 const bookmarkPopup = document.getElementById('bookmarkPopup');
@@ -743,7 +891,6 @@ const confirmMsg = document.getElementById('confirmMsg');
 const confirmOk = document.getElementById('confirmOk');
 const confirmCancel = document.getElementById('confirmCancel');
 const confirmNo = document.getElementById('confirmNo');
-
 // 数据结构：{ type:'folder', name, children:[] } 或 { type:'item', name, url, folderId }
 let bookmarks = JSON.parse(localStorage.getItem('my_bookmarks') || '[]');
 let collapsedFolders = JSON.parse(localStorage.getItem('collapsed_folders') || '[]');
@@ -751,14 +898,12 @@ let editTarget = null;
 let editIsFolder = false;
 let ctxTarget = null;
 let ctxIsFolder = false;
-
 function saveBookmarks(){
   localStorage.setItem('my_bookmarks', JSON.stringify(bookmarks));
 }
 function saveCollapsed(){
   localStorage.setItem('collapsed_folders', JSON.stringify(collapsedFolders));
 }
-
 function getFavicon(url){
   try{
     const domain = new URL(url).hostname;
@@ -767,7 +912,6 @@ function getFavicon(url){
     return '';
   }
 }
-
 function getAllFolders(items){
   let result = [];
   items.forEach(item => {
@@ -778,7 +922,6 @@ function getAllFolders(items){
   });
   return result;
 }
-
 function updateFolderSelect(){
   const folders = getAllFolders(bookmarks);
   editFolder.innerHTML = '<option value="">（根目录）</option>';
@@ -789,7 +932,6 @@ function updateFolderSelect(){
     editFolder.appendChild(opt);
   });
 }
-
 function findItem(items, name, url){
   for(let i = 0; i < items.length; i++){
     const item = items[i];
@@ -801,7 +943,6 @@ function findItem(items, name, url){
   }
   return null;
 }
-
 function findFolder(items, name){
   for(let i = 0; i < items.length; i++){
     if(items[i].type === 'folder' && items[i].name === name) return { items, index: i };
@@ -812,12 +953,10 @@ function findFolder(items, name){
   }
   return null;
 }
-
 function renderBookmarks(filter = ''){
   bookmarkList.innerHTML = '';
   renderItems(bookmarks, bookmarkList, filter);
 }
-
 function renderItems(items, container, filter){
   items.forEach((item, idx) => {
     if(item.type === 'folder'){
@@ -873,7 +1012,6 @@ function renderItems(items, container, filter){
     }
   });
 }
-
 function showContextMenu(x, y){
   contextMenu.style.left = x + 'px';
   contextMenu.style.top = y + 'px';
@@ -883,7 +1021,6 @@ function hideContextMenu(){
   contextMenu.classList.remove('show');
 }
 contextMenu.addEventListener('contextmenu', (e) => e.preventDefault());
-
 ctxEdit.onclick = (e) => {
   e.stopPropagation();
   hideContextMenu();
@@ -906,7 +1043,6 @@ ctxEdit.onclick = (e) => {
   }
   editPopup.classList.add('show');
 };
-
 ctxDelete.onclick = (e) => {
   e.stopPropagation();
   hideContextMenu();
@@ -916,7 +1052,6 @@ ctxDelete.onclick = (e) => {
   confirmMsg.textContent = `确定删除"${item.name}"？`;
   confirmPopup.classList.add('show');
 };
-
 confirmOk.onclick = (e) => {
   e.stopPropagation();
   if(!ctxTarget) return;
@@ -925,12 +1060,10 @@ confirmOk.onclick = (e) => {
   renderBookmarks(bookmarkSearch.value);
   confirmPopup.classList.remove('show');
 };
-
 confirmCancel.onclick = (e) => {
   e.stopPropagation();
   confirmPopup.classList.remove('show');
 };
-
 confirmNo.onclick = (e) => {
   e.stopPropagation();
   confirmPopup.classList.remove('show');
@@ -948,7 +1081,6 @@ bookmarkClose.addEventListener('click', (e) => {
 bookmarkSearch.addEventListener('input', () => {
   renderBookmarks(bookmarkSearch.value);
 });
-
 addBookmarkBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   editTarget = null;
@@ -961,18 +1093,15 @@ addBookmarkBtn.addEventListener('click', (e) => {
   updateFolderSelect();
   editPopup.classList.add('show');
 });
-
 addFolderBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   folderName.value = '';
   folderPopup.classList.add('show');
 });
-
 editClose.addEventListener('click', (e) => {
   e.stopPropagation();
   editPopup.classList.remove('show');
 });
-
 editConfirm.addEventListener('click', () => {
   const name = editName.value.trim();
   if(!name) return;
@@ -1005,12 +1134,10 @@ editConfirm.addEventListener('click', () => {
   renderBookmarks(bookmarkSearch.value);
   editPopup.classList.remove('show');
 });
-
 folderClose.addEventListener('click', (e) => {
   e.stopPropagation();
   folderPopup.classList.remove('show');
 });
-
 folderConfirm.addEventListener('click', () => {
   const name = folderName.value.trim();
   if(!name) return;
@@ -1019,7 +1146,6 @@ folderConfirm.addEventListener('click', () => {
   renderBookmarks(bookmarkSearch.value);
   folderPopup.classList.remove('show');
 });
-
 // 点击弹窗外部关闭
 document.addEventListener('click', (e) => {
   if(!bookmarkPopup.contains(e.target) && !bookmarkBtn.contains(e.target)){
@@ -1037,6 +1163,118 @@ document.addEventListener('click', (e) => {
   if(!contextMenu.contains(e.target)){
     hideContextMenu();
   }
+  if(!calendarPopup.contains(e.target) && !calendarBtn.contains(e.target)){
+    calendarPopup.classList.remove('show');
+  }
+});
+
+// ===== 日历功能（新增） =====
+const calendarBtn = document.getElementById('calendarBtn');
+const calendarPopup = document.getElementById('calendarPopup');
+const calendarClose = document.getElementById('calendarClose');
+const calTime = document.getElementById('calTime');
+const calDate = document.getElementById('calDate');
+const calTitle = document.getElementById('calTitle');
+const calGrid = document.getElementById('calGrid');
+const calPrev = document.getElementById('calPrev');
+const calNext = document.getElementById('calNext');
+const calNoteDate = document.getElementById('calNoteDate');
+const calNoteInput = document.getElementById('calNoteInput');
+const calNoteSave = document.getElementById('calNoteSave');
+
+let calYear, calMonth;
+let calSelected = '';
+let calNotes = JSON.parse(localStorage.getItem('cal_notes') || '{}');
+
+function calUpdateTime(){
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  calTime.textContent = h + ':' + m;
+  const week = ['日','一','二','三','四','五','六'][now.getDay()];
+  calDate.textContent = now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日 周' + week;
+}
+calUpdateTime();
+setInterval(calUpdateTime, 1000);
+
+function calRender(){
+  calTitle.textContent = calYear + '年' + (calMonth+1) + '月';
+  calGrid.innerHTML = '';
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const today = new Date();
+  for(let i = 0; i < firstDay; i++){
+    const d = document.createElement('div');
+    d.className = 'cal-day other';
+    d.textContent = '';
+    calGrid.appendChild(d);
+  }
+  for(let day = 1; day <= daysInMonth; day++){
+    const key = calYear + '-' + (calMonth+1) + '-' + day;
+    const d = document.createElement('div');
+    d.className = 'cal-day';
+    d.textContent = day;
+    if(today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === day){
+      d.classList.add('today');
+    }
+    if(calNotes[key]){
+      d.classList.add('has-note');
+    }
+    if(key === calSelected){
+      d.style.background = 'rgba(255,255,255,0.35)';
+    }
+    d.onclick = (e) => {
+      e.stopPropagation();
+      calSelected = key;
+      calNoteDate.value = key;
+      calNoteInput.value = calNotes[key] || '';
+      calRender();
+    };
+    calGrid.appendChild(d);
+  }
+}
+
+calendarBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  calSelected = calYear + '-' + (calMonth+1) + '-' + now.getDate();
+  calNoteDate.value = calSelected;
+  calNoteInput.value = calNotes[calSelected] || '';
+  calRender();
+  calendarPopup.classList.add('show');
+});
+calendarPopup.addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+calendarClose.addEventListener('click', (e) => {
+  e.stopPropagation();
+  calendarPopup.classList.remove('show');
+});
+calPrev.addEventListener('click', (e) => {
+  e.stopPropagation();
+  calMonth--;
+  if(calMonth < 0){ calMonth = 11; calYear--; }
+  calRender();
+});
+calNext.addEventListener('click', (e) => {
+  e.stopPropagation();
+  calMonth++;
+  if(calMonth > 11){ calMonth = 0; calYear++; }
+  calRender();
+});
+calNoteSave.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if(!calSelected) return;
+  const val = calNoteInput.value.trim();
+  if(val){
+    calNotes[calSelected] = val;
+  }else{
+    delete calNotes[calSelected];
+  }
+  localStorage.setItem('cal_notes', JSON.stringify(calNotes));
+  calRender();
 });
 </script>
 </body>
