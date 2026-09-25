@@ -866,37 +866,42 @@ let currentPicInfo = { desc:'', author:'', link:'', picId:'', bgUrl:'' };
 // 后端先放一边，所有数据走浏览器缓存，后面接后端时把缓存上传即可
 const API_BASE = "https://like-api2.lightboxofficial.workers.dev"; // 暂时不用，先存着
 async function setBingBg(){
-  // 背景图直接用bing.img.run国内镜像（302重定向，最简单稳定）
-  const bgUrl = "https://bing.img.run/uhd.php";
-  const imgUrl = bgUrl + "?_t=" + Date.now();
-  document.body.style.backgroundImage = `url(${imgUrl})`;
-  currentPicInfo.bgUrl = bgUrl;
-  // 尝试获取元数据（拍摄者、场景）
+  // 用api.bimg.cc国内必应壁纸镜像
   try{
-    const resp = await fetch("https://api.vvhan.com/api/bing?type=json");
-    const img = await resp.json();
-    if(img && img.copyright){
-      const copyright = img.copyright || '';
+    const resp = await fetch("https://api.bimg.cc/today?w=1920&h=1080&mkt=zh-CN");
+    const data = await resp.json();
+    console.log("必应壁纸API返回:", data);
+    if(data && data.url){
+      const imgUrl = data.url + "?_t=" + Date.now();
+      document.body.style.backgroundImage = `url(${imgUrl})`;
+      currentPicInfo.bgUrl = data.url;
+      // 解析版权信息
+      const copyright = data.copyright || '';
       const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
       if(match){
         currentPicInfo.desc = match[1];
         currentPicInfo.author = match[2];
       }else{
-        currentPicInfo.desc = copyright;
+        currentPicInfo.desc = copyright || '必应壁纸';
         currentPicInfo.author = '';
       }
-      currentPicInfo.link = img.copyright_link || '';
-      currentPicInfo.picId = img.start_date || 'default';
+      currentPicInfo.link = data.copyrightlink || data.copyright_link || '';
+      currentPicInfo.picId = data.startdate || data.start_date || 'bing_' + Date.now();
       document.getElementById('picDesc').textContent = currentPicInfo.desc || '暂无';
       document.getElementById('picAuthor').textContent = currentPicInfo.author || '暂无';
-      liked = localStorage.getItem('bing_liked_' + currentPicInfo.picId) === '1';
-      loadLikeCount();
+      return;
     }
   }catch(e){
-    console.error("获取壁纸元数据失败",e);
-    document.getElementById('picDesc').textContent = '必应壁纸';
-    document.getElementById('picAuthor').textContent = '暂无';
+    console.error("必应壁纸API失败", e);
   }
+  // 降级用picsum
+  const fallback = "https://picsum.photos/1920/1080?random=" + Date.now();
+  document.body.style.backgroundImage = `url(${fallback})`;
+  currentPicInfo.bgUrl = fallback;
+  currentPicInfo.desc = "随机风景壁纸";
+  currentPicInfo.author = "Picsum";
+  document.getElementById('picDesc').textContent = currentPicInfo.desc;
+  document.getElementById('picAuthor').textContent = currentPicInfo.author;
 }
 const albumBtn = document.getElementById('albumBtn');
 const infoPopup = document.getElementById('infoPopup');
@@ -1434,11 +1439,9 @@ async function renderToday(){
   const week = ['日','一','二','三','四','五','六'][now.getDay()];
   todayDate.textContent = now.getFullYear() + '年' + m + '月' + d + '日 周' + week;
 
-  // 配图用今日必应壁纸
-  if(currentPicInfo.bgUrl){
-    todayImage.src = currentPicInfo.bgUrl;
-    todayImage.parentElement.style.display = '';
-  }
+  // 配图用picsum
+  todayImage.src = currentPicInfo.bgUrl || "https://picsum.photos/600/300?random=" + Date.now();
+  todayImage.parentElement.style.display = '';
 
   // 先查本地节日（公历+节气+农历）
   const festival = festivals[key];
