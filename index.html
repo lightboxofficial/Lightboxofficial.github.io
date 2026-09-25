@@ -866,7 +866,7 @@ let currentPicInfo = { desc:'', author:'', link:'', picId:'', bgUrl:'' };
 // 后端先放一边，所有数据走浏览器缓存，后面接后端时把缓存上传即可
 const API_BASE = "https://like-api2.lightboxofficial.workers.dev"; // 暂时不用，先存着
 async function setBingBg(){
-  // 先用picsum保底
+  // 1. 先用picsum保底
   try{
     const res = await fetch("https://picsum.photos/v2/list?page=1&limit=50");
     const list = await res.json();
@@ -886,30 +886,38 @@ async function setBingBg(){
     currentPicInfo.desc = "风景壁纸";
     currentPicInfo.author = "Picsum";
   }
-  // 用CORS代理请求必应壁纸（换allorigins代理）
+  // 2. 用GitHub Actions生成的JSON（通过jsdelivr CDN）
   try{
-    const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://api.xsot.cn/bing");
-    const resp = await fetch(proxyUrl);
-    const result = await resp.json();
-    console.log("必应壁纸API返回:", result);
-    if(result && result.success && result.data && result.data.image){
-      const imgUrl = result.data.image;
+    // 替换成你自己的GitHub用户名
+    const jsonUrl = "https://cdn.jsdelivr.net/gh/lightboxofficial/Bing-Wallpaper-Action@main/data/zh-CN.json";
+    const resp = await fetch(jsonUrl);
+    const bingData = await resp.json();
+    if(bingData && bingData.length > 0){
+      const today = bingData[0];
+      const imgUrl = "https://cn.bing.com" + today.url;
       const img = new Image();
       img.onload = function(){
         document.body.style.backgroundImage = `url(${imgUrl})`;
         currentPicInfo.bgUrl = imgUrl;
-        currentPicInfo.desc = result.data.title || '必应壁纸';
-        currentPicInfo.author = '';
-        currentPicInfo.link = '';
-        currentPicInfo.picId = 'bing_' + result.data.date;
-        document.getElementById('picDesc').textContent = currentPicInfo.desc;
-        document.getElementById('picAuthor').textContent = '暂无';
+        const copyright = today.copyright || '';
+        const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
+        if(match){
+          currentPicInfo.desc = match[1];
+          currentPicInfo.author = match[2];
+        }else{
+          currentPicInfo.desc = copyright || '必应壁纸';
+          currentPicInfo.author = '';
+        }
+        currentPicInfo.link = today.copyrightlink || '';
+        currentPicInfo.picId = today.startdate || 'bing_' + Date.now();
+        document.getElementById('picDesc').textContent = currentPicInfo.desc || '暂无';
+        document.getElementById('picAuthor').textContent = currentPicInfo.author || '暂无';
       };
       img.onerror = function(){};
       img.src = imgUrl;
     }
   }catch(e){
-    console.log("必应壁纸CORS代理失败", e);
+    console.log("必应壁纸JSON加载失败，用picsum");
   }
 }
 const albumBtn = document.getElementById('albumBtn');
