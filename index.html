@@ -6,6 +6,24 @@
 <title>NoTificians无闻小站-求索既无止，何处是归途</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+/* 去掉数字输入框的上下箭头 */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
+input[type=number]{
+  -moz-appearance:textfield;
+}
+/* 所有滚动条隐藏 */
+::-webkit-scrollbar{
+  width:0;
+  height:0;
+}
+*{
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
 html,body{
   width:100%;
   height:100%;
@@ -61,6 +79,7 @@ html,body{
   padding:6px;
   transition:opacity 0.2s, transform 0.15s;
   flex-shrink:0;
+  position:relative;
 }
 .icon-btn:hover{
   opacity:0.7;
@@ -72,6 +91,35 @@ html,body{
   width:20px;
   height:20px;
   stroke:rgba(255,255,255,0.75);
+}
+/* 激活状态小白点 */
+.icon-btn.active::after{
+  content:'';
+  position:absolute;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:#fff;
+}
+/* 工具项激活状态 */
+.tool-item.active{
+  background:rgba(255,255,255,0.2);
+}
+/* 弹窗可拖拽 */
+.popup-header{
+  cursor:move;
+  user-select:none;
+}
+.tool-sub-popup{
+  left:50%;
+  bottom:50%;
+  transform:translateX(-50%) translateY(50%) scale(0.85);
+  width:320px;
+  max-height:80vh;
+  overflow-y:auto;
 }
 .info-popup{
   position:fixed;
@@ -262,6 +310,11 @@ html,body{
   transition:opacity 0.25s cubic-bezier(0.34,1.56,0.64,1),
             transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
   pointer-events:none;
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+.popup::-webkit-scrollbar{
+  display:none;
 }
 .popup.show{
   opacity:1;
@@ -275,6 +328,25 @@ html,body{
   margin-bottom:12px;
   font-size:15px;
   font-weight:600;
+  cursor:move;
+  user-select:none;
+  -webkit-user-select:none;
+}
+/* 工具图标激活状态小白点 */
+.tool-item{
+  position:relative;
+}
+.tool-item.active::after{
+  content:'';
+  position:absolute;
+  bottom:2px;
+  left:50%;
+  transform:translateX(-50%);
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:#fff;
+  opacity:0.8;
 }
 .popup-close{
   width:24px;
@@ -338,18 +410,6 @@ html,body{
   font-size:12px;
   opacity:0.8;
 }
-/* 工具子弹窗 */
-.tool-sub-popup{
-  left:50%;
-  bottom:50%;
-  transform:translateX(-50%) translateY(50%) scale(0.85);
-  width:320px;
-  max-height:80vh;
-  overflow-y:auto;
-}
-.tool-sub-popup.show{
-  transform:translateX(-50%) translateY(50%) scale(1);
-}
 /* 计算器 */
 .calc-display{
   width:100%;
@@ -399,6 +459,67 @@ html,body{
   text-align:center;
   font-variant-numeric:tabular-nums;
   margin:20px 0;
+}
+/* 结果输出容器：横向滚动，无滚动条 */
+.result-box{
+  white-space:nowrap;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  background:rgba(30,30,45,0.45);
+  backdrop-filter:blur(10px);
+  border-radius:10px;
+  padding:12px 14px;
+  border:1px solid rgba(255,255,255,0.1);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.result-box::-webkit-scrollbar{
+  display:none;
+}
+.result-text{
+  flex:1;
+  overflow-x:auto;
+  scrollbar-width:none;
+  white-space:nowrap;
+}
+.result-text::-webkit-scrollbar{
+  display:none;
+}
+.result-copy-btn{
+  flex-shrink:0;
+  padding:4px 10px;
+  font-size:12px;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.18);
+  color:#fff;
+  border-radius:8px;
+  cursor:pointer;
+}
+.result-copy-btn:hover{
+  background:rgba(255,255,255,0.22);
+}
+/* 复制提示 */
+.copy-toast{
+  position:fixed;
+  bottom:120px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.55);
+  backdrop-filter:blur(10px);
+  color:#fff;
+  padding:8px 16px;
+  border-radius:8px;
+  font-size:14px;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.2s ease;
+  z-index:9999;
+}
+.copy-toast.show{
+  opacity:1;
 }
 /* 收藏夹主弹窗 */
 .bookmark-popup{
@@ -586,6 +707,29 @@ select.search-box option{
   box-sizing:border-box;
   transition:border-color 0.2s, box-shadow 0.2s;
   font-family:inherit;
+  max-width:100%;
+}
+/* 去掉数字输入框的上下箭头 */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
+input[type=number]{
+  -moz-appearance:textfield;
+}
+/* 文本域自动滚动 */
+textarea{
+  resize:vertical;
+  overflow-y:auto;
+  scrollbar-width:thin;
+}
+textarea::-webkit-scrollbar{
+  width:4px;
+}
+textarea::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,0.2);
+  border-radius:2px;
 }
 .form-group input:focus,
 .form-group textarea:focus{
@@ -1099,11 +1243,23 @@ select.search-box option{
   </div>
   <div class="form-group">
     <label>转换结果</label>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <div style="flex:1;min-width:80px"><small style="opacity:0.5">十进制</small><div id="baseDec" style="font-size:14px;margin-top:2px">0</div></div>
-      <div style="flex:1;min-width:80px"><small style="opacity:0.5">二进制</small><div id="baseBin" style="font-size:14px;margin-top:2px">0</div></div>
-      <div style="flex:1;min-width:80px"><small style="opacity:0.5">八进制</small><div id="baseOct" style="font-size:14px;margin-top:2px">0</div></div>
-      <div style="flex:1;min-width:80px"><small style="opacity:0.5">十六进制</small><div id="baseHex" style="font-size:14px;margin-top:2px">0</div></div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div class="result-box">
+        <span class="result-text"><small style="opacity:0.5">十进制:</small> <span id="baseDec">0</span></span>
+        <button class="result-copy-btn" onclick="copyText(document.getElementById('baseDec').textContent)">复制</button>
+      </div>
+      <div class="result-box">
+        <span class="result-text"><small style="opacity:0.5">二进制:</small> <span id="baseBin">0</span></span>
+        <button class="result-copy-btn" onclick="copyText(document.getElementById('baseBin').textContent)">复制</button>
+      </div>
+      <div class="result-box">
+        <span class="result-text"><small style="opacity:0.5">八进制:</small> <span id="baseOct">0</span></span>
+        <button class="result-copy-btn" onclick="copyText(document.getElementById('baseOct').textContent)">复制</button>
+      </div>
+      <div class="result-box">
+        <span class="result-text"><small style="opacity:0.5">十六进制:</small> <span id="baseHex">0</span></span>
+        <button class="result-copy-btn" onclick="copyText(document.getElementById('baseHex').textContent)">复制</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1119,15 +1275,24 @@ select.search-box option{
   </div>
   <div class="form-group">
     <label>MD5</label>
-    <div id="hashMd5" style="font-size:12px;opacity:0.8;word-break:break-all;background:rgba(255,255,255,0.08);padding:8px;border-radius:6px">-</div>
+    <div class="result-box">
+      <span class="result-text" id="hashMd5">-</span>
+      <button class="result-copy-btn" onclick="copyText(document.getElementById('hashMd5').textContent)">复制</button>
+    </div>
   </div>
   <div class="form-group">
     <label>SHA-1</label>
-    <div id="hashSha1" style="font-size:12px;opacity:0.8;word-break:break-all;background:rgba(255,255,255,0.08);padding:8px;border-radius:6px">-</div>
+    <div class="result-box">
+      <span class="result-text" id="hashSha1">-</span>
+      <button class="result-copy-btn" onclick="copyText(document.getElementById('hashSha1').textContent)">复制</button>
+    </div>
   </div>
   <div class="form-group">
     <label>SHA-256</label>
-    <div id="hashSha256" style="font-size:12px;opacity:0.8;word-break:break-all;background:rgba(255,255,255,0.08);padding:8px;border-radius:6px">-</div>
+    <div class="result-box">
+      <span class="result-text" id="hashSha256">-</span>
+      <button class="result-copy-btn" onclick="copyText(document.getElementById('hashSha256').textContent)">复制</button>
+    </div>
   </div>
 </div>
 <!-- 计时器弹窗 -->
@@ -1185,7 +1350,10 @@ select.search-box option{
   </div>
   <div class="form-group">
     <label>结果</label>
-    <textarea id="cryptoOutput" readonly style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;min-height:60px"></textarea>
+    <div class="result-box" style="align-items:flex-start">
+      <span class="result-text" id="cryptoOutput" style="white-space:pre-wrap;word-break:break-all">-</span>
+      <button class="result-copy-btn" onclick="copyText(document.getElementById('cryptoOutput').textContent)">复制</button>
+    </div>
   </div>
 </div>
 <!-- 密码生成器弹窗 -->
@@ -1214,7 +1382,10 @@ select.search-box option{
   </div>
   <div class="form-group">
     <label>生成的密码</label>
-    <input type="text" id="pwdResult" readonly style="font-size:16px;letter-spacing:1px">
+    <div class="result-box">
+      <span class="result-text" id="pwdResult">点击生成</span>
+      <button class="result-copy-btn" onclick="copyText(document.getElementById('pwdResult').textContent)">复制</button>
+    </div>
   </div>
   <button class="confirm-btn" id="pwdGenerate">生成密码</button>
 </div>
@@ -1234,12 +1405,18 @@ select.search-box option{
   <div class="form-group">
     <label>时间戳转日期</label>
     <input type="text" id="tsInput" placeholder="输入时间戳（秒/毫秒）...">
-    <div id="tsResult" style="font-size:13px;opacity:0.8;margin-top:4px">-</div>
+    <div class="result-box" style="margin-top:4px">
+      <span class="result-text" id="tsResult">-</span>
+      <button class="result-copy-btn" onclick="copyText(document.getElementById('tsResult').textContent)">复制</button>
+    </div>
   </div>
   <div class="form-group">
     <label>日期转时间戳</label>
     <input type="text" id="tsDateInput" placeholder="YYYY-MM-DD HH:mm:ss">
-    <div id="tsDateResult" style="font-size:13px;opacity:0.8;margin-top:4px">-</div>
+    <div class="result-box" style="margin-top:4px">
+      <span class="result-text" id="tsDateResult">-</span>
+      <button class="result-copy-btn" onclick="copyText(document.getElementById('tsDateResult').textContent)">复制</button>
+    </div>
   </div>
 </div>
 <!-- 随机数生成弹窗 -->
@@ -1260,7 +1437,10 @@ select.search-box option{
   </div>
   <div class="form-group">
     <label>生成结果</label>
-    <div id="randResult" style="font-size:32px;text-align:center;padding:16px;background:rgba(255,255,255,0.08);border-radius:8px">?</div>
+    <div class="result-box" style="font-size:32px;text-align:center;padding:16px">
+      <span class="result-text" id="randResult" style="text-align:center">?</span>
+      <button class="result-copy-btn" onclick="copyText(document.getElementById('randResult').textContent)">复制</button>
+    </div>
   </div>
   <button class="confirm-btn" id="randGenerate">生成随机数</button>
 </div>
@@ -1280,7 +1460,10 @@ select.search-box option{
   </div>
   <div class="form-group">
     <label>结果</label>
-    <textarea id="jsonOutput" readonly style="min-height:80px"></textarea>
+    <div class="result-box" style="align-items:flex-start">
+      <span class="result-text" id="jsonOutput" style="white-space:pre-wrap;word-break:break-all">-</span>
+      <button class="result-copy-btn" onclick="copyText(document.getElementById('jsonOutput').textContent)">复制</button>
+    </div>
   </div>
 </div>
 <!-- Markdown编辑器弹窗 -->
@@ -2221,6 +2404,70 @@ const toolsBtn = document.getElementById('toolsBtn');
 const toolsPopup = document.getElementById('toolsPopup');
 const toolsClose = document.getElementById('toolsClose');
 
+// ===== 复制功能 =====
+function copyText(text){
+  navigator.clipboard.writeText(text).then(function(){
+    let toast = document.querySelector('.copy-toast');
+    if(!toast){
+      toast = document.createElement('div');
+      toast.className = 'copy-toast';
+      toast.textContent = '已复制';
+      document.body.appendChild(toast);
+    }
+    toast.classList.add('show');
+    setTimeout(function(){
+      toast.classList.remove('show');
+    }, 1200);
+  });
+}
+
+// 弹窗可拖动功能
+function makeDraggable(popup){
+  const header = popup.querySelector('.popup-header');
+  if(!header) return;
+  let isDragging = false;
+  let startX, startY, initialLeft, initialTop;
+  header.addEventListener('mousedown', function(e){
+    isDragging = true;
+    const rect = popup.getBoundingClientRect();
+    initialLeft = rect.left;
+    initialTop = rect.top;
+    startX = e.clientX;
+    startY = e.clientY;
+    popup.style.right = 'auto';
+    popup.style.bottom = 'auto';
+    popup.style.transform = 'none';
+    popup.style.left = initialLeft + 'px';
+    popup.style.top = initialTop + 'px';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', function(e){
+    if(!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    popup.style.left = (initialLeft + dx) + 'px';
+    popup.style.top = (initialTop + dy) + 'px';
+  });
+  document.addEventListener('mouseup', function(){
+    isDragging = false;
+  });
+}
+// 给所有弹窗添加拖动功能
+document.querySelectorAll('.popup').forEach(makeDraggable);
+
+// 工具图标激活状态切换
+function toggleToolActive(toolId, popupId){
+  const tool = document.getElementById(toolId);
+  const popup = document.getElementById(popupId);
+  if(popup.classList.contains('show')){
+    popup.classList.remove('show');
+    tool.classList.remove('active');
+  } else {
+    popup.classList.add('show');
+    tool.classList.add('active');
+  }
+}
+
 toolsBtn.addEventListener('click', function(e){
   e.stopPropagation();
   toolsPopup.classList.toggle('show');
@@ -2229,17 +2476,13 @@ toolsClose.addEventListener('click', function(e){
   e.stopPropagation();
   toolsPopup.classList.remove('show');
 });
-// 点击工具项时关闭工具弹窗
-document.querySelectorAll('.tool-item').forEach(function(item){
-  item.addEventListener('click', function(){
-    toolsPopup.classList.remove('show');
-  });
-});
+// 所有弹窗点击外部关闭
 document.addEventListener('click', function(e){
+  // 工具弹窗
   if(!toolsPopup.contains(e.target) && !toolsBtn.contains(e.target)){
     toolsPopup.classList.remove('show');
   }
-  // 其他弹窗点击外部关闭
+  // 收藏夹
   if(bookmarkPopup && !bookmarkPopup.contains(e.target) && bookmarkBtn && !bookmarkBtn.contains(e.target)){
     bookmarkPopup.classList.remove('show');
   }
@@ -2261,6 +2504,12 @@ document.addEventListener('click', function(e){
   if(todayPopup && !todayPopup.contains(e.target) && todayBtn && !todayBtn.contains(e.target)){
     todayPopup.classList.remove('show');
   }
+  // 所有工具子弹窗
+  document.querySelectorAll('.tool-sub-popup').forEach(popup => {
+    if(!popup.contains(e.target)){
+      popup.classList.remove('show');
+    }
+  });
 });
 
 // ===== 计算器 =====
@@ -2287,7 +2536,8 @@ document.querySelectorAll('.calc-btn').forEach(btn => {
     }
   });
 });
-document.getElementById('toolCalculator').addEventListener('click', function(){
+document.getElementById('toolCalculator').addEventListener('click', function(e){
+  e.stopPropagation();
   document.getElementById('calculatorPopup').classList.add('show');
 });
 
@@ -2312,7 +2562,7 @@ function updateBase(){
 }
 baseInput.addEventListener('input', updateBase);
 baseFrom.addEventListener('change', updateBase);
-document.getElementById('toolBaseConvert').addEventListener('click', function(){
+document.getElementById('toolBaseConvert').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('baseConvertPopup').classList.add('show');
 });
 
@@ -2340,7 +2590,7 @@ async function updateHash(){
   }
 }
 hashInput.addEventListener('input', updateHash);
-document.getElementById('toolHash').addEventListener('click', function(){
+document.getElementById('toolHash').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('hashPopup').classList.add('show');
 });
 
@@ -2353,7 +2603,7 @@ function formatTime(s){
   const ms = Math.floor((s%1)*10);
   return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0') + '.' + ms;
 }
-document.getElementById('toolTimer').addEventListener('click', function(){
+document.getElementById('toolTimer').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('timerPopup').classList.add('show');
 });
 document.getElementById('timerStart').addEventListener('click', function(e){
@@ -2408,11 +2658,58 @@ function updateColor(){
   document.getElementById('colorHsl').textContent = h + ', ' + s + '%, ' + l + '%';
 }
 colorPicker.addEventListener('input', updateColor);
-document.getElementById('toolColor').addEventListener('click', function(){
+document.getElementById('toolColor').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('colorPopup').classList.add('show');
 });
 
-// ===== 加解密工具 =====
+// 所有弹窗都可拖拽
+document.querySelectorAll('.popup, .info-popup').forEach(popup => {
+  const header = popup.querySelector('.popup-header') || popup;
+  if(header) makeDraggable(popup, header);
+  popup.addEventListener('click', function(e){
+    e.stopPropagation();
+  });
+});
+
+// ===== 工具图标激活状态（暂时注释） =====
+/*
+function setActive(btnId, popupId){
+  const btn = document.getElementById(btnId);
+  const popup = document.getElementById(popupId);
+  if(!btn || !popup) return;
+  popup.addEventListener('click', function(e){
+    e.stopPropagation();
+  });
+  const observer = new MutationObserver(function(){
+    if(popup.classList.contains('show')){
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  observer.observe(popup, {attributes:true, attributeFilter:['class']});
+}
+setActive('albumBtn', 'infoPopup');
+setActive('toolBookmark', 'bookmarkPopup');
+setActive('toolCalendar', 'calendarPopup');
+setActive('toolToday', 'todayPopup');
+setActive('toolCalculator', 'calculatorPopup');
+setActive('toolBaseConvert', 'baseConvertPopup');
+setActive('toolHash', 'hashPopup');
+setActive('toolTimer', 'timerPopup');
+setActive('toolColor', 'colorPopup');
+setActive('toolCrypto', 'cryptoPopup');
+setActive('toolPwdGen', 'pwdGenPopup');
+setActive('toolTimestamp', 'timestampPopup');
+setActive('toolRandom', 'randomPopup');
+setActive('toolJsonFmt', 'jsonFmtPopup');
+setActive('toolMarkdown', 'markdownPopup');
+setActive('toolPomodoro', 'pomodoroPopup');
+setActive('toolCountdown', 'countdownPopup');
+setActive('toolSciCalc', 'sciCalcPopup');
+setActive('toolGeo', 'geoPopup');
+*/
+
 const cryptoInput = document.getElementById('cryptoInput');
 const cryptoOutput = document.getElementById('cryptoOutput');
 const cryptoKey = document.getElementById('cryptoKey');
@@ -2451,10 +2748,10 @@ document.getElementById('cryptoEncrypt').addEventListener('click', async functio
   const key = cryptoKey.value;
   try{
     if(algo === 'base64'){
-      cryptoOutput.value = b64encode(text);
+      cryptoOutput.textContent = b64encode(text);
     } else if(algo === 'rc4'){
       if(!key) throw new Error('请输入密钥');
-      cryptoOutput.value = b64encode(rc4(text, key));
+      cryptoOutput.textContent = b64encode(rc4(text, key));
     } else if(algo === 'aes'){
       if(!key) throw new Error('请输入密钥');
       const enc = new TextEncoder();
@@ -2465,10 +2762,10 @@ document.getElementById('cryptoEncrypt').addEventListener('click', async functio
       const combined = new Uint8Array(iv.length + encrypted.byteLength);
       combined.set(iv);
       combined.set(new Uint8Array(encrypted), iv.length);
-      cryptoOutput.value = btoa(String.fromCharCode(...combined));
+      cryptoOutput.textContent = btoa(String.fromCharCode(...combined));
     }
   }catch(err){
-    cryptoOutput.value = '加密失败: ' + err.message;
+    cryptoOutput.textContent = '加密失败: ' + err.message;
   }
 });
 
@@ -2479,10 +2776,10 @@ document.getElementById('cryptoDecrypt').addEventListener('click', async functio
   const key = cryptoKey.value;
   try{
     if(algo === 'base64'){
-      cryptoOutput.value = b64decode(text);
+      cryptoOutput.textContent = b64decode(text);
     } else if(algo === 'rc4'){
       if(!key) throw new Error('请输入密钥');
-      cryptoOutput.value = rc4(b64decode(text), key);
+      cryptoOutput.textContent = rc4(b64decode(text), key);
     } else if(algo === 'aes'){
       if(!key) throw new Error('请输入密钥');
       const keyData = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key));
@@ -2491,14 +2788,14 @@ document.getElementById('cryptoDecrypt').addEventListener('click', async functio
       const iv = combined.slice(0, 12);
       const data = combined.slice(12);
       const decrypted = await crypto.subtle.decrypt({name:'AES-GCM', iv: iv}, aesKey, data);
-      cryptoOutput.value = new TextDecoder().decode(decrypted);
+      cryptoOutput.textContent = new TextDecoder().decode(decrypted);
     }
   }catch(err){
-    cryptoOutput.value = '解密失败: ' + err.message;
+    cryptoOutput.textContent = '解密失败: ' + err.message;
   }
 });
 
-document.getElementById('toolCrypto').addEventListener('click', function(){
+document.getElementById('toolCrypto').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('cryptoPopup').classList.add('show');
 });
 
@@ -2519,7 +2816,7 @@ function generatePassword(){
   for(let i = 0; i < len; i++){
     pwd += chars[Math.floor(Math.random() * chars.length)];
   }
-  document.getElementById('pwdResult').value = pwd;
+  document.getElementById('pwdResult').textContent = pwd;
 }
 document.getElementById('pwdLen').addEventListener('input', function(){
   document.getElementById('pwdLenVal').textContent = this.value;
@@ -2528,7 +2825,7 @@ document.getElementById('pwdGenerate').addEventListener('click', function(e){
   e.stopPropagation();
   generatePassword();
 });
-document.getElementById('toolPwdGen').addEventListener('click', function(){
+document.getElementById('toolPwdGen').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('pwdGenPopup').classList.add('show');
   generatePassword();
 });
@@ -2572,19 +2869,34 @@ document.getElementById('tsDateInput').addEventListener('input', function(){
     document.getElementById('tsDateResult').textContent = Math.floor(d.getTime() / 1000);
   }
 });
-document.getElementById('toolTimestamp').addEventListener('click', function(){
+document.getElementById('toolTimestamp').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('timestampPopup').classList.add('show');
 });
 
 // ===== 随机数生成 =====
 document.getElementById('randGenerate').addEventListener('click', function(e){
   e.stopPropagation();
-  const min = parseInt(document.getElementById('randMin').value) || 1;
-  const max = parseInt(document.getElementById('randMax').value) || 100;
-  const val = Math.floor(Math.random() * (max - min + 1)) + min;
+  const min = BigInt(document.getElementById('randMin').value || '1');
+  const max = BigInt(document.getElementById('randMax').value || '100');
+  if(max <= min){
+    document.getElementById('randResult').textContent = "范围错误";
+    return;
+  }
+  const range = max - min + 1n;
+  // 生成随机大整数，避免科学计数法
+  let result = 0n;
+  const bits = range.toString(2).length;
+  do{
+    result = 0n;
+    for(let i = 0; i < bits; i += 15){
+      const chunk = BigInt(Math.floor(Math.random() * 32768));
+      result = (result << 15n) | chunk;
+    }
+  }while(result >= range);
+  const val = (min + result).toString();
   document.getElementById('randResult').textContent = val;
 });
-document.getElementById('toolRandom').addEventListener('click', function(){
+document.getElementById('toolRandom').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('randomPopup').classList.add('show');
 });
 
@@ -2593,21 +2905,21 @@ document.getElementById('jsonFormat').addEventListener('click', function(e){
   e.stopPropagation();
   try{
     const obj = JSON.parse(document.getElementById('jsonInput').value);
-    document.getElementById('jsonOutput').value = JSON.stringify(obj, null, 2);
+    document.getElementById('jsonOutput').textContent = JSON.stringify(obj, null, 2);
   }catch(err){
-    document.getElementById('jsonOutput').value = 'JSON解析错误: ' + err.message;
+    document.getElementById('jsonOutput').textContent = 'JSON解析错误: ' + err.message;
   }
 });
 document.getElementById('jsonMinify').addEventListener('click', function(e){
   e.stopPropagation();
   try{
     const obj = JSON.parse(document.getElementById('jsonInput').value);
-    document.getElementById('jsonOutput').value = JSON.stringify(obj);
+    document.getElementById('jsonOutput').textContent = JSON.stringify(obj);
   }catch(err){
-    document.getElementById('jsonOutput').value = 'JSON解析错误: ' + err.message;
+    document.getElementById('jsonOutput').textContent = 'JSON解析错误: ' + err.message;
   }
 });
-document.getElementById('toolJsonFmt').addEventListener('click', function(){
+document.getElementById('toolJsonFmt').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('jsonFmtPopup').classList.add('show');
 });
 
@@ -2630,7 +2942,7 @@ const mdPreview = document.getElementById('mdPreview');
 mdInput.addEventListener('input', function(){
   mdPreview.innerHTML = simpleMd(mdInput.value) || '预览区';
 });
-document.getElementById('toolMarkdown').addEventListener('click', function(){
+document.getElementById('toolMarkdown').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('markdownPopup').classList.add('show');
 });
 
@@ -2684,7 +2996,7 @@ document.getElementById('pomodoroReset').addEventListener('click', function(e){
   pomoUpdateDisplay();
   document.getElementById('pomodoroStart').textContent = '开始';
 });
-document.getElementById('toolPomodoro').addEventListener('click', function(){
+document.getElementById('toolPomodoro').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('pomodoroPopup').classList.add('show');
 });
 
@@ -2735,7 +3047,7 @@ document.getElementById('cdReset').addEventListener('click', function(e){
   cdUpdateDisplay();
   document.getElementById('cdStart').textContent = '开始';
 });
-document.getElementById('toolCountdown').addEventListener('click', function(){
+document.getElementById('toolCountdown').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('countdownPopup').classList.add('show');
 });
 
@@ -2791,7 +3103,7 @@ document.querySelectorAll('#sciCalcPopup .calc-btn').forEach(btn => {
     }
   });
 });
-document.getElementById('toolSciCalc').addEventListener('click', function(){
+document.getElementById('toolSciCalc').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('sciCalcPopup').classList.add('show');
 });
 
@@ -2821,7 +3133,7 @@ document.getElementById('geoRefresh').addEventListener('click', function(e){
   e.stopPropagation();
   getLocation();
 });
-document.getElementById('toolGeo').addEventListener('click', function(){
+document.getElementById('toolGeo').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('geoPopup').classList.add('show');
   getLocation();
 });
