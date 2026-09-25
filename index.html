@@ -198,27 +198,53 @@ html,body{
 }
 @media (max-width:720px){
   .island{
-    position:static;
-    width: calc(100% - 40px) !important;
-    margin:8px auto;
-  }
-  .island-container{
-    position:fixed;
-    bottom:16px;
-    left:0;
-    right:0;
-    display:flex;
+    height:auto;
+    padding:8px;
     flex-direction:column;
+    gap:4px;
+    width:auto !important;
+  }
+  .island-left{
+    left:8px;
+    top:50%;
+    transform:translateY(-50%);
+    bottom:auto;
+    position:fixed;
+  }
+  .island-right{
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    bottom:auto;
+    position:fixed;
+  }
+  .island-main{
+    left:50%;
+    bottom:16px;
+    top:auto;
+    transform:translateX(-50%);
+    position:fixed;
+    width:200px !important;
+    flex-direction:row !important;
+    height:40px !important;
   }
   .info-popup{
     left:20px;
     right:20px;
     width:auto;
+    bottom:80px;
   }
-  .bookmark-popup,.edit-popup{
-    left:20px;
-    right:20px;
-    width:auto;
+  .tools-popup{
+    left:20px !important;
+    right:20px !important;
+    width:auto !important;
+    bottom:80px !important;
+  }
+  .tool-sub-popup{
+    left:20px !important;
+    right:20px !important;
+    width:auto !important;
+    max-height:70vh;
   }
 }
 /* ===== 收藏夹弹窗 ===== */
