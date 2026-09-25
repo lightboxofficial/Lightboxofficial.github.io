@@ -881,37 +881,30 @@ async function setBingBg(){
     document.getElementById('picDesc').textContent = currentPicInfo.desc;
     document.getElementById('picAuthor').textContent = currentPicInfo.author;
   }catch(e){
-    // picsum API也失败，用随机URL
     const fallback = "https://picsum.photos/1920/1080?random=" + Date.now();
     document.body.style.backgroundImage = `url(${fallback})`;
     currentPicInfo.desc = "风景壁纸";
     currentPicInfo.author = "Picsum";
   }
-  // 2. 尝试加载必应壁纸，成功了就替换
+  // 2. 尝试加载必应壁纸（国内CDN源 api.xsot.cn）
   try{
-    const resp = await fetch("https://api.bimg.cc/today?w=1920&h=1080&mkt=zh-CN");
-    const data = await resp.json();
-    if(data && data.url){
+    const resp = await fetch("https://api.xsot.cn/bing");
+    const result = await resp.json();
+    if(result && result.success && result.data && result.data.image){
+      const imgUrl = result.data.image;
       const img = new Image();
       img.onload = function(){
-        document.body.style.backgroundImage = `url(${data.url})`;
-        currentPicInfo.bgUrl = data.url;
-        const copyright = data.copyright || '';
-        const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
-        if(match){
-          currentPicInfo.desc = match[1];
-          currentPicInfo.author = match[2];
-        }else{
-          currentPicInfo.desc = copyright || '必应壁纸';
-          currentPicInfo.author = '';
-        }
-        currentPicInfo.link = data.copyrightlink || '';
-        currentPicInfo.picId = data.startdate || 'bing_' + Date.now();
-        document.getElementById('picDesc').textContent = currentPicInfo.desc || '暂无';
-        document.getElementById('picAuthor').textContent = currentPicInfo.author || '暂无';
+        document.body.style.backgroundImage = `url(${imgUrl})`;
+        currentPicInfo.bgUrl = imgUrl;
+        currentPicInfo.desc = result.data.title || '必应壁纸';
+        currentPicInfo.author = '';
+        currentPicInfo.link = '';
+        currentPicInfo.picId = 'bing_' + result.data.date;
+        document.getElementById('picDesc').textContent = currentPicInfo.desc;
+        document.getElementById('picAuthor').textContent = '暂无';
       };
       img.onerror = function(){};
-      img.src = data.url;
+      img.src = imgUrl;
     }
   }catch(e){
     console.log("必应壁纸API失败，用picsum");
