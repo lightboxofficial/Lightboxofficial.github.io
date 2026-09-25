@@ -866,42 +866,56 @@ let currentPicInfo = { desc:'', author:'', link:'', picId:'', bgUrl:'' };
 // 后端先放一边，所有数据走浏览器缓存，后面接后端时把缓存上传即可
 const API_BASE = "https://like-api2.lightboxofficial.workers.dev"; // 暂时不用，先存着
 async function setBingBg(){
-  // 用api.bimg.cc国内必应壁纸镜像
+  // 1. 先用picsum保底
+  try{
+    const res = await fetch("https://picsum.photos/v2/list?page=1&limit=50");
+    const list = await res.json();
+    const random = list[Math.floor(Math.random() * list.length)];
+    const imgUrl = `https://picsum.photos/id/${random.id}/1920/1080`;
+    document.body.style.backgroundImage = `url(${imgUrl})`;
+    currentPicInfo.bgUrl = imgUrl;
+    currentPicInfo.desc = random.author || '风景壁纸';
+    currentPicInfo.author = random.author || 'Picsum';
+    currentPicInfo.link = random.url || '';
+    currentPicInfo.picId = 'picsum_' + random.id;
+    document.getElementById('picDesc').textContent = currentPicInfo.desc;
+    document.getElementById('picAuthor').textContent = currentPicInfo.author;
+  }catch(e){
+    // picsum API也失败，用随机URL
+    const fallback = "https://picsum.photos/1920/1080?random=" + Date.now();
+    document.body.style.backgroundImage = `url(${fallback})`;
+    currentPicInfo.desc = "风景壁纸";
+    currentPicInfo.author = "Picsum";
+  }
+  // 2. 尝试加载必应壁纸，成功了就替换
   try{
     const resp = await fetch("https://api.bimg.cc/today?w=1920&h=1080&mkt=zh-CN");
     const data = await resp.json();
-    console.log("必应壁纸API返回:", data);
     if(data && data.url){
-      const imgUrl = data.url + "?_t=" + Date.now();
-      document.body.style.backgroundImage = `url(${imgUrl})`;
-      currentPicInfo.bgUrl = data.url;
-      // 解析版权信息
-      const copyright = data.copyright || '';
-      const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
-      if(match){
-        currentPicInfo.desc = match[1];
-        currentPicInfo.author = match[2];
-      }else{
-        currentPicInfo.desc = copyright || '必应壁纸';
-        currentPicInfo.author = '';
-      }
-      currentPicInfo.link = data.copyrightlink || data.copyright_link || '';
-      currentPicInfo.picId = data.startdate || data.start_date || 'bing_' + Date.now();
-      document.getElementById('picDesc').textContent = currentPicInfo.desc || '暂无';
-      document.getElementById('picAuthor').textContent = currentPicInfo.author || '暂无';
-      return;
+      const img = new Image();
+      img.onload = function(){
+        document.body.style.backgroundImage = `url(${data.url})`;
+        currentPicInfo.bgUrl = data.url;
+        const copyright = data.copyright || '';
+        const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
+        if(match){
+          currentPicInfo.desc = match[1];
+          currentPicInfo.author = match[2];
+        }else{
+          currentPicInfo.desc = copyright || '必应壁纸';
+          currentPicInfo.author = '';
+        }
+        currentPicInfo.link = data.copyrightlink || '';
+        currentPicInfo.picId = data.startdate || 'bing_' + Date.now();
+        document.getElementById('picDesc').textContent = currentPicInfo.desc || '暂无';
+        document.getElementById('picAuthor').textContent = currentPicInfo.author || '暂无';
+      };
+      img.onerror = function(){};
+      img.src = data.url;
     }
   }catch(e){
-    console.error("必应壁纸API失败", e);
+    console.log("必应壁纸API失败，用picsum");
   }
-  // 降级用picsum
-  const fallback = "https://picsum.photos/1920/1080?random=" + Date.now();
-  document.body.style.backgroundImage = `url(${fallback})`;
-  currentPicInfo.bgUrl = fallback;
-  currentPicInfo.desc = "随机风景壁纸";
-  currentPicInfo.author = "Picsum";
-  document.getElementById('picDesc').textContent = currentPicInfo.desc;
-  document.getElementById('picAuthor').textContent = currentPicInfo.author;
 }
 const albumBtn = document.getElementById('albumBtn');
 const infoPopup = document.getElementById('infoPopup');
