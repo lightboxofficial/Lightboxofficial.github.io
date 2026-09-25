@@ -866,7 +866,7 @@ let currentPicInfo = { desc:'', author:'', link:'', picId:'', bgUrl:'' };
 // 后端先放一边，所有数据走浏览器缓存，后面接后端时把缓存上传即可
 const API_BASE = "https://like-api2.lightboxofficial.workers.dev"; // 暂时不用，先存着
 async function setBingBg(){
-  // 1. 先用picsum保底
+  // 先用picsum保底
   try{
     const res = await fetch("https://picsum.photos/v2/list?page=1&limit=50");
     const list = await res.json();
@@ -886,10 +886,12 @@ async function setBingBg(){
     currentPicInfo.desc = "风景壁纸";
     currentPicInfo.author = "Picsum";
   }
-  // 2. 尝试加载必应壁纸（国内CDN源 api.xsot.cn）
+  // 用CORS代理请求必应壁纸（换allorigins代理）
   try{
-    const resp = await fetch("https://api.xsot.cn/bing");
+    const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://api.xsot.cn/bing");
+    const resp = await fetch(proxyUrl);
     const result = await resp.json();
+    console.log("必应壁纸API返回:", result);
     if(result && result.success && result.data && result.data.image){
       const imgUrl = result.data.image;
       const img = new Image();
@@ -907,7 +909,7 @@ async function setBingBg(){
       img.src = imgUrl;
     }
   }catch(e){
-    console.log("必应壁纸API失败，用picsum");
+    console.log("必应壁纸CORS代理失败", e);
   }
 }
 const albumBtn = document.getElementById('albumBtn');
