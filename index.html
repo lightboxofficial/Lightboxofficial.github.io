@@ -114,15 +114,15 @@ html,body{
   user-select:none;
 }
 .tool-sub-popup{
-  left:50% !important;
-  top:50% !important;
-  transform:translate(-50%, -50%) scale(0.85) !important;
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%) scale(0.85);
   width:320px;
   max-height:80vh;
   overflow-y:auto;
 }
 .tool-sub-popup.show{
-  transform:translate(-50%, -50%) scale(1) !important;
+  transform:translate(-50%, -50%) scale(1);
 }
 .info-popup{
   position:fixed;
@@ -2429,8 +2429,9 @@ let activeDragPopup = null;
 let startX, startY, initialLeft, initialTop;
 
 function makeDraggable(popup){
-  const header = popup.querySelector('.popup-header');
+  const header = popup.querySelector('.popup-header') || popup.querySelector('.info-popup-header') || popup;
   if(!header) return;
+  header.style.cursor = 'move';
   header.addEventListener('mousedown', function(e){
     e.preventDefault();
     const rect = popup.getBoundingClientRect();
@@ -2442,7 +2443,7 @@ function makeDraggable(popup){
   });
 }
 // 给所有弹窗添加拖动功能
-document.querySelectorAll('.popup').forEach(makeDraggable);
+document.querySelectorAll('.popup, .info-popup').forEach(makeDraggable);
 
 // 全局拖拽事件（只绑定一次）
 document.addEventListener('mousemove', function(e){
@@ -2452,11 +2453,15 @@ document.addEventListener('mousemove', function(e){
   const popup = activeDragPopup;
   popup.style.right = 'auto';
   popup.style.bottom = 'auto';
+  popup.style.transition = 'none';
   popup.style.transform = 'none';
   popup.style.left = (initialLeft + dx) + 'px';
   popup.style.top = (initialTop + dy) + 'px';
 });
 document.addEventListener('mouseup', function(){
+  if(activeDragPopup){
+    activeDragPopup.style.transition = '';
+  }
   activeDragPopup = null;
 });
 
@@ -2682,10 +2687,8 @@ document.getElementById('toolColor').addEventListener('click', function(e){e.sto
   document.getElementById('colorPopup').classList.add('show');
 });
 
-// 所有弹窗都可拖拽
+// 所有弹窗点击阻止冒泡
 document.querySelectorAll('.popup, .info-popup').forEach(popup => {
-  const header = popup.querySelector('.popup-header') || popup;
-  if(header) makeDraggable(popup, header);
   popup.addEventListener('click', function(e){
     e.stopPropagation();
   });
