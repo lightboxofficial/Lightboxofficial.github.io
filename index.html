@@ -2674,8 +2674,8 @@ function updateColor(){
   const b = parseInt(hex.slice(5,7),16);
   document.getElementById('colorHex').textContent = hex;
   document.getElementById('colorRgb').textContent = r + ', ' + g + ', ' + b;
-  const [h,s,l] = hexToHsl(hex);
-  document.getElementById('colorHsl').textContent = h + ', ' + s + '%, ' + l + '%';
+  const hsl = hexToHsl(hex);
+  document.getElementById('colorHsl').textContent = hsl[0] + ', ' + hsl[1] + '%, ' + hsl[2] + '%';
 }
 colorPicker.addEventListener('input', updateColor);
 document.getElementById('toolColor').addEventListener('click', function(e){e.stopPropagation();
@@ -2782,7 +2782,7 @@ document.getElementById('cryptoEncrypt').addEventListener('click', async functio
       const combined = new Uint8Array(iv.length + encrypted.byteLength);
       combined.set(iv);
       combined.set(new Uint8Array(encrypted), iv.length);
-      cryptoOutput.textContent = btoa(String.fromCharCode(...combined));
+      cryptoOutput.textContent = btoa(String.fromCharCode.apply(null, combined));
     }
   }catch(err){
     cryptoOutput.textContent = '加密失败: ' + err.message;
@@ -2896,24 +2896,28 @@ document.getElementById('toolTimestamp').addEventListener('click', function(e){e
 // ===== 随机数生成 =====
 document.getElementById('randGenerate').addEventListener('click', function(e){
   e.stopPropagation();
-  const min = BigInt(document.getElementById('randMin').value || '1');
-  const max = BigInt(document.getElementById('randMax').value || '100');
+  const min = parseInt(document.getElementById('randMin').value) || 1;
+  const max = parseInt(document.getElementById('randMax').value) || 100;
   if(max <= min){
     document.getElementById('randResult').textContent = "范围错误";
     return;
   }
-  const range = max - min + 1n;
-  // 生成随机大整数，避免科学计数法
-  let result = 0n;
-  const bits = range.toString(2).length;
-  do{
-    result = 0n;
-    for(let i = 0; i < bits; i += 15){
-      const chunk = BigInt(Math.floor(Math.random() * 32768));
-      result = (result << 15n) | chunk;
+  // 生成随机数，超大数用字符串处理避免科学计数法
+  let val;
+  if(max > 1e15){
+    // 超大范围，生成字符串形式的随机数
+    const minStr = String(min);
+    const maxStr = String(max);
+    // 简单处理：生成随机位数的数字
+    const len = Math.floor(Math.random() * (maxStr.length - minStr.length + 1)) + minStr.length;
+    let num = '';
+    for(let i = 0; i < len; i++){
+      num += Math.floor(Math.random() * 10);
     }
-  }while(result >= range);
-  const val = (min + result).toString();
+    val = num;
+  } else {
+    val = String(Math.floor(Math.random() * (max - min + 1)) + min);
+  }
   document.getElementById('randResult').textContent = val;
 });
 document.getElementById('toolRandom').addEventListener('click', function(e){e.stopPropagation();
@@ -3040,8 +3044,8 @@ document.getElementById('cdStart').addEventListener('click', function(e){
   } else {
     if(cdSeconds === 0){
       const m = parseInt(document.getElementById('cdMin').value) || 0;
-      const  = parseInt(document.getElementById('cdSec').value) || 0;
-      cdSeconds = m * 60 + ;
+      const s = parseInt(document.getElementById('cdSec').value) || 0;
+      cdSeconds = m * 60 + s;
       cdUpdateDisplay();
     }
     this.textContent = '暂停';
@@ -3062,8 +3066,8 @@ document.getElementById('cdReset').addEventListener('click', function(e){
   clearInterval(cdInterval);
   cdInterval = null;
   const m = parseInt(document.getElementById('cdMin').value) || 0;
-  const  = parseInt(document.getElementById('cdSec').value) || 0;
-  cdSeconds = m * 60 + ;
+  const s = parseInt(document.getElementById('cdSec').value) || 0;
+  cdSeconds = m * 60 + s;
   cdUpdateDisplay();
   document.getElementById('cdStart').textContent = '开始';
 });
