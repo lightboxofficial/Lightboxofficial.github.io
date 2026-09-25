@@ -267,6 +267,113 @@ html,body{
 .popup-close:hover{
   background:rgba(255,255,255,0.35);
 }
+/* 工具弹窗 */
+.tools-popup{
+  left:36px;
+  bottom:80px;
+  width:280px;
+  max-height:400px;
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+.tools-popup::-webkit-scrollbar{
+  display:none;
+}
+.tools-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.tool-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  padding:12px 8px;
+  border-radius:10px;
+  border:none;
+  background:rgba(255,255,255,0.08);
+  color:#fff;
+  cursor:pointer;
+  transition:background 0.2s, transform 0.15s;
+}
+.tool-item:hover{
+  background:rgba(255,255,255,0.15);
+}
+.tool-item:active{
+  transform:scale(0.95);
+}
+.tool-item svg{
+  width:24px;
+  height:24px;
+  stroke:rgba(255,255,255,0.75);
+}
+.tool-item span{
+  font-size:12px;
+  opacity:0.8;
+}
+/* 工具子弹窗 */
+.tool-sub-popup{
+  left:50%;
+  bottom:50%;
+  transform:translateX(-50%) translateY(50%) scale(0.85);
+  width:320px;
+  max-height:80vh;
+  overflow-y:auto;
+}
+.tool-sub-popup.show{
+  transform:translateX(-50%) translateY(50%) scale(1);
+}
+/* 计算器 */
+.calc-display{
+  width:100%;
+  background:rgba(255,255,255,0.1);
+  border:none;
+  border-radius:8px;
+  padding:12px;
+  color:#fff;
+  font-size:20px;
+  text-align:right;
+  margin-bottom:12px;
+  box-sizing:border-box;
+  outline:none;
+}
+.calc-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+.calc-btn{
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  background:rgba(255,255,255,0.1);
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+  transition:background 0.15s;
+}
+.calc-btn:hover{
+  background:rgba(255,255,255,0.2);
+}
+.calc-btn.op{
+  background:rgba(255,255,255,0.15);
+}
+.calc-btn.eq{
+  background:#fff;
+  color:#000;
+}
+.calc-btn.clear{
+  background:rgba(255,107,107,0.3);
+}
+/* 计时器 */
+.timer-display{
+  font-size:48px;
+  font-weight:300;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+  margin:20px 0;
+}
 /* 收藏夹主弹窗 */
 .bookmark-popup{
   left:36px;
@@ -278,8 +385,10 @@ html,body{
 }
 .search-box{
   width:100%;
-  background:rgba(255,255,255,0.12);
-  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(20,20,30,0.45);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.12);
   border-radius:8px;
   padding:8px 12px;
   color:#fff;
@@ -287,12 +396,29 @@ html,body{
   outline:none;
   margin-bottom:12px;
   box-sizing:border-box;
+  transition:border-color 0.2s, box-shadow 0.2s;
 }
 .search-box::placeholder{
   opacity:0.5;
 }
 .search-box:focus{
-  background:rgba(255,255,255,0.18);
+  border-color:rgba(120,170,255,0.45);
+  box-shadow:0 0 0 3px rgba(120,170,255,0.15);
+}
+/* select下拉框深色磨砂 */
+select.search-box{
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat:no-repeat;
+  background-position:right 10px center;
+  background-size:16px;
+  padding-right:32px;
+  cursor:pointer;
+}
+select.search-box option{
+  background:#1c1c2a;
+  color:#fff;
 }
 .bookmark-list{
   flex:1;
@@ -324,20 +450,6 @@ html,body{
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-}
-.add-btn{
-  flex:1;
-  padding:10px;
-  border-radius:8px;
-  border:none;
-  background:rgba(255,255,255,0.15);
-  color:#fff;
-  font-size:14px;
-  cursor:pointer;
-  transition:background 0.2s;
-}
-.add-btn:hover{
-  background:rgba(255,255,255,0.25);
 }
 .btn-row{
   display:flex;
@@ -433,34 +545,61 @@ html,body{
   opacity:0.6;
   margin-bottom:4px;
 }
-.form-group input{
+.form-group input,
+.form-group textarea{
   width:100%;
-  background:rgba(255,255,255,0.12);
-  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(20,20,30,0.45);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.12);
   border-radius:8px;
   padding:8px 12px;
   color:#fff;
   font-size:13px;
   outline:none;
   box-sizing:border-box;
+  transition:border-color 0.2s, box-shadow 0.2s;
+  font-family:inherit;
 }
-.form-group input:focus{
-  background:rgba(255,255,255,0.18);
+.form-group input:focus,
+.form-group textarea:focus{
+  border-color:rgba(120,170,255,0.45);
+  box-shadow:0 0 0 3px rgba(120,170,255,0.15);
 }
 .confirm-btn{
   width:100%;
   padding:10px;
   border-radius:8px;
   border:none;
-  background:#fff;
+  background:rgba(255,255,255,0.9);
   color:#000;
   font-size:14px;
   font-weight:600;
   cursor:pointer;
-  transition:opacity 0.2s;
+  transition:opacity 0.2s, transform 0.1s;
 }
 .confirm-btn:hover{
   opacity:0.85;
+}
+.confirm-btn:active{
+  transform:scale(0.98);
+}
+.add-btn{
+  flex:1;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.08);
+  color:#fff;
+  font-size:14px;
+  cursor:pointer;
+  transition:background 0.2s, transform 0.1s;
+}
+.add-btn:hover{
+  background:rgba(255,255,255,0.15);
+}
+.add-btn:active{
+  transform:scale(0.98);
 }
 
 /* ===== 日历弹窗（新增，不影响原有样式） ===== */
@@ -677,25 +816,9 @@ html,body{
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
       </svg>
     </button>
-    <button class="icon-btn" id="bookmarkBtn" title="收藏夹">
+    <button class="icon-btn" id="toolsBtn" title="工具">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-      </svg>
-    </button>
-    <!-- 新增：日历图标 -->
-    <button class="icon-btn" id="calendarBtn" title="日历">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-        <line x1="16" y1="2" x2="16" y2="6"></line>
-        <line x1="8" y1="2" x2="8" y2="6"></line>
-        <line x1="3" y1="10" x2="21" y2="10"></line>
-      </svg>
-    </button>
-    <!-- 新增：今日图标 -->
-    <button class="icon-btn" id="todayBtn" title="今日">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <polyline points="12 6 12 12 16 14"></polyline>
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
       </svg>
     </button>
   </div>
@@ -740,6 +863,513 @@ html,body{
   </div>
 </div>
 <div class="toast" id="toast">链接已复制</div>
+<!-- 工具弹窗 -->
+<div class="popup tools-popup" id="toolsPopup">
+  <div class="popup-header">
+    <span>工具箱</span>
+    <button class="popup-close" id="toolsClose">✕</button>
+  </div>
+  <div class="tools-grid">
+    <button class="tool-item" id="toolBookmark" title="收藏夹">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <span>收藏夹</span>
+    </button>
+    <button class="tool-item" id="toolCalendar" title="日历">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      <span>日历</span>
+    </button>
+    <button class="tool-item" id="toolToday" title="今日">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      <span>今日</span>
+    </button>
+    <button class="tool-item" id="toolCalculator" title="计算器">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+        <line x1="8" y1="6" x2="16" y2="6"></line>
+        <line x1="16" y1="14" x2="16.01" y2="14"></line>
+        <line x1="12" y1="14" x2="12.01" y2="14"></line>
+        <line x1="8" y1="14" x2="8.01" y2="14"></line>
+        <line x1="16" y1="18" x2="16.01" y2="18"></line>
+        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+        <line x1="8" y1="18" x2="8.01" y2="18"></line>
+      </svg>
+      <span>计算器</span>
+    </button>
+    <button class="tool-item" id="toolBaseConvert" title="进制转换">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 7V4h16v3"></path>
+        <path d="M9 20h6"></path>
+        <path d="M12 4v16"></path>
+      </svg>
+      <span>进制转换</span>
+    </button>
+    <button class="tool-item" id="toolHash" title="哈希转换">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" y1="9" x2="20" y2="9"></line>
+        <line x1="4" y1="15" x2="20" y2="15"></line>
+        <line x1="10" y1="3" x2="8" y2="21"></line>
+        <line x1="16" y1="3" x2="14" y2="21"></line>
+      </svg>
+      <span>哈希转换</span>
+    </button>
+    <button class="tool-item" id="toolTimer" title="计时器">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="13" r="8"></circle>
+        <path d="M12 9v4l2 2"></path>
+        <path d="M5 3L2 6"></path>
+        <path d="M22 6l-3-3"></path>
+      </svg>
+      <span>计时器</span>
+    </button>
+    <button class="tool-item" id="toolColor" title="颜色转换">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <circle cx="12" cy="12" r="4"></circle>
+      </svg>
+      <span>颜色转换</span>
+    </button>
+    <button class="tool-item" id="toolCrypto" title="加解密工具">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <span>加解密</span>
+    </button>
+    <button class="tool-item" id="toolPwdGen" title="密码生成器">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"></path>
+      </svg>
+      <span>密码生成</span>
+    </button>
+    <button class="tool-item" id="toolTimestamp" title="时间戳转换">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      <span>时间戳</span>
+    </button>
+    <button class="tool-item" id="toolRandom" title="随机数生成">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+        <circle cx="15.5" cy="15.5" r="1.5"></circle>
+        <circle cx="15.5" cy="8.5" r="1.5"></circle>
+        <circle cx="8.5" cy="15.5" r="1.5"></circle>
+      </svg>
+      <span>随机数</span>
+    </button>
+    <button class="tool-item" id="toolJsonFmt" title="JSON格式化">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 18 22 12 16 6"></polyline>
+        <polyline points="8 6 2 12 8 18"></polyline>
+      </svg>
+      <span>JSON格式</span>
+    </button>
+    <button class="tool-item" id="toolMarkdown" title="Markdown编辑器">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+      </svg>
+      <span>Markdown</span>
+    </button>
+    <button class="tool-item" id="toolPomodoro" title="番茄钟">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="13" r="8"></circle>
+        <path d="M12 9v4l2 2"></path>
+        <path d="M5 3L2 6"></path>
+        <path d="M22 6l-3-3"></path>
+      </svg>
+      <span>番茄钟</span>
+    </button>
+    <button class="tool-item" id="toolCountdown" title="倒计时器">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 8 10"></polyline>
+      </svg>
+      <span>倒计时</span>
+    </button>
+    <button class="tool-item" id="toolSciCalc" title="科学计算器">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+        <line x1="8" y1="6" x2="16" y2="6"></line>
+        <line x1="8" y1="10" x2="8" y2="10.01"></line>
+        <line x1="12" y1="10" x2="12" y2="10.01"></line>
+        <line x1="16" y1="10" x2="16" y2="10.01"></line>
+        <line x1="8" y1="14" x2="8" y2="14.01"></line>
+        <line x1="12" y1="14" x2="12" y2="14.01"></line>
+        <line x1="16" y1="14" x2="16" y2="14.01"></line>
+        <line x1="8" y1="18" x2="8" y2="18.01"></line>
+        <line x1="12" y1="18" x2="12" y2="18.01"></line>
+        <line x1="16" y1="18" x2="16" y2="18.01"></line>
+      </svg>
+      <span>科学计算器</span>
+    </button>
+    <button class="tool-item" id="toolGeo" title="经纬度定位">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+      <span>经纬度</span>
+    </button>
+  </div>
+</div>
+<!-- 计算器弹窗 -->
+<div class="popup tool-sub-popup" id="calculatorPopup">
+  <div class="popup-header">
+    <span>计算器</span>
+    <button class="popup-close" onclick="document.getElementById('calculatorPopup').classList.remove('show')">✕</button>
+  </div>
+  <input type="text" class="calc-display" id="calcDisplay" readonly value="0">
+  <div class="calc-grid">
+    <button class="calc-btn" data-val="7">7</button>
+    <button class="calc-btn" data-val="8">8</button>
+    <button class="calc-btn" data-val="9">9</button>
+    <button class="calc-btn op" data-val="/">÷</button>
+    <button class="calc-btn" data-val="4">4</button>
+    <button class="calc-btn" data-val="5">5</button>
+    <button class="calc-btn" data-val="6">6</button>
+    <button class="calc-btn op" data-val="*">×</button>
+    <button class="calc-btn" data-val="1">1</button>
+    <button class="calc-btn" data-val="2">2</button>
+    <button class="calc-btn" data-val="3">3</button>
+    <button class="calc-btn op" data-val="-">−</button>
+    <button class="calc-btn" data-val="0">0</button>
+    <button class="calc-btn" data-val=".">.</button>
+    <button class="calc-btn eq" data-val="=">=</button>
+    <button class="calc-btn op" data-val="+">+</button>
+    <button class="calc-btn clear" data-val="C" style="grid-column:span 4">清除</button>
+  </div>
+</div>
+<!-- 进制转换弹窗 -->
+<div class="popup tool-sub-popup" id="baseConvertPopup">
+  <div class="popup-header">
+    <span>进制转换</span>
+    <button class="popup-close" onclick="document.getElementById('baseConvertPopup').classList.remove('show')">✕</button>
+  </div>
+  <div class="form-group">
+    <label>输入数字</label>
+    <input type="text" id="baseInput" placeholder="输入数字...">
+  </div>
+  <div class="form-group">
+    <label>进制</label>
+    <select id="baseFrom" class="search-box" style="margin-bottom:0">
+      <option value="10">十进制</option>
+      <option value="2">二进制</option>
+      <option value="8">八进制</option>
+      <option value="16">十六进制</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>转换结果</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div style="flex:1;min-width:80px"><small style="opacity:0.5">十进制</small><div id="baseDec" style="font-size:14px;margin-top:2px">0</div></div>
+      <div style="flex:1;min-width:80px"><small style="opacity:0.5">二进制</small><div id="baseBin" style="font-size:14px;margin-top:2px">0</div></div>
+      <div style="flex:1;min-width:80px"><small style="opacity:0.5">八进制</small><div id="baseOct" style="font-size:14px;margin-top:2px">0</div></div>
+      <div style="flex:1;min-width:80px"><small style="opacity:0.5">十六进制</small><div id="baseHex" style="font-size:14px;margin-top:2px">0</div></div>
+    </div>
+  </div>
+</div>
+<!-- 哈希转换弹窗 -->
+<div class="popup tool-sub-popup" id="hashPopup">
+  <div class="popup-header">
+    <span>哈希转换</span>
+    <button class="popup-close" onclick="document.getElementById('hashPopup').classList.remove('show')">✕</button>
+  </div>
+  <div class="form-group">
+    <label>输入文本</label>
+    <textarea id="hashInput" placeholder="输入要哈希的文本..." style="width:100%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;min-height:60px"></textarea>
+  </div>
+  <div class="form-group">
+    <label>MD5</label>
+    <div id="hashMd5" style="font-size:12px;opacity:0.8;word-break:break-all;background:rgba(255,255,255,0.08);padding:8px;border-radius:6px">-</div>
+  </div>
+  <div class="form-group">
+    <label>SHA-1</label>
+    <div id="hashSha1" style="font-size:12px;opacity:0.8;word-break:break-all;background:rgba(255,255,255,0.08);padding:8px;border-radius:6px">-</div>
+  </div>
+  <div class="form-group">
+    <label>SHA-256</label>
+    <div id="hashSha256" style="font-size:12px;opacity:0.8;word-break:break-all;background:rgba(255,255,255,0.08);padding:8px;border-radius:6px">-</div>
+  </div>
+</div>
+<!-- 计时器弹窗 -->
+<div class="popup tool-sub-popup" id="timerPopup">
+  <div class="popup-header">
+    <span>计时器</span>
+    <button class="popup-close" onclick="document.getElementById('timerPopup').classList.remove('show')">✕</button>
+  </div>
+  <div class="timer-display" id="timerDisplay">00:00.0</div>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+    <button class="confirm-btn" id="timerStart" style="width:80px;padding:8px">开始</button>
+    <button class="add-btn" id="timerReset" style="width:80px;padding:8px">重置</button>
+  </div>
+</div>
+<!-- 颜色转换弹窗 -->
+<div class="popup tool-sub-popup" id="colorPopup">
+  <div class="popup-header">
+    <span>颜色转换</span>
+    <button class="popup-close" onclick="document.getElementById('colorPopup').classList.remove('show')">✕</button>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+    <input type="color" id="colorPicker" value="#409eff" style="width:60px;height:60px;border:none;border-radius:8px;cursor:pointer">
+    <div style="flex:1">
+      <div style="font-size:13px;margin-bottom:4px">HEX: <span id="colorHex" style="opacity:0.8">#409eff</span></div>
+      <div style="font-size:13px;margin-bottom:4px">RGB: <span id="colorRgb" style="opacity:0.8">64, 158, 255</span></div>
+      <div style="font-size:13px">HSL: <span id="colorHsl" style="opacity:0.8">210, 100%, 63%</span></div>
+    </div>
+  </div>
+</div>
+<!-- 加解密工具弹窗 -->
+<div class="popup tool-sub-popup" id="cryptoPopup">
+  <div class="popup-header">
+    <span>加解密工具</span>
+    <button class="popup-close" onclick="document.getElementById('cryptoPopup').classList.remove('show')">✕</button>
+  </div>
+  <div class="form-group">
+    <label>算法</label>
+    <select id="cryptoAlgo" class="search-box" style="margin-bottom:0">
+      <option value="aes">AES-256-GCM</option>
+      <option value="rc4">RC4</option>
+      <option value="base64">Base64</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>密钥（Base64算法可留空）</label>
+    <input type="text" id="cryptoKey" placeholder="输入密钥...">
+  </div>
+  <div class="form-group">
+    <label>输入</label>
+    <textarea id="cryptoInput" placeholder="输入文本..." style="width:100%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;min-height:60px"></textarea>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="confirm-btn" id="cryptoEncrypt" style="flex:1;padding:8px">加密</button>
+    <button class="add-btn" id="cryptoDecrypt" style="flex:1;padding:8px">解密</button>
+  </div>
+  <div class="form-group">
+    <label>结果</label>
+    <textarea id="cryptoOutput" readonly style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;min-height:60px"></textarea>
+  </div>
+</div>
+<!-- 密码生成器弹窗 -->
+<div class="popup tool-sub-popup" id="pwdGenPopup">
+  <div class="popup-header">
+    <span>密码生成器</span>
+    <button class="popup-close" onclick="document.getElementById('pwdGenPopup').classList.remove('show')">✕</button>
+  </div>
+  <div class="form-group">
+    <label>密码长度: <span id="pwdLenVal">16</span></label>
+    <input type="range" id="pwdLen" min="4" max="64" value="16" style="width:100%">
+  </div>
+  <div class="form-group" style="display:flex;gap:12px;flex-wrap:wrap">
+    <label style="display:flex;align-items:center;gap:4px;opacity:1">
+      <input type="checkbox" id="pwdUpper" checked> 大写字母
+    </label>
+    <label style="display:flex;align-items:center;gap:4px;opacity:1">
+      <input type="checkbox" id="pwdLower" checked> 小写字母
+    </label>
+    <label style="display:flex;align-items:center;gap:4px;opacity:1">
+      <input type="checkbox" id="pwdNum" checked> 数字
+    </label>
+    <label style="display:flex;align-items:center;gap:4px;opacity:1">
+      <input type="checkbox" id="pwdSymbol"> 特殊符号
+    </label>
+  </div>
+  <div class="form-group">
+    <label>生成的密码</label>
+    <input type="text" id="pwdResult" readonly style="font-size:16px;letter-spacing:1px">
+  </div>
+  <button class="confirm-btn" id="pwdGenerate">生成密码</button>
+</div>
+<!-- 时间戳转换弹窗 -->
+<div class="popup tool-sub-popup" id="timestampPopup">
+  <div class="popup-header">
+    <span>时间戳转换</span>
+    <button class="popup-close" onclick="document.getElementById('timestampPopup').classList.remove('show')">✕</button>
+  </div>
+  <div class="form-group">
+    <label>当前时间戳</label>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="tsNow" readonly style="flex:1">
+      <button class="add-btn" id="tsCopy" style="width:60px;padding:8px">复制</button>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>时间戳转日期</label>
+    <input type="text" id="tsInput" placeholder="输入时间戳（秒/毫秒）...">
+    <div id="tsResult" style="font-size:13px;opacity:0.8;margin-top:4px">-</div>
+  </div>
+  <div class="form-group">
+    <label>日期转时间戳</label>
+    <input type="text" id="tsDateInput" placeholder="YYYY-MM-DD HH:mm:ss">
+    <div id="tsDateResult" style="font-size:13px;opacity:0.8;margin-top:4px">-</div>
+  </div>
+</div>
+<!-- 随机数生成弹窗 -->
+<div class="popup tool-sub-popup" id="randomPopup">
+  <div class="popup-header">
+    <span>随机数生成</span>
+    <button class="popup-close" onclick="document.getElementById('randomPopup').classList.remove('show')">✕</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <div class="form-group" style="flex:1;margin-bottom:0">
+      <label>最小值</label>
+      <input type="number" id="randMin" value="1">
+    </div>
+    <div class="form-group" style="flex:1;margin-bottom:0">
+      <label>最大值</label>
+      <input type="number" id="randMax" value="100">
+    </div>
+  </div>
+  <div class="form-group">
+    <label>生成结果</label>
+    <div id="randResult" style="font-size:32px;text-align:center;padding:16px;background:rgba(255,255,255,0.08);border-radius:8px">?</div>
+  </div>
+  <button class="confirm-btn" id="randGenerate">生成随机数</button>
+</div>
+<!-- JSON格式化弹窗 -->
+<div class="popup tool-sub-popup" id="jsonFmtPopup">
+  <div class="popup-header">
+    <span>JSON格式化</span>
+    <button class="popup-close" onclick="document.getElementById('jsonFmtPopup').classList.remove('show')">✕</button>
+  </div>
+  <div class="form-group">
+    <label>输入JSON</label>
+    <textarea id="jsonInput" placeholder='{"key":"value"}' style="min-height:80px"></textarea>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="confirm-btn" id="jsonFormat" style="flex:1;padding:8px">格式化</button>
+    <button class="add-btn" id="jsonMinify" style="flex:1;padding:8px">压缩</button>
+  </div>
+  <div class="form-group">
+    <label>结果</label>
+    <textarea id="jsonOutput" readonly style="min-height:80px"></textarea>
+  </div>
+</div>
+<!-- Markdown编辑器弹窗 -->
+<div class="popup tool-sub-popup" id="markdownPopup">
+  <div class="popup-header">
+    <span>Markdown 编辑器</span>
+    <button class="popup-close" onclick="document.getElementById('markdownPopup').classList.remove('show')">✕</button>
+  </div>
+  <div style="display:flex;gap:12px">
+    <div style="flex:1">
+      <textarea id="mdInput" placeholder="# 标题&#10;**粗体** *斜体*&#10;- 列表项" style="width:100%;min-height:250px;background:rgba(20,20,30,0.45);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:12px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;font-family:monospace"></textarea>
+    </div>
+    <div style="flex:1;max-height:250px;overflow-y:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:12px;font-size:13px;line-height:1.6">
+      <div id="mdPreview" style="color:#ddd">预览区</div>
+    </div>
+  </div>
+</div>
+<!-- 番茄钟弹窗 -->
+<div class="popup tool-sub-popup" id="pomodoroPopup">
+  <div class="popup-header">
+    <span>番茄钟</span>
+    <button class="popup-close" onclick="document.getElementById('pomodoroPopup').classList.remove('show')">✕</button>
+  </div>
+  <div style="text-align:center">
+    <div id="pomodoroMode" style="font-size:14px;opacity:0.6;margin-bottom:8px">专注时间</div>
+    <div id="pomodoroDisplay" style="font-size:56px;font-weight:300;font-variant-numeric:tabular-nums;margin:16px 0">25:00</div>
+    <div id="pomodoroCount" style="font-size:13px;opacity:0.6;margin-bottom:16px">已完成 0 个番茄</div>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:center">
+    <button class="confirm-btn" id="pomodoroStart" style="width:80px;padding:10px">开始</button>
+    <button class="add-btn" id="pomodoroReset" style="width:80px;padding:10px">重置</button>
+  </div>
+</div>
+<!-- 倒计时器弹窗 -->
+<div class="popup tool-sub-popup" id="countdownPopup">
+  <div class="popup-header">
+    <span>倒计时器</span>
+    <button class="popup-close" onclick="document.getElementById('countdownPopup').classList.remove('show')">✕</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    <div class="form-group" style="flex:1;margin-bottom:0">
+      <label>分</label>
+      <input type="number" id="cdMin" value="5" min="0">
+    </div>
+    <div class="form-group" style="flex:1;margin-bottom:0">
+      <label>秒</label>
+      <input type="number" id="cdSec" value="0" min="0" max="59">
+    </div>
+  </div>
+  <div id="cdDisplay" style="font-size:48px;text-align:center;font-variant-numeric:tabular-nums;margin:16px 0">05:00</div>
+  <div style="display:flex;gap:8px;justify-content:center">
+    <button class="confirm-btn" id="cdStart" style="width:80px;padding:10px">开始</button>
+    <button class="add-btn" id="cdReset" style="width:80px;padding:10px">重置</button>
+  </div>
+</div>
+<!-- 科学计算器弹窗 -->
+<div class="popup tool-sub-popup" id="sciCalcPopup">
+  <div class="popup-header">
+    <span>科学计算器</span>
+    <button class="popup-close" onclick="document.getElementById('sciCalcPopup').classList.remove('show')">✕</button>
+  </div>
+  <input type="text" class="calc-display" id="sciCalcDisplay" readonly value="0">
+  <div class="calc-grid" style="grid-template-columns:repeat(5,1fr)">
+    <button class="calc-btn" data-val="sin">sin</button>
+    <button class="calc-btn" data-val="cos">cos</button>
+    <button class="calc-btn" data-val="tan">tan</button>
+    <button class="calc-btn" data-val="log">log</button>
+    <button class="calc-btn" data-val="ln">ln</button>
+    <button class="calc-btn" data-val="^2">x²</button>
+    <button class="calc-btn" data-val="sqrt">√</button>
+    <button class="calc-btn" data-val="π">π</button>
+    <button class="calc-btn" data-val="e">e</button>
+    <button class="calc-btn" data-val="(">(</button>
+    <button class="calc-btn" data-val="7">7</button>
+    <button class="calc-btn" data-val="8">8</button>
+    <button class="calc-btn" data-val="9">9</button>
+    <button class="calc-btn op" data-val="/">÷</button>
+    <button class="calc-btn" data-val=")">)</button>
+    <button class="calc-btn" data-val="4">4</button>
+    <button class="calc-btn" data-val="5">5</button>
+    <button class="calc-btn" data-val="6">6</button>
+    <button class="calc-btn op" data-val="*">×</button>
+    <button class="calc-btn" data-val="!">n!</button>
+    <button class="calc-btn" data-val="1">1</button>
+    <button class="calc-btn" data-val="2">2</button>
+    <button class="calc-btn" data-val="3">3</button>
+    <button class="calc-btn op" data-val="-">−</button>
+    <button class="calc-btn" data-val="%">%</button>
+    <button class="calc-btn" data-val="0">0</button>
+    <button class="calc-btn" data-val=".">.</button>
+    <button class="calc-btn eq" data-val="=">=</button>
+    <button class="calc-btn op" data-val="+">+</button>
+    <button class="calc-btn clear" data-val="C" style="grid-column:span 5">清除</button>
+  </div>
+</div>
+<!-- 经纬度定位弹窗 -->
+<div class="popup tool-sub-popup" id="geoPopup">
+  <div class="popup-header">
+    <span>经纬度定位</span>
+    <button class="popup-close" onclick="document.getElementById('geoPopup').classList.remove('show')">✕</button>
+  </div>
+  <div class="form-group">
+    <label>纬度</label>
+    <input type="text" id="geoLat" readonly value="获取中...">
+  </div>
+  <div class="form-group">
+    <label>经度</label>
+    <input type="text" id="geoLng" readonly value="获取中...">
+  </div>
+  <div class="form-group">
+    <label>精度</label>
+    <input type="text" id="geoAcc" readonly value="-">
+  </div>
+  <button class="confirm-btn" id="geoRefresh">重新定位</button>
+</div>
 <!-- 收藏夹弹窗 -->
 <div class="popup bookmark-popup" id="bookmarkPopup">
   <div class="popup-header">
@@ -1003,7 +1633,7 @@ shareBtn.addEventListener('click', async function(e){
 setBingBg();
 setInterval(setBingBg, 10*60*1000);
 // ===== 收藏夹功能 =====
-const bookmarkBtn = document.getElementById('bookmarkBtn');
+const bookmarkBtn = document.getElementById('toolBookmark');
 const bookmarkPopup = document.getElementById('bookmarkPopup');
 const bookmarkClose = document.getElementById('bookmarkClose');
 const bookmarkSearch = document.getElementById('bookmarkSearch');
@@ -1284,30 +1914,9 @@ folderConfirm.addEventListener('click', () => {
   renderBookmarks(bookmarkSearch.value);
   folderPopup.classList.remove('show');
 });
-// 点击弹窗外部关闭
-document.addEventListener('click', (e) => {
-  if(!bookmarkPopup.contains(e.target) && !bookmarkBtn.contains(e.target)){
-    bookmarkPopup.classList.remove('show');
-  }
-  if(!editPopup.contains(e.target)){
-    editPopup.classList.remove('show');
-  }
-  if(!folderPopup.contains(e.target)){
-    folderPopup.classList.remove('show');
-  }
-  if(!confirmPopup.contains(e.target)){
-    confirmPopup.classList.remove('show');
-  }
-  if(!contextMenu.contains(e.target)){
-    hideContextMenu();
-  }
-  if(!calendarPopup.contains(e.target) && !calendarBtn.contains(e.target)){
-    calendarPopup.classList.remove('show');
-  }
-});
 
 // ===== 日历功能（新增） =====
-const calendarBtn = document.getElementById('calendarBtn');
+const calendarBtn = document.getElementById('toolCalendar');
 const calendarPopup = document.getElementById('calendarPopup');
 const calendarClose = document.getElementById('calendarClose');
 const calTime = document.getElementById('calTime');
@@ -1416,7 +2025,7 @@ calNoteSave.addEventListener('click', (e) => {
 });
 
 // ===== 今日弹窗（新增） =====
-const todayBtn = document.getElementById('todayBtn');
+const todayBtn = document.getElementById('toolToday');
 const todayPopup = document.getElementById('todayPopup');
 const todayClose = document.getElementById('todayClose');
 const todayDate = document.getElementById('todayDate');
@@ -1581,11 +2190,616 @@ todayPopup.addEventListener('click', (e) => {
   e.stopPropagation();
 });
 
-document.addEventListener('click', (e) => {
-  if(!todayPopup.contains(e.target) && !todayBtn.contains(e.target)){
+// ===== 工具弹窗 =====
+const toolsBtn = document.getElementById('toolsBtn');
+const toolsPopup = document.getElementById('toolsPopup');
+const toolsClose = document.getElementById('toolsClose');
+
+toolsBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  toolsPopup.classList.toggle('show');
+});
+toolsClose.addEventListener('click', function(e){
+  e.stopPropagation();
+  toolsPopup.classList.remove('show');
+});
+// 点击工具项时关闭工具弹窗
+document.querySelectorAll('.tool-item').forEach(function(item){
+  item.addEventListener('click', function(){
+    toolsPopup.classList.remove('show');
+  });
+});
+document.addEventListener('click', function(e){
+  if(!toolsPopup.contains(e.target) && !toolsBtn.contains(e.target)){
+    toolsPopup.classList.remove('show');
+  }
+  // 其他弹窗点击外部关闭
+  if(bookmarkPopup && !bookmarkPopup.contains(e.target) && bookmarkBtn && !bookmarkBtn.contains(e.target)){
+    bookmarkPopup.classList.remove('show');
+  }
+  if(editPopup && !editPopup.contains(e.target)){
+    editPopup.classList.remove('show');
+  }
+  if(folderPopup && !folderPopup.contains(e.target)){
+    folderPopup.classList.remove('show');
+  }
+  if(confirmPopup && !confirmPopup.contains(e.target)){
+    confirmPopup.classList.remove('show');
+  }
+  if(contextMenu && !contextMenu.contains(e.target)){
+    hideContextMenu();
+  }
+  if(calendarPopup && !calendarPopup.contains(e.target) && calendarBtn && !calendarBtn.contains(e.target)){
+    calendarPopup.classList.remove('show');
+  }
+  if(todayPopup && !todayPopup.contains(e.target) && todayBtn && !todayBtn.contains(e.target)){
     todayPopup.classList.remove('show');
   }
 });
+
+// ===== 计算器 =====
+const calcDisplay = document.getElementById('calcDisplay');
+let calcExpr = '';
+document.querySelectorAll('.calc-btn').forEach(btn => {
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    const val = this.dataset.val;
+    if(val === 'C'){
+      calcExpr = '';
+      calcDisplay.value = '0';
+    } else if(val === '='){
+      try{
+        calcDisplay.value = eval(calcExpr);
+        calcExpr = calcDisplay.value;
+      }catch(err){
+        calcDisplay.value = '错误';
+        calcExpr = '';
+      }
+    } else {
+      calcExpr += val;
+      calcDisplay.value = calcExpr;
+    }
+  });
+});
+document.getElementById('toolCalculator').addEventListener('click', function(){
+  document.getElementById('calculatorPopup').classList.add('show');
+});
+
+// ===== 进制转换 =====
+const baseInput = document.getElementById('baseInput');
+const baseFrom = document.getElementById('baseFrom');
+function updateBase(){
+  const val = baseInput.value.trim();
+  const from = parseInt(baseFrom.value);
+  if(!val || isNaN(parseInt(val, from))){
+    document.getElementById('baseDec').textContent = '0';
+    document.getElementById('baseBin').textContent = '0';
+    document.getElementById('baseOct').textContent = '0';
+    document.getElementById('baseHex').textContent = '0';
+    return;
+  }
+  const dec = parseInt(val, from);
+  document.getElementById('baseDec').textContent = dec.toString(10);
+  document.getElementById('baseBin').textContent = dec.toString(2);
+  document.getElementById('baseOct').textContent = dec.toString(8);
+  document.getElementById('baseHex').textContent = dec.toString(16).toUpperCase();
+}
+baseInput.addEventListener('input', updateBase);
+baseFrom.addEventListener('change', updateBase);
+document.getElementById('toolBaseConvert').addEventListener('click', function(){
+  document.getElementById('baseConvertPopup').classList.add('show');
+});
+
+// ===== 哈希转换 =====
+const hashInput = document.getElementById('hashInput');
+async function updateHash(){
+  const text = hashInput.value;
+  if(!text){
+    document.getElementById('hashMd5').textContent = '-';
+    document.getElementById('hashSha1').textContent = '-';
+    document.getElementById('hashSha256').textContent = '-';
+    return;
+  }
+  // MD5用简单实现
+  document.getElementById('hashMd5').textContent = '（需后端支持）';
+  // SHA用Web Crypto API
+  try{
+    const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(text));
+    document.getElementById('hashSha1').textContent = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    const buf2 = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    document.getElementById('hashSha256').textContent = Array.from(new Uint8Array(buf2)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }catch(e){
+    document.getElementById('hashSha1').textContent = '浏览器不支持';
+    document.getElementById('hashSha256').textContent = '浏览器不支持';
+  }
+}
+hashInput.addEventListener('input', updateHash);
+document.getElementById('toolHash').addEventListener('click', function(){
+  document.getElementById('hashPopup').classList.add('show');
+});
+
+// ===== 计时器 =====
+let timerInterval = null;
+let timerSeconds = 0;
+function formatTime(s){
+  const m = Math.floor(s/60);
+  const sec = Math.floor(s%60);
+  const ms = Math.floor((s%1)*10);
+  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0') + '.' + ms;
+}
+document.getElementById('toolTimer').addEventListener('click', function(){
+  document.getElementById('timerPopup').classList.add('show');
+});
+document.getElementById('timerStart').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(timerInterval){
+    clearInterval(timerInterval);
+    timerInterval = null;
+    this.textContent = '继续';
+  } else {
+    this.textContent = '暂停';
+    timerInterval = setInterval(function(){
+      timerSeconds += 0.1;
+      document.getElementById('timerDisplay').textContent = formatTime(timerSeconds);
+    }, 100);
+  }
+});
+document.getElementById('timerReset').addEventListener('click', function(e){
+  e.stopPropagation();
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerSeconds = 0;
+  document.getElementById('timerDisplay').textContent = '00:00.0';
+  document.getElementById('timerStart').textContent = '开始';
+});
+
+// ===== 颜色转换 =====
+const colorPicker = document.getElementById('colorPicker');
+function hexToHsl(hex){
+  let r = parseInt(hex.slice(1,3),16)/255;
+  let g = parseInt(hex.slice(3,5),16)/255;
+  let b = parseInt(hex.slice(5,7),16)/255;
+  let max = Math.max(r,g,b), min = Math.min(r,g,b);
+  let h = 0, s = 0, l = (max+min)/2;
+  if(max !== min){
+    let d = max - min;
+    s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+    if(max === r) h = (g-b)/d + (g<b?6:0);
+    else if(max === g) h = (b-r)/d + 2;
+    else h = (r-g)/d + 4;
+    h /= 6;
+  }
+  return [Math.round(h*360), Math.round(s*100), Math.round(l*100)];
+}
+function updateColor(){
+  const hex = colorPicker.value;
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  document.getElementById('colorHex').textContent = hex;
+  document.getElementById('colorRgb').textContent = r + ', ' + g + ', ' + b;
+  const [h,s,l] = hexToHsl(hex);
+  document.getElementById('colorHsl').textContent = h + ', ' + s + '%, ' + l + '%';
+}
+colorPicker.addEventListener('input', updateColor);
+document.getElementById('toolColor').addEventListener('click', function(){
+  document.getElementById('colorPopup').classList.add('show');
+});
+
+// ===== 加解密工具 =====
+const cryptoInput = document.getElementById('cryptoInput');
+const cryptoOutput = document.getElementById('cryptoOutput');
+const cryptoKey = document.getElementById('cryptoKey');
+const cryptoAlgo = document.getElementById('cryptoAlgo');
+
+// RC4加解密
+function rc4(data, key){
+  let S = [];
+  for(let i = 0; i < 256; i++) S[i] = i;
+  let j = 0;
+  for(let i = 0; i < 256; i++){
+    j = (j + S[i] + key.charCodeAt(i % key.length)) % 256;
+    [S[i], S[j]] = [S[j], S[i]];
+  }
+  let i = 0; j = 0;
+  let result = '';
+  for(let k = 0; k < data.length; k++){
+    i = (i + 1) % 256;
+    j = (j + S[i]) % 256;
+    [S[i], S[j]] = [S[j], S[i]];
+    result += String.fromCharCode(data.charCodeAt(k) ^ S[(S[i] + S[j]) % 256]);
+  }
+  return result;
+}
+function b64encode(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function b64decode(str){
+  return decodeURIComponent(escape(atob(str)));
+}
+
+document.getElementById('cryptoEncrypt').addEventListener('click', async function(e){
+  e.stopPropagation();
+  const algo = cryptoAlgo.value;
+  const text = cryptoInput.value;
+  const key = cryptoKey.value;
+  try{
+    if(algo === 'base64'){
+      cryptoOutput.value = b64encode(text);
+    } else if(algo === 'rc4'){
+      if(!key) throw new Error('请输入密钥');
+      cryptoOutput.value = b64encode(rc4(text, key));
+    } else if(algo === 'aes'){
+      if(!key) throw new Error('请输入密钥');
+      const enc = new TextEncoder();
+      const keyData = await crypto.subtle.digest('SHA-256', enc.encode(key));
+      const aesKey = await crypto.subtle.importKey('raw', keyData, {name:'AES-GCM'}, false, ['encrypt']);
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encrypted = await crypto.subtle.encrypt({name:'AES-GCM', iv: iv}, aesKey, enc.encode(text));
+      const combined = new Uint8Array(iv.length + encrypted.byteLength);
+      combined.set(iv);
+      combined.set(new Uint8Array(encrypted), iv.length);
+      cryptoOutput.value = btoa(String.fromCharCode(...combined));
+    }
+  }catch(err){
+    cryptoOutput.value = '加密失败: ' + err.message;
+  }
+});
+
+document.getElementById('cryptoDecrypt').addEventListener('click', async function(e){
+  e.stopPropagation();
+  const algo = cryptoAlgo.value;
+  const text = cryptoInput.value;
+  const key = cryptoKey.value;
+  try{
+    if(algo === 'base64'){
+      cryptoOutput.value = b64decode(text);
+    } else if(algo === 'rc4'){
+      if(!key) throw new Error('请输入密钥');
+      cryptoOutput.value = rc4(b64decode(text), key);
+    } else if(algo === 'aes'){
+      if(!key) throw new Error('请输入密钥');
+      const keyData = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key));
+      const aesKey = await crypto.subtle.importKey('raw', keyData, {name:'AES-GCM'}, false, ['decrypt']);
+      const combined = Uint8Array.from(atob(text), c => c.charCodeAt(0));
+      const iv = combined.slice(0, 12);
+      const data = combined.slice(12);
+      const decrypted = await crypto.subtle.decrypt({name:'AES-GCM', iv: iv}, aesKey, data);
+      cryptoOutput.value = new TextDecoder().decode(decrypted);
+    }
+  }catch(err){
+    cryptoOutput.value = '解密失败: ' + err.message;
+  }
+});
+
+document.getElementById('toolCrypto').addEventListener('click', function(){
+  document.getElementById('cryptoPopup').classList.add('show');
+});
+
+// ===== 密码生成器 =====
+function generatePassword(){
+  const len = parseInt(document.getElementById('pwdLen').value);
+  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lower = 'abcdefghijklmnopqrstuvwxyz';
+  const num = '0123456789';
+  const symbol = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+  let chars = '';
+  if(document.getElementById('pwdUpper').checked) chars += upper;
+  if(document.getElementById('pwdLower').checked) chars += lower;
+  if(document.getElementById('pwdNum').checked) chars += num;
+  if(document.getElementById('pwdSymbol').checked) chars += symbol;
+  if(!chars) chars = lower;
+  let pwd = '';
+  for(let i = 0; i < len; i++){
+    pwd += chars[Math.floor(Math.random() * chars.length)];
+  }
+  document.getElementById('pwdResult').value = pwd;
+}
+document.getElementById('pwdLen').addEventListener('input', function(){
+  document.getElementById('pwdLenVal').textContent = this.value;
+});
+document.getElementById('pwdGenerate').addEventListener('click', function(e){
+  e.stopPropagation();
+  generatePassword();
+});
+document.getElementById('toolPwdGen').addEventListener('click', function(){
+  document.getElementById('pwdGenPopup').classList.add('show');
+  generatePassword();
+});
+
+// ===== 时间戳转换 =====
+function updateNowTs(){
+  const now = Math.floor(Date.now() / 1000);
+  document.getElementById('tsNow').value = now;
+}
+setInterval(updateNowTs, 1000);
+updateNowTs();
+document.getElementById('tsCopy').addEventListener('click', function(e){
+  e.stopPropagation();
+  navigator.clipboard.writeText(document.getElementById('tsNow').value);
+});
+document.getElementById('tsInput').addEventListener('input', function(){
+  const val = this.value.trim();
+  if(!val){
+    document.getElementById('tsResult').textContent = '-';
+    return;
+  }
+  let ts = parseInt(val);
+  if(val.length === 13) ts = Math.floor(ts / 1000);
+  const d = new Date(ts * 1000);
+  if(isNaN(d.getTime())){
+    document.getElementById('tsResult').textContent = '无效时间戳';
+  } else {
+    document.getElementById('tsResult').textContent = d.toLocaleString('zh-CN');
+  }
+});
+document.getElementById('tsDateInput').addEventListener('input', function(){
+  const val = this.value.trim();
+  if(!val){
+    document.getElementById('tsDateResult').textContent = '-';
+    return;
+  }
+  const d = new Date(val.replace(/-/g, '/'));
+  if(isNaN(d.getTime())){
+    document.getElementById('tsDateResult').textContent = '无效日期';
+  } else {
+    document.getElementById('tsDateResult').textContent = Math.floor(d.getTime() / 1000);
+  }
+});
+document.getElementById('toolTimestamp').addEventListener('click', function(){
+  document.getElementById('timestampPopup').classList.add('show');
+});
+
+// ===== 随机数生成 =====
+document.getElementById('randGenerate').addEventListener('click', function(e){
+  e.stopPropagation();
+  const min = parseInt(document.getElementById('randMin').value) || 1;
+  const max = parseInt(document.getElementById('randMax').value) || 100;
+  const val = Math.floor(Math.random() * (max - min + 1)) + min;
+  document.getElementById('randResult').textContent = val;
+});
+document.getElementById('toolRandom').addEventListener('click', function(){
+  document.getElementById('randomPopup').classList.add('show');
+});
+
+// ===== JSON格式化 =====
+document.getElementById('jsonFormat').addEventListener('click', function(e){
+  e.stopPropagation();
+  try{
+    const obj = JSON.parse(document.getElementById('jsonInput').value);
+    document.getElementById('jsonOutput').value = JSON.stringify(obj, null, 2);
+  }catch(err){
+    document.getElementById('jsonOutput').value = 'JSON解析错误: ' + err.message;
+  }
+});
+document.getElementById('jsonMinify').addEventListener('click', function(e){
+  e.stopPropagation();
+  try{
+    const obj = JSON.parse(document.getElementById('jsonInput').value);
+    document.getElementById('jsonOutput').value = JSON.stringify(obj);
+  }catch(err){
+    document.getElementById('jsonOutput').value = 'JSON解析错误: ' + err.message;
+  }
+});
+document.getElementById('toolJsonFmt').addEventListener('click', function(){
+  document.getElementById('jsonFmtPopup').classList.add('show');
+});
+
+// ===== Markdown编辑器 =====
+function simpleMd(text){
+  let html = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/\*(.*?)\*/g, '<i>$1</i>')
+    .replace(/`(.*?)`/g, '<code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px">$1</code>')
+    .replace(/^\- (.*$)/gm, '<li>$1</li>')
+    .replace(/\n/g, '<br>');
+  return html;
+}
+const mdInput = document.getElementById('mdInput');
+const mdPreview = document.getElementById('mdPreview');
+mdInput.addEventListener('input', function(){
+  mdPreview.innerHTML = simpleMd(mdInput.value) || '预览区';
+});
+document.getElementById('toolMarkdown').addEventListener('click', function(){
+  document.getElementById('markdownPopup').classList.add('show');
+});
+
+// ===== 番茄钟 =====
+let pomoInterval = null;
+let pomoSeconds = 25 * 60;
+let pomoMode = 'work'; // work / break
+let pomoCount = 0;
+function pomoFormat(s){
+  const m = Math.floor(s/60);
+  const sec = s%60;
+  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
+function pomoUpdateDisplay(){
+  document.getElementById('pomodoroDisplay').textContent = pomoFormat(pomoSeconds);
+  document.getElementById('pomodoroMode').textContent = pomoMode === 'work' ? '专注时间' : '休息时间';
+  document.getElementById('pomodoroCount').textContent = '已完成 ' + pomoCount + ' 个番茄';
+}
+document.getElementById('pomodoroStart').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(pomoInterval){
+    clearInterval(pomoInterval);
+    pomoInterval = null;
+    this.textContent = '继续';
+  } else {
+    this.textContent = '暂停';
+    pomoInterval = setInterval(function(){
+      pomoSeconds--;
+      if(pomoSeconds <= 0){
+        if(pomoMode === 'work'){
+          pomoCount++;
+          pomoMode = 'break';
+          pomoSeconds = 5 * 60;
+        } else {
+          pomoMode = 'work';
+          pomoSeconds = 25 * 60;
+        }
+        alert(pomoMode === 'work' ? '休息结束，继续专注！' : '专注完成，休息一下！');
+      }
+      pomoUpdateDisplay();
+    }, 1000);
+  }
+});
+document.getElementById('pomodoroReset').addEventListener('click', function(e){
+  e.stopPropagation();
+  clearInterval(pomoInterval);
+  pomoInterval = null;
+  pomoMode = 'work';
+  pomoSeconds = 25 * 60;
+  pomoCount = 0;
+  pomoUpdateDisplay();
+  document.getElementById('pomodoroStart').textContent = '开始';
+});
+document.getElementById('toolPomodoro').addEventListener('click', function(){
+  document.getElementById('pomodoroPopup').classList.add('show');
+});
+
+// ===== 倒计时器 =====
+let cdInterval = null;
+let cdSeconds = 0;
+function cdFormat(s){
+  const m = Math.floor(s/60);
+  const sec = s%60;
+  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
+function cdUpdateDisplay(){
+  document.getElementById('cdDisplay').textContent = cdFormat(cdSeconds);
+}
+document.getElementById('cdStart').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(cdInterval){
+    clearInterval(cdInterval);
+    cdInterval = null;
+    this.textContent = '继续';
+  } else {
+    if(cdSeconds === 0){
+      const m = parseInt(document.getElementById('cdMin').value) || 0;
+      const s = parseInt(document.getElementById('cdSec').value) || 0;
+      cdSeconds = m * 60 + s;
+      cdUpdateDisplay();
+    }
+    this.textContent = '暂停';
+    cdInterval = setInterval(function(){
+      cdSeconds--;
+      cdUpdateDisplay();
+      if(cdSeconds <= 0){
+        clearInterval(cdInterval);
+        cdInterval = null;
+        alert('倒计时结束！');
+        document.getElementById('cdStart').textContent = '开始';
+      }
+    }, 1000);
+  }
+});
+document.getElementById('cdReset').addEventListener('click', function(e){
+  e.stopPropagation();
+  clearInterval(cdInterval);
+  cdInterval = null;
+  const m = parseInt(document.getElementById('cdMin').value) || 0;
+  const s = parseInt(document.getElementById('cdSec').value) || 0;
+  cdSeconds = m * 60 + s;
+  cdUpdateDisplay();
+  document.getElementById('cdStart').textContent = '开始';
+});
+document.getElementById('toolCountdown').addEventListener('click', function(){
+  document.getElementById('countdownPopup').classList.add('show');
+});
+
+// ===== 科学计算器 =====
+const sciCalcDisplay = document.getElementById('sciCalcDisplay');
+let sciExpr = '';
+function factorial(n){
+  if(n < 0) return NaN;
+  if(n === 0 || n === 1) return 1;
+  let r = 1;
+  for(let i = 2; i <= n; i++) r *= i;
+  return r;
+}
+document.querySelectorAll('#sciCalcPopup .calc-btn').forEach(btn => {
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    const val = this.dataset.val;
+    if(val === 'C'){
+      sciExpr = '';
+      sciCalcDisplay.value = '0';
+    } else if(val === '='){
+      try{
+        let expr = sciExpr
+          .replace(/sin\(/g, 'Math.sin(')
+          .replace(/cos\(/g, 'Math.cos(')
+          .replace(/tan\(/g, 'Math.tan(')
+          .replace(/log\(/g, 'Math.log10(')
+          .replace(/ln\(/g, 'Math.log(')
+          .replace(/sqrt\(/g, 'Math.sqrt(')
+          .replace(/\^2/g, '**2')
+          .replace(/π/g, 'Math.PI')
+          .replace(/e/g, 'Math.E')
+          .replace(/!/g, '');
+        // 处理阶乘
+        const factorialRegex = /(\d+)!/g;
+        expr = expr.replace(factorialRegex, function(match, num){
+          return factorial(parseInt(num));
+        });
+        const result = eval(expr);
+        sciCalcDisplay.value = result;
+        sciExpr = result.toString();
+      }catch(err){
+        sciCalcDisplay.value = '错误';
+        sciExpr = '';
+      }
+    } else {
+      if(['sin','cos','tan','log','ln','sqrt'].includes(val)){
+        sciExpr += val + '(';
+      } else {
+        sciExpr += val;
+      }
+      sciCalcDisplay.value = sciExpr;
+    }
+  });
+});
+document.getElementById('toolSciCalc').addEventListener('click', function(){
+  document.getElementById('sciCalcPopup').classList.add('show');
+});
+
+// ===== 经纬度定位 =====
+function getLocation(){
+  document.getElementById('geoLat').value = '获取中...';
+  document.getElementById('geoLng').value = '获取中...';
+  document.getElementById('geoAcc').value = '-';
+  if(!navigator.geolocation){
+    document.getElementById('geoLat').value = '不支持定位';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      document.getElementById('geoLat').value = pos.coords.latitude.toFixed(6);
+      document.getElementById('geoLng').value = pos.coords.longitude.toFixed(6);
+      document.getElementById('geoAcc').value = pos.coords.accuracy.toFixed(0) + ' 米';
+    },
+    function(err){
+      document.getElementById('geoLat').value = '定位失败';
+      document.getElementById('geoLng').value = '定位失败';
+      document.getElementById('geoAcc').value = '请检查浏览器定位权限';
+    }
+  );
+}
+document.getElementById('geoRefresh').addEventListener('click', function(e){
+  e.stopPropagation();
+  getLocation();
+});
+document.getElementById('toolGeo').addEventListener('click', function(){
+  document.getElementById('geoPopup').classList.add('show');
+  getLocation();
+});
+
 </script>
 </body>
 </html>
