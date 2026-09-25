@@ -588,6 +588,77 @@ html,body{
   font-weight:600;
   cursor:pointer;
 }
+
+/* 今日弹窗 */
+.today-popup{
+  left:36px;
+  bottom:80px;
+  width:300px;
+  z-index:1001;
+}
+.today-date{
+  font-size:12px;
+  opacity:0.6;
+  margin-bottom:4px;
+}
+.today-title{
+  font-size:18px;
+  font-weight:600;
+  margin-bottom:10px;
+}
+.today-image{
+  width:100%;
+  border-radius:10px;
+  overflow:hidden;
+  margin-bottom:10px;
+  background:rgba(255,255,255,0.08);
+}
+.today-image img{
+  width:100%;
+  height:130px;
+  object-fit:cover;
+  display:block;
+}
+.today-desc{
+  font-size:13px;
+  line-height:1.6;
+  opacity:0.85;
+  margin-bottom:12px;
+}
+.today-weather{
+  background:rgba(255,255,255,0.08);
+  border-radius:10px;
+  padding:10px;
+}
+.weather-title{
+  font-size:13px;
+  font-weight:600;
+  margin-bottom:8px;
+  opacity:0.9;
+}
+.weather-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.weather-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,0.06);
+  border-radius:8px;
+  padding:8px 4px;
+}
+.weather-label{
+  font-size:11px;
+  opacity:0.6;
+  margin-bottom:2px;
+}
+.weather-value{
+  font-size:14px;
+  font-weight:600;
+}
 </style>
 </head>
 <body>
@@ -620,6 +691,13 @@ html,body{
         <line x1="3" y1="10" x2="21" y2="10"></line>
       </svg>
     </button>
+    <!-- 新增：今日图标 -->
+    <button class="icon-btn" id="todayBtn" title="今日">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+    </button>
   </div>
   <div class="island island-main">
   </div>
@@ -641,7 +719,7 @@ html,body{
   </div>
   <div class="info-item">
     <div class="info-label">来源</div>
-    <div class="info-value">必应每日壁纸</div>
+    <div class="info-value">必应壁纸（国内镜像）</div>
   </div>
   <div class="like-row">
     <button class="like-btn" id="likeBtn">
@@ -751,35 +829,73 @@ html,body{
     <button id="calNoteSave">保存便签</button>
   </div>
 </div>
+<!-- 今日弹窗（新增） -->
+<div class="popup today-popup" id="todayPopup">
+  <div class="popup-header">
+    <span>今日</span>
+    <button class="popup-close" id="todayClose">✕</button>
+  </div>
+  <div class="today-body" id="todayBody">
+    <div class="today-date" id="todayDate">加载中...</div>
+    <div class="today-title" id="todayTitle">加载中...</div>
+    <div class="today-image">
+      <img id="todayImage" alt="今日配图" onerror="this.parentElement.style.display='none'">
+    </div>
+    <div class="today-desc" id="todayDesc">加载中...</div>
+    <div class="today-weather">
+      <div class="weather-title">天气 <span id="weatherCity" style="font-size:11px;opacity:0.6"></span></div>
+      <div class="weather-grid">
+        <div class="weather-item">
+          <span class="weather-label">温度</span>
+          <span class="weather-value" id="weatherTemp">--</span>
+        </div>
+        <div class="weather-item">
+          <span class="weather-label">湿度</span>
+          <span class="weather-value" id="weatherHumidity">--</span>
+        </div>
+        <div class="weather-item">
+          <span class="weather-label">天气</span>
+          <span class="weather-value" id="weatherText">--</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
-let currentPicInfo = { desc:'', author:'', link:'', picId:'' };
+let currentPicInfo = { desc:'', author:'', link:'', picId:'', bgUrl:'' };
 // 后端先放一边，所有数据走浏览器缓存，后面接后端时把缓存上传即可
 const API_BASE = "https://like-api2.lightboxofficial.workers.dev"; // 暂时不用，先存着
 async function setBingBg(){
+  // 背景图直接用bing.img.run国内镜像（302重定向，最简单稳定）
+  const bgUrl = "https://bing.img.run/uhd.php";
+  const imgUrl = bgUrl + "?_t=" + Date.now();
+  document.body.style.backgroundImage = `url(${imgUrl})`;
+  currentPicInfo.bgUrl = bgUrl;
+  // 尝试获取元数据（拍摄者、场景）
   try{
-    const resp = await fetch("https://bing.biturl.top/");
+    const resp = await fetch("https://api.vvhan.com/api/bing?type=json");
     const img = await resp.json();
-    const imgUrl = img.url + "&_t=" + Date.now();
-    document.body.style.backgroundImage = `url(${imgUrl})`;
-    const copyright = img.copyright || '';
-    const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
-    if(match){
-      currentPicInfo.desc = match[1];
-      currentPicInfo.author = match[2];
-    }else{
-      currentPicInfo.desc = copyright;
-      currentPicInfo.author = '';
+    if(img && img.copyright){
+      const copyright = img.copyright || '';
+      const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
+      if(match){
+        currentPicInfo.desc = match[1];
+        currentPicInfo.author = match[2];
+      }else{
+        currentPicInfo.desc = copyright;
+        currentPicInfo.author = '';
+      }
+      currentPicInfo.link = img.copyright_link || '';
+      currentPicInfo.picId = img.start_date || 'default';
+      document.getElementById('picDesc').textContent = currentPicInfo.desc || '暂无';
+      document.getElementById('picAuthor').textContent = currentPicInfo.author || '暂无';
+      liked = localStorage.getItem('bing_liked_' + currentPicInfo.picId) === '1';
+      loadLikeCount();
     }
-    currentPicInfo.link = img.copyright_link || '';
-    currentPicInfo.picId = img.start_date || 'default';
-    document.getElementById('picDesc').textContent = currentPicInfo.desc || '暂无';
-    document.getElementById('picAuthor').textContent = currentPicInfo.author || '暂无';
-    // 新图片加载后重新拉点赞数
-    liked = localStorage.getItem('bing_liked_' + currentPicInfo.picId) === '1';
-    loadLikeCount();
   }catch(e){
-    console.error("获取壁纸失败",e);
-    document.body.style.backgroundImage = `url(https://picsum.photos/id/1018/1920/1080)`;
+    console.error("获取壁纸元数据失败",e);
+    document.getElementById('picDesc').textContent = '必应壁纸';
+    document.getElementById('picAuthor').textContent = '暂无';
   }
 }
 const albumBtn = document.getElementById('albumBtn');
@@ -1275,6 +1391,180 @@ calNoteSave.addEventListener('click', (e) => {
   }
   localStorage.setItem('cal_notes', JSON.stringify(calNotes));
   calRender();
+});
+
+// ===== 今日弹窗（新增） =====
+const todayBtn = document.getElementById('todayBtn');
+const todayPopup = document.getElementById('todayPopup');
+const todayClose = document.getElementById('todayClose');
+const todayDate = document.getElementById('todayDate');
+const todayTitle = document.getElementById('todayTitle');
+const todayImage = document.getElementById('todayImage');
+const todayDesc = document.getElementById('todayDesc');
+const weatherTemp = document.getElementById('weatherTemp');
+const weatherHumidity = document.getElementById('weatherHumidity');
+const weatherText = document.getElementById('weatherText');
+const weatherCity = document.getElementById('weatherCity');
+
+// 公历节日
+const festivals = {
+  '1-1':'元旦','2-14':'情人节','3-8':'妇女节','3-12':'植树节',
+  '4-1':'愚人节','5-1':'劳动节','5-4':'青年节','6-1':'儿童节',
+  '7-1':'建党节','8-1':'建军节','9-10':'教师节','10-1':'国庆节',
+  '12-25':'圣诞节','9-3':'抗战胜利纪念日','12-13':'国家公祭日'
+};
+// 节气
+const solarTerms = {
+  '1-5':'小寒','1-20':'大寒','2-4':'立春','2-18':'雨水','3-5':'惊蛰','3-20':'春分',
+  '4-4':'清明','4-20':'谷雨','5-5':'立夏','5-21':'小满','6-5':'芒种','6-21':'夏至',
+  '7-7':'小暑','7-23':'大暑','8-7':'立秋','8-23':'处暑','9-8':'白露','9-23':'秋分',
+  '10-8':'寒露','10-23':'霜降','11-7':'立冬','11-22':'小雪','12-7':'大雪','12-22':'冬至'
+};
+// 2026年农历节日（公历日期）
+const lunarFestivals = {
+  '2-17':'春节','3-3':'元宵节','6-19':'端午节','8-19':'七夕',
+  '9-25':'中秋节','10-18':'重阳节'
+};
+
+async function renderToday(){
+  const now = new Date();
+  const m = now.getMonth() + 1;
+  const d = now.getDate();
+  const key = m + '-' + d;
+  const week = ['日','一','二','三','四','五','六'][now.getDay()];
+  todayDate.textContent = now.getFullYear() + '年' + m + '月' + d + '日 周' + week;
+
+  // 配图用今日必应壁纸
+  if(currentPicInfo.bgUrl){
+    todayImage.src = currentPicInfo.bgUrl;
+    todayImage.parentElement.style.display = '';
+  }
+
+  // 先查本地节日（公历+节气+农历）
+  const festival = festivals[key];
+  const term = solarTerms[key];
+  const lunar = lunarFestivals[key];
+  let title = '', desc = '';
+  const parts = [];
+  if(lunar) parts.push(lunar);
+  if(festival) parts.push(festival);
+  if(term) parts.push(term);
+  if(parts.length > 0){
+    title = parts.join(' · ');
+    desc = '今天是' + parts.join('和') + '。';
+  }
+
+  // 再请求节日API补充（timor.tech 国内稳定）
+  try{
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth()+1).padStart(2,'0');
+    const d = String(today.getDate()).padStart(2,'0');
+    const dateStr = `${y}-${m}-${d}`;
+    const res = await fetch(`https://timor.tech/api/holiday/info/${dateStr}`);
+    const data = await res.json();
+    if(data && data.type){
+      const typeMap = {0:'工作日',1:'周末',2:'节日'};
+      let apiTitle = '';
+      let apiDesc = '';
+      if(data.type.type === 2 && data.type.name){
+        apiTitle = data.type.name;
+        apiDesc = `今天是${data.type.name}。`;
+      }else if(data.type.type === 1){
+        apiTitle = '周末';
+        apiDesc = '今天是周末，好好休息。';
+      }else{
+        apiTitle = '工作日';
+        apiDesc = '今天是工作日，加油！';
+      }
+      if(apiTitle){ title = apiTitle; desc = apiDesc; }
+    }
+  }catch(e){
+    // API失败用本地数据
+  }
+
+  if(!title){
+    title = '普通的一天';
+    desc = '认真生活，今天也值得被记录。';
+  }
+  todayTitle.textContent = title;
+  todayDesc.textContent = desc;
+}
+
+// 天气码映射
+function mapWeatherCode(code){
+  const map = {
+    0:'晴',1:'晴',2:'多云',3:'阴',
+    45:'雾',48:'雾凇',
+    51:'毛毛雨',53:'毛毛雨',55:'毛毛雨',
+    56:'冻雨',57:'冻雨',
+    61:'小雨',63:'中雨',65:'大雨',
+    66:'冻雨',67:'冻雨',
+    71:'小雪',73:'中雪',75:'大雪',77:'雪粒',
+    80:'阵雨',81:'阵雨',82:'暴雨',
+    85:'阵雪',86:'阵雪',
+    95:'雷暴',96:'雷暴冰雹',99:'雷暴冰雹'
+  };
+  return map[code] || '未知';
+}
+
+async function loadWeather(lat, lon){
+  try{
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=temperature_2m,relative_humidity_2m,weather_code&timezone=auto';
+    const res = await fetch(url);
+    const data = await res.json();
+    const cur = data.current;
+    weatherTemp.textContent = Math.round(cur.temperature_2m) + '°C';
+    weatherHumidity.textContent = cur.relative_humidity_2m + '%';
+    weatherText.textContent = mapWeatherCode(cur.weather_code);
+  }catch(e){
+    weatherTemp.textContent = '--';
+    weatherHumidity.textContent = '--';
+    weatherText.textContent = '加载失败';
+  }
+}
+
+function requestLocation(){
+  if(!navigator.geolocation){
+    weatherText.textContent = '不支持定位';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude.toFixed(2);
+      const lon = pos.coords.longitude.toFixed(2);
+      weatherCity.textContent = '（' + lat + ',' + lon + '）';
+      loadWeather(lat, lon);
+    },
+    (err) => {
+      weatherText.textContent = '定位失败';
+      // 降级用徐州
+      loadWeather(34.26, 117.18);
+    }
+  );
+}
+
+todayBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  renderToday();
+  todayPopup.classList.toggle('show');
+  if(!todayPopup.classList.contains('weather-loaded')){
+    todayPopup.classList.add('weather-loaded');
+    requestLocation();
+  }
+});
+todayClose.addEventListener('click', (e) => {
+  e.stopPropagation();
+  todayPopup.classList.remove('show');
+});
+todayPopup.addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
+document.addEventListener('click', (e) => {
+  if(!todayPopup.contains(e.target) && !todayBtn.contains(e.target)){
+    todayPopup.classList.remove('show');
+  }
 });
 </script>
 </body>
