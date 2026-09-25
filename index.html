@@ -114,12 +114,15 @@ html,body{
   user-select:none;
 }
 .tool-sub-popup{
-  left:50%;
-  bottom:50%;
-  transform:translateX(-50%) translateY(50%) scale(0.85);
+  left:50% !important;
+  top:50% !important;
+  transform:translate(-50%, -50%) scale(0.85) !important;
   width:320px;
   max-height:80vh;
   overflow-y:auto;
+}
+.tool-sub-popup.show{
+  transform:translate(-50%, -50%) scale(1) !important;
 }
 .info-popup{
   position:fixed;
@@ -2422,38 +2425,55 @@ function copyText(text){
 }
 
 // 弹窗可拖动功能
+let activeDragPopup = null;
+let startX, startY, initialLeft, initialTop;
+
 function makeDraggable(popup){
   const header = popup.querySelector('.popup-header');
   if(!header) return;
-  let isDragging = false;
-  let startX, startY, initialLeft, initialTop;
   header.addEventListener('mousedown', function(e){
-    isDragging = true;
+    e.preventDefault();
     const rect = popup.getBoundingClientRect();
     initialLeft = rect.left;
     initialTop = rect.top;
     startX = e.clientX;
     startY = e.clientY;
-    popup.style.right = 'auto';
-    popup.style.bottom = 'auto';
-    popup.style.transform = 'none';
-    popup.style.left = initialLeft + 'px';
-    popup.style.top = initialTop + 'px';
-    e.preventDefault();
-  });
-  document.addEventListener('mousemove', function(e){
-    if(!isDragging) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    popup.style.left = (initialLeft + dx) + 'px';
-    popup.style.top = (initialTop + dy) + 'px';
-  });
-  document.addEventListener('mouseup', function(){
-    isDragging = false;
+    activeDragPopup = popup;
   });
 }
 // 给所有弹窗添加拖动功能
 document.querySelectorAll('.popup').forEach(makeDraggable);
+
+// 全局拖拽事件（只绑定一次）
+document.addEventListener('mousemove', function(e){
+  if(!activeDragPopup) return;
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  const popup = activeDragPopup;
+  popup.style.right = 'auto';
+  popup.style.bottom = 'auto';
+  popup.style.transform = 'none';
+  popup.style.left = (initialLeft + dx) + 'px';
+  popup.style.top = (initialTop + dy) + 'px';
+});
+document.addEventListener('mouseup', function(){
+  activeDragPopup = null;
+});
+
+// 弹窗打开时重置位置到屏幕中间
+document.querySelectorAll('.tool-sub-popup').forEach(function(popup){
+  // 监听show类变化，添加时重置位置
+  const observer = new MutationObserver(function(){
+    if(popup.classList.contains('show')){
+      popup.style.left = '50%';
+      popup.style.top = '50%';
+      popup.style.right = 'auto';
+      popup.style.bottom = 'auto';
+      popup.style.transform = 'translate(-50%, -50%)';
+    }
+  });
+  observer.observe(popup, {attributes:true, attributeFilter:['class']});
+});
 
 // 工具图标激活状态切换
 function toggleToolActive(toolId, popupId){
@@ -3020,8 +3040,8 @@ document.getElementById('cdStart').addEventListener('click', function(e){
   } else {
     if(cdSeconds === 0){
       const m = parseInt(document.getElementById('cdMin').value) || 0;
-      const s = parseInt(document.getElementById('cdSec').value) || 0;
-      cdSeconds = m * 60 + s;
+      const  = parseInt(document.getElementById('cdSec').value) || 0;
+      cdSeconds = m * 60 + ;
       cdUpdateDisplay();
     }
     this.textContent = '暂停';
@@ -3042,8 +3062,8 @@ document.getElementById('cdReset').addEventListener('click', function(e){
   clearInterval(cdInterval);
   cdInterval = null;
   const m = parseInt(document.getElementById('cdMin').value) || 0;
-  const s = parseInt(document.getElementById('cdSec').value) || 0;
-  cdSeconds = m * 60 + s;
+  const  = parseInt(document.getElementById('cdSec').value) || 0;
+  cdSeconds = m * 60 + ;
   cdUpdateDisplay();
   document.getElementById('cdStart').textContent = '开始';
 });
