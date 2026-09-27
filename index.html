@@ -1956,11 +1956,12 @@ let currentPicInfo = { desc:'', author:'', link:'', picId:'', bgUrl:'' };
 // 后端先放一边，所有数据走浏览器缓存，后面接后端时把缓存上传即可
 const API_BASE = "https://like-api2.lightboxofficial.workers.dev"; // 暂时不用，先存着
 async function setBingBg(){
-  // 从GitHub Actions + jsdelivr CDN加载必应壁纸JSON（无CORS跨域）
+  // 从同域名GitHub Pages加载必应壁纸JSON（无CORS跨域，国内稳定）
+  const jsonUrl = "https://lightboxofficial.github.io/Bing-Wallpaper-Action/data/zh-CN_update.json";
   try{
-    const resp = await fetch("https://cdn.jsdelivr.net/gh/lightboxofficial/Bing-Wallpaper-Action@main/data/zh-CN_update.json");
+    const resp = await fetch(jsonUrl);
     const data = await resp.json();
-    if(data.images && data.images.length > 0){
+    if(data && data.images && data.images.length > 0){
       const img = data.images[0];
       const imgUrl = "https://cn.bing.com" + img.url;
       const copyright = img.copyright || '';
@@ -1992,7 +1993,7 @@ async function setBingBg(){
       return;
     }
   }catch(e){
-    console.log("必应壁纸CDN加载失败，降级picsum", e);
+    console.log("必应壁纸加载失败，降级picsum", e);
   }
   // 降级picsum
   loadFallback();
