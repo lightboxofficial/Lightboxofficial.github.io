@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NoTificians无闻小站-求索既无止，何处是归途</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 /* 去掉数字输入框的上下箭头 */
@@ -297,6 +298,52 @@ html,body{
     width:auto !important;
     max-height:70vh;
   }
+  /* 窄屏：时钟和搜索框适配 */
+  .top-center{
+    top:60px;
+    width:92%;
+  }
+  .clock{
+    font-size:48px;
+    margin-bottom:12px;
+    letter-spacing:-1px;
+  }
+  .clock-digit{
+    width:0.6em;
+    min-width:0.6em;
+    max-width:0.6em;
+  }
+  .clock .colon{
+    width:0.4em;
+    min-width:0.4em;
+    max-width:0.4em;
+  }
+  .search-box{
+    height:38px;
+  }
+  .search-engine-btn{
+    width:32px;
+    height:32px;
+  }
+  .search-engine-btn svg{
+    width:16px;
+    height:16px;
+  }
+  .search-input{
+    height:32px;
+    font-size:13px;
+  }
+  .search-go-btn{
+    width:32px;
+    height:32px;
+  }
+  .search-go-btn svg{
+    width:14px;
+    height:14px;
+  }
+  .engine-popup{
+    width:260px;
+  }
 }
 /* ===== 收藏夹弹窗 ===== */
 .popup{
@@ -523,6 +570,180 @@ html,body{
 }
 .copy-toast.show{
   opacity:1;
+}
+/* ===== 顶部时间+搜索框 ===== */
+.top-center{
+  position:fixed;
+  top:12%;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  z-index:10;
+  width:90%;
+  max-width:600px;
+}
+.clock{
+  font-family:'Oswald', system-ui, sans-serif;
+  font-size:72px;
+  font-weight:300;
+  color:#fff;
+  margin-bottom:16px;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  letter-spacing:0;
+  line-height:1;
+}
+.clock-digit{
+  display:inline-flex;
+  width:0.62em;
+  min-width:0.62em;
+  max-width:0.62em;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";
+  overflow:hidden;
+}
+.clock .colon{
+  width:0.42em;
+  min-width:0.42em;
+  max-width:0.42em;
+  text-align:center;
+  line-height:1;
+  animation:blink 1s infinite;
+}
+@keyframes blink{
+  0%, 50% { opacity:1; }
+  51%, 100% { opacity:0.3; }
+}
+.search-box{
+  display:flex;
+  align-items:center;
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(14px);
+  border-radius:50px;
+  padding:3px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.2);
+  height:42px;
+}
+.search-engine-btn{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  border:none;
+  background:rgba(255,255,255,0.12);
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  transition:background 0.2s;
+}
+.search-engine-btn:hover{
+  background:rgba(255,255,255,0.2);
+}
+.search-engine-btn svg{
+  width:18px;
+  height:18px;
+}
+.search-input{
+  flex:1;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#fff;
+  font-size:14px;
+  padding:0 10px;
+  height:36px;
+}
+.search-input::placeholder{
+  color:rgba(255,255,255,0.5);
+}
+.search-go-btn{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  border:none;
+  background:rgba(255,255,255,0.12);
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  transition:background 0.2s;
+}
+.search-go-btn:hover{
+  background:rgba(255,255,255,0.25);
+}
+.search-go-btn svg{
+  width:18px;
+  height:18px;
+}
+/* 搜索引擎选择弹窗 */
+.engine-popup{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0.85);
+  width:280px;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(14px);
+  border-radius:16px;
+  padding:16px;
+  color:#fff;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  z-index:1100;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.25s cubic-bezier(0.34,1.56,0.64,1),
+            transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.engine-popup.show{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+  pointer-events:auto;
+}
+.engine-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+  margin-top:12px;
+}
+.engine-item{
+  padding:10px 12px;
+  background:rgba(255,255,255,0.08);
+  border-radius:10px;
+  cursor:pointer;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  transition:background 0.2s;
+}
+.engine-item:hover{
+  background:rgba(255,255,255,0.18);
+}
+.engine-item.active{
+  background:rgba(255,255,255,0.22);
+}
+.engine-icon{
+  width:32px;
+  height:32px;
+  border-radius:8px;
+  background:rgba(255,255,255,0.1);
+  backdrop-filter:blur(8px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  color:rgba(255,255,255,0.7);
 }
 /* 收藏夹主弹窗 */
 .bookmark-popup{
@@ -974,6 +1195,33 @@ textarea::-webkit-scrollbar-thumb{
 </style>
 </head>
 <body>
+<!-- 顶部时间+搜索框 -->
+<div class="top-center">
+  <div class="clock" id="clock">
+    <span class="clock-digit" id="h1">0</span><span class="clock-digit" id="h2">0</span><span class="colon">:</span><span class="clock-digit" id="m1">0</span><span class="clock-digit" id="m2">0</span><span class="colon">:</span><span class="clock-digit" id="s1">0</span><span class="clock-digit" id="s2">0</span>
+  </div>
+  <div class="search-box">
+    <button class="search-engine-btn" id="engineBtn" title="选择搜索引擎">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="2" y1="12" x2="22" y2="12"></line>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+      </svg>
+    </button>
+    <input type="text" class="search-input" id="searchInput" placeholder="搜索...">
+    <button class="search-go-btn" id="searchGoBtn" title="搜索">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </button>
+  </div>
+</div>
+<!-- 搜索引擎选择弹窗 -->
+<div class="engine-popup" id="enginePopup">
+  <div style="font-size:15px;font-weight:600;margin-bottom:4px">选择搜索引擎</div>
+  <div class="engine-grid" id="engineGrid"></div>
+</div>
 <div class="island-container">
   <div class="island island-left">
     <button class="icon-btn" id="albumBtn" title="壁纸信息">
@@ -1708,59 +1956,56 @@ let currentPicInfo = { desc:'', author:'', link:'', picId:'', bgUrl:'' };
 // 后端先放一边，所有数据走浏览器缓存，后面接后端时把缓存上传即可
 const API_BASE = "https://like-api2.lightboxofficial.workers.dev"; // 暂时不用，先存着
 async function setBingBg(){
-  // 1. 先用picsum保底
+  // 从GitHub Actions + jsdelivr CDN加载必应壁纸JSON（无CORS跨域）
   try{
-    const res = await fetch("https://picsum.photos/v2/list?page=1&limit=50");
-    const list = await res.json();
-    const random = list[Math.floor(Math.random() * list.length)];
-    const imgUrl = `https://picsum.photos/id/${random.id}/1920/1080`;
-    document.body.style.backgroundImage = `url(${imgUrl})`;
-    currentPicInfo.bgUrl = imgUrl;
-    currentPicInfo.desc = random.author || '风景壁纸';
-    currentPicInfo.author = random.author || 'Picsum';
-    currentPicInfo.link = random.url || '';
-    currentPicInfo.picId = 'picsum_' + random.id;
-    document.getElementById('picDesc').textContent = currentPicInfo.desc;
-    document.getElementById('picAuthor').textContent = currentPicInfo.author;
-  }catch(e){
-    const fallback = "https://picsum.photos/1920/1080?random=" + Date.now();
-    document.body.style.backgroundImage = `url(${fallback})`;
-    currentPicInfo.desc = "风景壁纸";
-    currentPicInfo.author = "Picsum";
-  }
-  // 2. 用GitHub Actions生成的JSON（通过jsdelivr CDN）
-  try{
-    // 替换成你自己的GitHub用户名
-    const jsonUrl = "https://cdn.jsdelivr.net/gh/lightboxofficial/Bing-Wallpaper-Action@main/data/zh-CN.json";
-    const resp = await fetch(jsonUrl);
-    const bingData = await resp.json();
-    if(bingData && bingData.length > 0){
-      const today = bingData[0];
-      const imgUrl = "https://cn.bing.com" + today.url;
-      const img = new Image();
-      img.onload = function(){
+    const resp = await fetch("https://cdn.jsdelivr.net/gh/lightboxofficial/Bing-Wallpaper-Action@main/data/zh-CN_update.json");
+    const data = await resp.json();
+    if(data.images && data.images.length > 0){
+      const img = data.images[0];
+      const imgUrl = "https://cn.bing.com" + img.url;
+      const copyright = img.copyright || '';
+      const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
+      let desc, author;
+      if(match){
+        desc = match[1];
+        author = match[2];
+      }else{
+        desc = copyright || '必应壁纸';
+        author = '';
+      }
+      // 预加载图片
+      const preload = new Image();
+      preload.onload = function(){
         document.body.style.backgroundImage = `url(${imgUrl})`;
         currentPicInfo.bgUrl = imgUrl;
-        const copyright = today.copyright || '';
-        const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
-        if(match){
-          currentPicInfo.desc = match[1];
-          currentPicInfo.author = match[2];
-        }else{
-          currentPicInfo.desc = copyright || '必应壁纸';
-          currentPicInfo.author = '';
-        }
-        currentPicInfo.link = today.copyrightlink || '';
-        currentPicInfo.picId = today.startdate || 'bing_' + Date.now();
-        document.getElementById('picDesc').textContent = currentPicInfo.desc || '暂无';
-        document.getElementById('picAuthor').textContent = currentPicInfo.author || '暂无';
+        currentPicInfo.desc = desc;
+        currentPicInfo.author = author;
+        currentPicInfo.link = img.copyrightlink || '';
+        currentPicInfo.picId = img.startdate || 'bing_' + Date.now();
+        document.getElementById('picDesc').textContent = desc || '暂无';
+        document.getElementById('picAuthor').textContent = author || '暂无';
       };
-      img.onerror = function(){};
-      img.src = imgUrl;
+      preload.onerror = function(){
+        loadFallback();
+      };
+      preload.src = imgUrl;
+      return;
     }
   }catch(e){
-    console.log("必应壁纸JSON加载失败，用picsum");
+    console.log("必应壁纸CDN加载失败，降级picsum", e);
   }
+  // 降级picsum
+  loadFallback();
+}
+function loadFallback(){
+  const fallback = "https://picsum.photos/1920/1080?random=" + Date.now();
+  document.body.style.backgroundImage = `url(${fallback})`;
+  currentPicInfo.bgUrl = fallback;
+  currentPicInfo.desc = "风景壁纸";
+  currentPicInfo.author = "Picsum";
+  currentPicInfo.picId = 'picsum_' + Date.now();
+  document.getElementById('picDesc').textContent = '风景壁纸';
+  document.getElementById('picAuthor').textContent = 'Picsum';
 }
 const albumBtn = document.getElementById('albumBtn');
 const infoPopup = document.getElementById('infoPopup');
@@ -2407,6 +2652,97 @@ const toolsBtn = document.getElementById('toolsBtn');
 const toolsPopup = document.getElementById('toolsPopup');
 const toolsClose = document.getElementById('toolsClose');
 
+// ===== 顶部时钟 =====
+function updateClock(){
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('h1').textContent = h[0];
+  document.getElementById('h2').textContent = h[1];
+  document.getElementById('m1').textContent = m[0];
+  document.getElementById('m2').textContent = m[1];
+  document.getElementById('s1').textContent = s[0];
+  document.getElementById('s2').textContent = s[1];
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ===== 搜索引擎 =====
+const searchEngines = [
+  {name:'百度', url:'https://www.baidu.com/s?wd=',
+   icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/><path d="M8 11l2 2 4-4"/></svg>'},
+  {name:'谷歌', url:'https://www.google.com/search?q=',
+   icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>'},
+  {name:'必应', url:'https://www.bing.com/search?q=',
+   icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8v8l4-2 4 2V8"/></svg>'},
+  {name:'搜狗', url:'https://www.sogou.com/web?query=',
+   icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'},
+  {name:'360搜索', url:'https://www.so.com/s?q=',
+   icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>'},
+  {name:'Yandex', url:'https://yandex.com/search/?text=',
+   icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="currentColor" stroke="none" font-weight="bold">Я</text></svg>'},
+  {name:'知乎', url:'https://www.zhihu.com/search?type=content&q=',
+   icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>'},
+  {name:'B站', url:'https://search.bilibili.com/all?keyword=',
+   icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M17 2l-3 3M7 2l3 3"/><path d="M9 12l2 2 4-4"/></svg>'},
+  {name:'淘宝', url:'https://s.taobao.com/search?q=',
+   icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>'},
+  {name:'GitHub', url:'https://github.com/search?q=',
+   icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>'}
+];
+let currentEngine = localStorage.getItem('search_engine') || '百度';
+const engineBtn = document.getElementById('engineBtn');
+const enginePopup = document.getElementById('enginePopup');
+const engineGrid = document.getElementById('engineGrid');
+const searchInput = document.getElementById('searchInput');
+const searchGoBtn = document.getElementById('searchGoBtn');
+
+// 渲染搜索引擎列表
+function renderEngines(){
+  engineGrid.innerHTML = '';
+  searchEngines.forEach(function(engine){
+    const item = document.createElement('div');
+    item.className = 'engine-item' + (engine.name === currentEngine ? ' active' : '');
+    item.innerHTML = '<span class="engine-icon">' + engine.icon + '</span><span>' + engine.name + '</span>';
+    item.onclick = function(){
+      currentEngine = engine.name;
+      localStorage.setItem('search_engine', engine.name);
+      renderEngines();
+      enginePopup.classList.remove('show');
+    };
+    engineGrid.appendChild(item);
+  });
+}
+renderEngines();
+
+// 打开搜索引擎选择
+engineBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  enginePopup.classList.toggle('show');
+});
+
+// 搜索功能
+function doSearch(){
+  const q = searchInput.value.trim();
+  if(!q) return;
+  const engine = searchEngines.find(function(e){return e.name === currentEngine;});
+  if(engine){
+    window.open(engine.url + encodeURIComponent(q), '_blank');
+  }
+}
+searchGoBtn.addEventListener('click', doSearch);
+searchInput.addEventListener('keydown', function(e){
+  if(e.key === 'Enter') doSearch();
+});
+
+// 点击外部关闭搜索引擎弹窗
+document.addEventListener('click', function(e){
+  if(!enginePopup.contains(e.target) && !engineBtn.contains(e.target)){
+    enginePopup.classList.remove('show');
+  }
+});
+
 // ===== 复制功能 =====
 function copyText(text){
   navigator.clipboard.writeText(text).then(function(){
@@ -2424,7 +2760,7 @@ function copyText(text){
   });
 }
 
-// 弹窗可拖动功能
+// 弹窗可拖动功能（支持鼠标+触摸）
 let activeDragPopup = null;
 let startX, startY, initialLeft, initialTop;
 
@@ -2432,6 +2768,7 @@ function makeDraggable(popup){
   const header = popup.querySelector('.popup-header') || popup.querySelector('.info-popup-header') || popup;
   if(!header) return;
   header.style.cursor = 'move';
+  // 鼠标事件
   header.addEventListener('mousedown', function(e){
     e.preventDefault();
     const rect = popup.getBoundingClientRect();
@@ -2441,11 +2778,22 @@ function makeDraggable(popup){
     startY = e.clientY;
     activeDragPopup = popup;
   });
+  // 触摸事件
+  header.addEventListener('touchstart', function(e){
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = popup.getBoundingClientRect();
+    initialLeft = rect.left;
+    initialTop = rect.top;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    activeDragPopup = popup;
+  }, {passive:false});
 }
 // 给所有弹窗添加拖动功能
 document.querySelectorAll('.popup, .info-popup').forEach(makeDraggable);
 
-// 全局拖拽事件（只绑定一次）
+// 全局拖拽事件（鼠标）
 document.addEventListener('mousemove', function(e){
   if(!activeDragPopup) return;
   const dx = e.clientX - startX;
@@ -2459,6 +2807,28 @@ document.addEventListener('mousemove', function(e){
   popup.style.top = (initialTop + dy) + 'px';
 });
 document.addEventListener('mouseup', function(){
+  if(activeDragPopup){
+    activeDragPopup.style.transition = '';
+  }
+  activeDragPopup = null;
+});
+
+// 全局拖拽事件（触摸）
+document.addEventListener('touchmove', function(e){
+  if(!activeDragPopup) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  const dx = touch.clientX - startX;
+  const dy = touch.clientY - startY;
+  const popup = activeDragPopup;
+  popup.style.right = 'auto';
+  popup.style.bottom = 'auto';
+  popup.style.transition = 'none';
+  popup.style.transform = 'none';
+  popup.style.left = (initialLeft + dx) + 'px';
+  popup.style.top = (initialTop + dy) + 'px';
+}, {passive:false});
+document.addEventListener('touchend', function(){
   if(activeDragPopup){
     activeDragPopup.style.transition = '';
   }
