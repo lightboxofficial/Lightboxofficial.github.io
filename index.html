@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -2219,7 +2220,6 @@ shareBtn.addEventListener('click', async function(e){
     toast.classList.remove('show');
   }, 2000);
 });
-<<<<<<< HEAD
 // 主页磨砂玻璃窗口 - Windows风格
 const homeBtn = document.getElementById('homeBtn');
 const homeWindow = document.getElementById('homeWindow');
@@ -2364,130 +2364,6 @@ document.addEventListener('mouseup', function(){
   isResize = false;
   homeWindow.style.transition = 'opacity 0.25s ease, visibility 0.25s ease';
 });
-=======
-// 主页磨砂玻璃窗口 - Windows风格
-const homeBtn = document.getElementById('homeBtn');
-const homeWindow = document.getElementById('homeWindow');
-const homeWindowHeader = document.getElementById('homeWindowHeader');
-const homeCloseBtn = document.getElementById('homeCloseBtn');
-const homeMinimizeBtn = document.getElementById('homeMinimizeBtn');
-const homeMaximizeBtn = document.getElementById('homeMaximizeBtn');
-const homeResizeHandle = document.getElementById('homeResizeHandle');
-
-let homeWindowMax = false;
-let homePrevRect = null;
-let homeIsMinimized = false;
-
-// 打开窗口
-homeBtn.addEventListener('click', function(e){
-  e.stopPropagation();
-  if(homeIsMinimized){
-    homeIsMinimized = false;
-    homeWindow.style.display = 'flex';
-  }
-  homeWindow.classList.add('active');
-});
-// 关闭窗口
-homeCloseBtn.addEventListener('click', function(e){
-  e.stopPropagation();
-  homeWindow.classList.remove('active');
-});
-// 最小化窗口
-homeMinimizeBtn.addEventListener('click', function(e){
-  e.stopPropagation();
-  homeIsMinimized = true;
-  homeWindow.classList.remove('active');
-  setTimeout(() => {
-    homeWindow.style.display = 'none';
-  }, 250);
-});
-// 最大化/还原窗口
-homeMaximizeBtn.addEventListener('click', function(e){
-  e.stopPropagation();
-  toggleMaximize();
-});
-// 双击标题栏最大化/还原
-homeWindowHeader.addEventListener('dblclick', function(e){
-  if(e.target.closest('button')) return;
-  toggleMaximize();
-});
-function toggleMaximize(){
-  if(homeWindowMax){
-    // 还原
-    homeWindow.classList.remove('maximized');
-    homeWindowMax = false;
-    if(homePrevRect){
-      homeWindow.style.left = homePrevRect.left + 'px';
-      homeWindow.style.top = homePrevRect.top + 'px';
-      homeWindow.style.width = homePrevRect.width + 'px';
-      homeWindow.style.height = homePrevRect.height + 'px';
-      homeWindow.style.transform = 'none';
-    }
-  }else{
-    // 最大化
-    homePrevRect = homeWindow.getBoundingClientRect();
-    homeWindow.classList.add('maximized');
-    homeWindowMax = true;
-  }
-}
-
-// 拖拽移动窗口
-let isDrag = false;
-let dragStartX, dragStartY, winStartX, winStartY;
-homeWindowHeader.addEventListener('mousedown', function(e){
-  if(e.target.closest('button')) return;
-  if(homeWindowMax) return;
-  isDrag = true;
-  dragStartX = e.clientX;
-  dragStartY = e.clientY;
-  const rect = homeWindow.getBoundingClientRect();
-  winStartX = rect.left;
-  winStartY = rect.top;
-  homeWindow.style.transition = 'none';
-  homeWindow.style.transform = 'none';
-});
-document.addEventListener('mousemove', function(e){
-  if(!isDrag) return;
-  const dx = e.clientX - dragStartX;
-  const dy = e.clientY - dragStartY;
-  homeWindow.style.left = Math.max(0, winStartX + dx) + 'px';
-  homeWindow.style.top = Math.max(0, winStartY + dy) + 'px';
-});
-document.addEventListener('mouseup', function(){
-  isDrag = false;
-  homeWindow.style.transition = 'opacity 0.25s ease, visibility 0.25s ease';
-});
-
-// 右下角缩放手柄
-let isResize = false;
-let resizeStartX, resizeStartY, winW, winH;
-homeResizeHandle.addEventListener('mousedown', function(e){
-  e.stopPropagation();
-  if(homeWindowMax) return;
-  isResize = true;
-  resizeStartX = e.clientX;
-  resizeStartY = e.clientY;
-  const rect = homeWindow.getBoundingClientRect();
-  winW = rect.width;
-  winH = rect.height;
-  homeWindow.style.transition = 'none';
-});
-document.addEventListener('mousemove', function(e){
-  if(!isResize) return;
-  const dx = e.clientX - resizeStartX;
-  const dy = e.clientY - resizeStartY;
-  let newW = Math.max(320, winW + dx);
-  let newH = Math.max(240, winH + dy);
-  newW = Math.min(newW, window.innerWidth - 20);
-  newH = Math.min(newH, window.innerHeight - 20);
-  homeWindow.style.width = newW + 'px';
-  homeWindow.style.height = newH + 'px';
-});
-document.addEventListener('mouseup', function(){
-  isResize = false;
-  homeWindow.style.transition = 'opacity 0.25s ease, visibility 0.25s ease';
-});
->>>>>>> 7e109d1c0fafb1c83f9274f7a32e019f84535e2a
 setBingBg();
 setInterval(setBingBg, 10*60*1000);
 // ===== 收藏夹功能 =====
