@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -96,7 +95,7 @@ html,body{
   height:20px;
   stroke:rgba(255,255,255,0.75);
 }
-/* 主页磨砂玻璃窗口 - Windows风格 */
+/* 主页磨砂玻璃窗口 - 纯深暗色 */
 .home-window{
   position:fixed;
   left:50%;
@@ -110,17 +109,140 @@ html,body{
   max-height:92vh;
   border-radius:14px;
   overflow:hidden;
-  background:rgba(15,20,35,0.85);
-  backdrop-filter:blur(20px) saturate(150%);
-  -webkit-backdrop-filter:blur(20px) saturate(150%);
-  border:1px solid rgba(255,255,255,0.12);
-  box-shadow:0 30px 80px rgba(0,0,0,0.5),0 10px 30px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.16);
+  background:rgba(16,18,24,0.93);
+  backdrop-filter:blur(22px) saturate(120%);
+  -webkit-backdrop-filter:blur(22px) saturate(120%);
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 24px 70px rgba(0,0,0,0.5);
   z-index:50;
   display:flex;
   flex-direction:column;
   opacity:0;
   visibility:hidden;
-  transition:opacity 0.25s ease,visibility 0.25s ease;
+  transition:opacity 0.24s ease,visibility 0.24s ease;
+}
+/* 个人窗口 - GitHub Dark风格深蓝灰 */
+.profile-window{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(92vw,1100px);
+  height:min(86vh,720px);
+  min-width:320px;
+  min-height:240px;
+  max-width:96vw;
+  max-height:92vh;
+  border-radius:14px;
+  overflow:hidden;
+  background:rgba(16,18,24,0.92);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 24px 70px rgba(0,0,0,0.45);
+  z-index:50;
+  display:flex;
+  flex-direction:column;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 0.24s ease,visibility 0.24s ease;
+}
+.profile-window.active{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+/* 个人卡片样式 - 近黑磨砂玻璃，灰色磨砂边框 */
+.profile-card{
+  background:rgba(10,13,20,0.65);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(150,165,185,0.12);
+  border-radius:14px;
+  padding:20px;
+  margin-bottom:20px;
+  display:flex;
+  gap:20px;
+}
+.avatar-box{
+  width:120px;
+  height:120px;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.18);
+  cursor:pointer;
+  flex-shrink:0;
+  transition:transform 0.2s;
+}
+.avatar-box:hover{
+  transform:scale(1.03);
+}
+.avatar-box img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.profile-info{
+  flex:1;
+  display:flex;
+  align-items:center;
+}
+.profile-main{
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+.profile-buttons{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.profile-btn{
+  padding:10px 20px;
+  border-radius:8px;
+  background:#fff;
+  color:#000;
+  font-size:14px;
+  font-weight:600;
+  text-decoration:none;
+  transition:opacity 0.2s, transform 0.2s;
+  width:140px;
+  white-space:nowrap;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.profile-btn:hover{
+  opacity:0.9;
+  transform:scale(1.03);
+}
+.follow-btn{
+  background:#fff;
+  color:#000;
+}
+.github-btn{
+  background:#fff;
+  color:#000;
+}
+.profile-bio{
+  font-size:14px;
+  line-height:1.6;
+  color:rgba(255,255,255,0.8);
+}
+.about-card{
+  flex-direction:column;
+}
+.about-title{
+  font-size:16px;
+  font-weight:600;
+  margin-bottom:12px;
+  color:#fff;
+}
+.about-content{
+  font-size:14px;
+  line-height:1.7;
+  color:rgba(255,255,255,0.8);
 }
 .home-window.active{
   opacity:1;
@@ -183,6 +305,7 @@ html,body{
 .home-window-content{
   flex:1;
   overflow:auto;
+  padding:24px;
 }
 .home-resize-handle{
   position:absolute;
@@ -1350,6 +1473,12 @@ textarea::-webkit-scrollbar-thumb{
         <polyline points="9 22 9 12 15 12 15 22"></polyline>
       </svg>
     </button>
+    <button class="icon-btn" id="profileBtn" title="个人">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+    </button>
   </div>
   <div class="island island-right">
   </div>
@@ -1415,6 +1544,83 @@ textarea::-webkit-scrollbar-thumb{
   <div class="home-window-content">
   </div>
   <div class="home-resize-handle" id="homeResizeHandle"></div>
+</div>
+<!-- 个人窗口 - 蓝灰色调 -->
+<div class="profile-window" id="profileWindow">
+  <div class="home-window-header" id="profileWindowHeader">
+    <div class="home-window-title">个人</div>
+    <div class="home-window-controls">
+      <button class="home-window-btn minimize" id="profileMinimizeBtn" title="最小化">
+        <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M5 12h14"></path>
+        </svg>
+      </button>
+      <button class="home-window-btn maximize" id="profileMaximizeBtn" title="最大化">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="4" width="16" height="16"></rect>
+        </svg>
+      </button>
+      <button class="home-window-btn close" id="profileCloseBtn" title="关闭">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 6l12 12M18 6L6 18"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div class="home-window-content">
+    <!-- 个人资料卡片 -->
+    <div class="profile-card">
+      <div class="avatar-box" id="avatarBox">
+        <img src="avatar1.jpg" alt="头像" id="avatarImg">
+      </div>
+      <div class="profile-info">
+        <div class="profile-main">
+          <div class="profile-buttons">
+            <a href="https://space.bilibili.com/3546714772343354" target="_blank" class="profile-btn follow-btn">关注 Subscribe</a>
+            <a href="https://github.com/lightboxofficial" target="_blank" class="profile-btn github-btn">跟随 Following</a>
+          </div>
+          <div class="profile-bio">
+            小学牲 / B站野生UP主 / 编程猫佛系选手
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 自我介绍卡片 -->
+    <div class="profile-card about-card">
+      <div class="about-title">自我介绍</div>
+      <div class="about-content">
+        👋 Hi, I'm @lightboxofficial<br><br>
+        📣 lightboxofficial的GitHub个人主页📣<br>
+        ✨ 我是谁？✨<br>
+        大家好，我是lightboxofficial——一个在江苏徐州"苟且偷生"的代码打工人（误）小学牲（真），B站野生UP主，编程猫の佛系选手。<br><br>
+        虽然"胸无大志"，但"胸（怀）有大志"——毕竟我的梦想是成为"躺着也能把钱赚了"的卷王之王（划掉）咸鱼之王！🌚<br><br>
+        🌿 我的地盘🌿<br>
+        GitHub：本仓库主要存放我那些"看似有用实则摸鱼"的代码，欢迎围观，但别指望能直接拿来拯救世界（除非你想毁灭它）。<br>
+        B站：https://space.bilibili.com/3546714772343354 —— 偶尔更新一些"技术向鬼畜"和"摸鱼教程"，粉丝没有全靠同行衬托，求关注。<br>
+        编程猫：https://shequ.codemao.cn/user/7984238 —— 别问，问就是"少儿编程从入门到入土"。🐾<br><br>
+        ⚠️ 重要声明⚠️<br>
+        本仓库代码可能存在大量"魔法注释"和"祖传代码"，使用前请自备护目镜和防毒面具。<br>
+        若发现任何BUG，请温柔地告诉我，我会用"下次一定改"的真诚眼神凝视你。<br>
+        合作？没问题！只要你不介意我的"拖延症晚期"和"需求变更强迫症"。<br><br>
+        🔥 我的技能树🔥<br>
+        熟练掌握：Ctrl+C / V，摸鱼大法，以及"假装在工作的表情管理"。<br>
+        略懂：Python（写脚本）、c++（花式杂耍）、前端（调样式到眼瞎）。<br>
+        终极奥义：用30行代码实现别人100行功能——然后花200行修复它。😂<br><br>
+        💡 人生信条💡<br>
+        "代码写得好，不如PPT做得骚；技术强不强，关键看头发掉得多不多。"<br>
+        （温馨提示：本人头发茂密，可能是个假程序员🌝）<br><br>
+        🌙 联系我🌙<br>
+        邮箱：lightboxofficial@163.com / lightboxofficial@outlook.com<br>
+        微信：13815309423（加好友请备注"GitHub有缘人"）<br>
+        QQ：3896653459（加好友必发"啊米诺斯"）<br>
+        或者直接私信B站/编程猫——虽然我可能三天后才回……<br><br>
+        📸 最后の彩蛋📸<br>
+        如果你看到这里还没走，说明你也是个"细节怪"！送你一个专属成就："真爱粉の凝视"！✨<br>
+        快来和我一起——在代码的世界里，做一个快乐的咸鱼吧！🐟
+      </div>
+    </div>
+  </div>
+  <div class="home-resize-handle" id="profileResizeHandle"></div>
 </div>
 <!-- 工具弹窗 -->
 <div class="popup tools-popup" id="toolsPopup">
@@ -2364,6 +2570,161 @@ document.addEventListener('mouseup', function(){
   isResize = false;
   homeWindow.style.transition = 'opacity 0.25s ease, visibility 0.25s ease';
 });
+
+// ===== 个人窗口 =====
+const profileBtn = document.getElementById('profileBtn');
+const profileWindow = document.getElementById('profileWindow');
+const profileWindowHeader = document.getElementById('profileWindowHeader');
+const profileCloseBtn = document.getElementById('profileCloseBtn');
+const profileMinimizeBtn = document.getElementById('profileMinimizeBtn');
+const profileMaximizeBtn = document.getElementById('profileMaximizeBtn');
+const profileResizeHandle = document.getElementById('profileResizeHandle');
+
+let profileWindowMax = false;
+let profilePrevRect = null;
+let profileIsMinimized = false;
+
+// 打开个人窗口 - 默认近似最大化
+profileBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  if(profileIsMinimized){
+    profileIsMinimized = false;
+    profileWindow.style.display = 'flex';
+  }
+  profileWindow.classList.add('active');
+  applyProfileMaxSize();
+  profileWindowMax = true;
+});
+
+// 应用个人窗口近似最大化尺寸
+function applyProfileMaxSize(){
+  profileWindow.style.transition = 'none';
+  profileWindow.style.transform = 'none';
+  profileWindow.style.left = '20px';
+  profileWindow.style.top = '20px';
+  profileWindow.style.width = 'calc(100vw - 40px)';
+  profileWindow.style.height = 'calc(100vh - 130px)';
+}
+
+// 关闭个人窗口
+profileCloseBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  profileWindow.classList.remove('active');
+});
+
+// 最小化个人窗口
+profileMinimizeBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  profileIsMinimized = true;
+  profileWindow.classList.remove('active');
+  setTimeout(() => {
+    profileWindow.style.display = 'none';
+  }, 250);
+});
+
+// 最大化/还原个人窗口
+profileMaximizeBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  toggleProfileMaximize();
+});
+
+// 双击标题栏最大化/还原
+profileWindowHeader.addEventListener('dblclick', function(e){
+  if(e.target.closest('button')) return;
+  toggleProfileMaximize();
+});
+
+function toggleProfileMaximize(){
+  if(profileWindowMax){
+    profileWindowMax = false;
+    if(profilePrevRect){
+      profileWindow.style.left = profilePrevRect.left + 'px';
+      profileWindow.style.top = profilePrevRect.top + 'px';
+      profileWindow.style.width = profilePrevRect.width + 'px';
+      profileWindow.style.height = profilePrevRect.height + 'px';
+      profileWindow.style.transform = 'none';
+    }
+  }else{
+    profilePrevRect = profileWindow.getBoundingClientRect();
+    applyProfileMaxSize();
+    profileWindowMax = true;
+  }
+}
+
+// 拖拽移动个人窗口
+let profileIsDrag = false;
+let profileDragStartX, profileDragStartY, profileWinStartX, profileWinStartY;
+profileWindowHeader.addEventListener('mousedown', function(e){
+  if(e.target.closest('button')) return;
+  if(profileWindowMax){
+    profilePrevRect = profileWindow.getBoundingClientRect();
+    profileWindowMax = false;
+    profileWindow.style.width = profilePrevRect.width + 'px';
+    profileWindow.style.height = profilePrevRect.height + 'px';
+  }
+  profileIsDrag = true;
+  profileDragStartX = e.clientX;
+  profileDragStartY = e.clientY;
+  const rect = profileWindow.getBoundingClientRect();
+  profileWinStartX = rect.left;
+  profileWinStartY = rect.top;
+  profileWindow.style.transition = 'none';
+  profileWindow.style.transform = 'none';
+});
+document.addEventListener('mousemove', function(e){
+  if(!profileIsDrag) return;
+  const dx = e.clientX - profileDragStartX;
+  const dy = e.clientY - profileDragStartY;
+  profileWindow.style.left = Math.max(0, profileWinStartX + dx) + 'px';
+  profileWindow.style.top = Math.max(0, profileWinStartY + dy) + 'px';
+});
+document.addEventListener('mouseup', function(){
+  profileIsDrag = false;
+  profileWindow.style.transition = 'opacity 0.25s ease, visibility 0.25s ease';
+});
+
+// 右下角缩放个人窗口
+let profileIsResize = false;
+let profileResizeStartX, profileResizeStartY, profileWinW, profileWinH;
+profileResizeHandle.addEventListener('mousedown', function(e){
+  e.stopPropagation();
+  if(profileWindowMax){
+    profilePrevRect = profileWindow.getBoundingClientRect();
+    profileWindowMax = false;
+  }
+  profileIsResize = true;
+  profileResizeStartX = e.clientX;
+  profileResizeStartY = e.clientY;
+  const rect = profileWindow.getBoundingClientRect();
+  profileWinW = rect.width;
+  profileWinH = rect.height;
+  profileWindow.style.transition = 'none';
+});
+document.addEventListener('mousemove', function(e){
+  if(!profileIsResize) return;
+  const dx = e.clientX - profileResizeStartX;
+  const dy = e.clientY - profileResizeStartY;
+  let newW = Math.max(320, profileWinW + dx);
+  let newH = Math.max(240, profileWinH + dy);
+  newW = Math.min(newW, window.innerWidth - 20);
+  newH = Math.min(newH, window.innerHeight - 20);
+  profileWindow.style.width = newW + 'px';
+  profileWindow.style.height = newH + 'px';
+});
+document.addEventListener('mouseup', function(){
+  profileIsResize = false;
+  profileWindow.style.transition = 'opacity 0.25s ease, visibility 0.25s ease';
+});
+
+// 头像切换功能
+const avatarBox = document.getElementById('avatarBox');
+const avatarImg = document.getElementById('avatarImg');
+let avatarToggle = false;
+avatarBox.addEventListener('click', function(){
+  avatarToggle = !avatarToggle;
+  avatarImg.src = avatarToggle ? 'avatar2.jpg' : 'avatar1.jpg';
+});
+
 setBingBg();
 setInterval(setBingBg, 10*60*1000);
 // ===== 收藏夹功能 =====
