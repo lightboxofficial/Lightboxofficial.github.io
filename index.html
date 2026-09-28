@@ -244,6 +244,48 @@ html,body{
   line-height:1.7;
   color:rgba(255,255,255,0.8);
 }
+.links-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  flex:1;
+}
+.links-content{
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+.links-note{
+  flex:1;
+  font-size:14px;
+  line-height:1.7;
+  color:rgba(255,255,255,0.7);
+  padding:16px;
+  background:rgba(255,255,255,0.04);
+  border-radius:8px;
+  min-height:180px;
+  max-height:350px;
+  overflow-y:auto;
+}
+.link-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px;
+  border-radius:8px;
+  color:rgba(200,200,200,0.7);
+  text-decoration:none;
+  font-size:14px;
+  transition:background 0.2s, color 0.2s;
+}
+.link-item:hover{
+  background:rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.9);
+}
+.link-item svg{
+  flex-shrink:0;
+  opacity:0.7;
+}
 .home-window.active{
   opacity:1;
   visibility:visible;
@@ -1592,7 +1634,7 @@ textarea::-webkit-scrollbar-thumb{
         👋 Hi, I'm @lightboxofficial<br><br>
         📣 lightboxofficial的GitHub个人主页📣<br>
         ✨ 我是谁？✨<br>
-        大家好，我是lightboxofficial——一个在江苏徐州"苟且偷生"的代码打工人（误）小学牲（真），B站野生UP主，编程猫の佛系选手。<br><br>
+        大家好，我是lightboxofficial——一个在"苟且偷生"的代码打工人（误）畜中牲（真），B站野生UP主，编程猫の佛系选手。<br><br>
         虽然"胸无大志"，但"胸（怀）有大志"——毕竟我的梦想是成为"躺着也能把钱赚了"的卷王之王（划掉）咸鱼之王！🌚<br><br>
         🌿 我的地盘🌿<br>
         GitHub：本仓库主要存放我那些"看似有用实则摸鱼"的代码，欢迎围观，但别指望能直接拿来拯救世界（除非你想毁灭它）。<br>
@@ -1619,6 +1661,47 @@ textarea::-webkit-scrollbar-thumb{
         快来和我一起——在代码的世界里，做一个快乐的咸鱼吧！🐟
       </div>
     </div>
+    <!-- 链接卡片 -->
+    <div class="profile-card links-card">
+      <div class="about-title">相关链接</div>
+      <div class="links-content">
+        <div class="links-list">
+        <a href="https://github.com/lightboxofficial" target="_blank" class="link-item">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <a href="https://space.bilibili.com/3546714772343354" target="_blank" class="link-item">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.813 4.653h.854c.656 0 1.188.532 1.188 1.188v11.111c0 .656-.532 1.188-1.188 1.188H5.333a1.188 1.188 0 0 1-1.188-1.188V5.841c0-.656.532-1.188 1.188-1.188h.855L4.932 2.9a.594.594 0 0 1 .84-.84l1.59 1.594h9.277l1.59-1.594a.594.594 0 1 1 .84.84l-1.256 1.753zM8.024 8.425a.89.89 0 0 0-.891.89v4.262c0 .491.4.89.89.89.492 0 .891-.399.891-.89V9.315a.89.89 0 0 0-.89-.89zm7.952 0a.89.89 0 0 0-.89.89v4.262c0 .491.399.89.89.89.492 0 .89-.399.89-.89V9.315a.89.89 0 0 0-.89-.89z"/></svg>
+          <span>B站</span>
+        </a>
+        <a href="https://shequ.codemao.cn/user/7984238" target="_blank" class="link-item">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+          <span>编程猫</span>
+        </a>
+        <a href="mailto:lightboxofficial@163.com" class="link-item">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          <span>邮箱</span>
+        </a>
+        <a href="https://chat.neboer.site" target="_blank" class="link-item">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span>Matrix</span>
+        </a>
+        <a href="https://www.ccw.site/student/67ab30be4b57da1266f86d75" target="_blank" class="link-item">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+          <span>CCW</span>
+        </a>
+        <a href="https://center.mcmod.cn/1148080" target="_blank" class="link-item">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+          <span>MCMod</span>
+        </a>
+        </div>
+        <div class="links-note">
+          这里是一段测试文本。你可以直接在代码里改成你想写的内容。<br><br>
+          这是第二行，用来测试多行文本显示效果。<br>
+          这是第三行。<br><br>
+          这是第四段，测试段落间距。
+        </div>
+      </div>
   </div>
   <div class="home-resize-handle" id="profileResizeHandle"></div>
 </div>
@@ -2504,6 +2587,14 @@ function toggleMaximize(){
   }
 }
 
+// 窗口置顶管理
+let topZIndex = 100;
+function bringToFront(win){
+  topZIndex++;
+  win.style.zIndex = topZIndex;
+}
+homeWindow.addEventListener('mousedown', function(){ bringToFront(homeWindow); });
+
 // 拖拽移动窗口
 let isDrag = false;
 let dragStartX, dragStartY, winStartX, winStartY;
@@ -2579,6 +2670,7 @@ const profileCloseBtn = document.getElementById('profileCloseBtn');
 const profileMinimizeBtn = document.getElementById('profileMinimizeBtn');
 const profileMaximizeBtn = document.getElementById('profileMaximizeBtn');
 const profileResizeHandle = document.getElementById('profileResizeHandle');
+profileWindow.addEventListener('mousedown', function(){ bringToFront(profileWindow); });
 
 let profileWindowMax = false;
 let profilePrevRect = null;
@@ -2724,6 +2816,22 @@ avatarBox.addEventListener('click', function(){
   avatarToggle = !avatarToggle;
   avatarImg.src = avatarToggle ? 'avatar2.jpg' : 'avatar1.jpg';
 });
+
+// 首次访问自动弹出个人页面
+if(!localStorage.getItem('visited_before')){
+  setTimeout(function(){
+    profileWindow.classList.add('active');
+    profileWindowMax = true;
+    profileWindow.style.transition = 'none';
+    profileWindow.style.transform = 'none';
+    profileWindow.style.left = '20px';
+    profileWindow.style.top = '20px';
+    profileWindow.style.width = 'calc(100vw - 40px)';
+    profileWindow.style.height = 'calc(100vh - 130px)';
+    profileWindow.style.transition = 'opacity 0.4s cubic-bezier(0.34,1.56,0.64,1), visibility 0.4s ease';
+    localStorage.setItem('visited_before', '1');
+  }, 500);
+}
 
 setBingBg();
 setInterval(setBingBg, 10*60*1000);
@@ -3508,6 +3616,34 @@ toolsBtn.addEventListener('click', function(e){
 toolsClose.addEventListener('click', function(e){
   e.stopPropagation();
   toolsPopup.classList.remove('show');
+});
+// 工具箱弹窗拖拽
+const toolsHeader = toolsPopup.querySelector('.popup-header');
+let toolsIsDrag = false;
+let toolsDragStartX, toolsDragStartY, toolsWinStartX, toolsWinStartY;
+toolsHeader.addEventListener('mousedown', function(e){
+  if(e.target.closest('button')) return;
+  toolsIsDrag = true;
+  toolsDragStartX = e.clientX;
+  toolsDragStartY = e.clientY;
+  const rect = toolsPopup.getBoundingClientRect();
+  toolsWinStartX = rect.left;
+  toolsWinStartY = rect.top;
+  toolsPopup.style.transition = 'none';
+  toolsPopup.style.transform = 'none';
+  toolsPopup.style.left = toolsWinStartX + 'px';
+  toolsPopup.style.top = toolsWinStartY + 'px';
+  bringToFront(toolsPopup);
+});
+document.addEventListener('mousemove', function(e){
+  if(!toolsIsDrag) return;
+  const dx = e.clientX - toolsDragStartX;
+  const dy = e.clientY - toolsDragStartY;
+  toolsPopup.style.left = Math.max(0, toolsWinStartX + dx) + 'px';
+  toolsPopup.style.top = Math.max(0, toolsWinStartY + dy) + 'px';
+});
+document.addEventListener('mouseup', function(){
+  toolsIsDrag = false;
 });
 // 所有弹窗点击外部关闭
 document.addEventListener('click', function(e){
