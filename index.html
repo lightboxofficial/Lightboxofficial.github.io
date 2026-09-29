@@ -688,7 +688,17 @@ html,body{
   max-height:400px;
   overflow-y:auto;
   scrollbar-width:none;
+}.tools-popup{
+  left:36px;
+  bottom:80px;
+  width:280px;
+  max-height:400px;
+  overflow-y:auto;
+  scrollbar-width:none;
+  z-index: 9999 !important;
+  isolation: isolate;
 }
+
 .tools-popup::-webkit-scrollbar{
   display:none;
 }
@@ -2593,7 +2603,12 @@ function toggleMaximize(){
 let topZIndex = 100;
 function bringToFront(win){
   topZIndex++;
+  win.style.zIndex = topZIndex;function bringToFront(win){
+  topZIndex++;
   win.style.zIndex = topZIndex;
+  win.style.isolation = 'isolate';
+}
+
 }
 homeWindow.addEventListener('mousedown', function(){ bringToFront(homeWindow); });
 
@@ -3613,8 +3628,17 @@ function toggleToolActive(toolId, popupId){
 
 toolsBtn.addEventListener('click', function(e){
   e.stopPropagation();
-  toolsPopup.classList.toggle('show');
+  // 切换显示状态
+  if (toolsPopup.classList.contains('show')) {
+    toolsPopup.classList.remove('show');
+  } else {
+    // 先关闭所有其他工具子弹窗，避免堆叠
+    document.querySelectorAll('.tool-sub-popup.show').forEach(p => p.classList.remove('show'));
+    toolsPopup.classList.add('show');
+    bringToFront(toolsPopup);
+  }
 });
+
 toolsClose.addEventListener('click', function(e){
   e.stopPropagation();
   toolsPopup.classList.remove('show');
@@ -3648,40 +3672,84 @@ document.addEventListener('mouseup', function(){
   toolsIsDrag = false;
 });
 // 所有弹窗点击外部关闭
-document.addEventListener('click', function(e){
+document.addEventListener('click', function(e) {
+  const path = e.composedPath();
+
   // 工具弹窗
-  if(!toolsPopup.contains(e.target) && !toolsBtn.contains(e.target)){
+  const inToolsPopup = path.some(el => el === toolsPopup);
+  const inToolsBtn = path.some(el => el === toolsBtn);
+  if (!inToolsPopup && !inToolsBtn) {
     toolsPopup.classList.remove('show');
   }
+
   // 收藏夹
-  if(bookmarkPopup && !bookmarkPopup.contains(e.target) && bookmarkBtn && !bookmarkBtn.contains(e.target)){
-    bookmarkPopup.classList.remove('show');
+  if(bookmarkPopup){
+    const inBookmarkPopup = path.some(el => el === bookmarkPopup);
+    const inBookmarkBtn = path.some(el => el === bookmarkBtn);
+    if (!inBookmarkPopup && !inBookmarkBtn) {
+      bookmarkPopup.classList.remove('show');
+    }
   }
-  if(editPopup && !editPopup.contains(e.target)){
-    editPopup.classList.remove('show');
+
+  // editPopup
+  if(editPopup){
+    const inEditPopup = path.some(el => el === editPopup);
+    if (!inEditPopup) {
+      editPopup.classList.remove('show');
+    }
   }
-  if(folderPopup && !folderPopup.contains(e.target)){
-    folderPopup.classList.remove('show');
+
+  // folderPopup
+  if(folderPopup){
+    const inFolderPopup = path.some(el => el === folderPopup);
+    if (!inFolderPopup) {
+      folderPopup.classList.remove('show');
+    }
   }
-  if(confirmPopup && !confirmPopup.contains(e.target)){
-    confirmPopup.classList.remove('show');
+
+  // confirmPopup
+  if(confirmPopup){
+    const inConfirmPopup = path.some(el => el === confirmPopup);
+    if (!inConfirmPopup) {
+      confirmPopup.classList.remove('show');
+    }
   }
-  if(contextMenu && !contextMenu.contains(e.target)){
-    hideContextMenu();
+
+  // 右键菜单
+  if(contextMenu){
+    const inContextMenu = path.some(el => el === contextMenu);
+    if (!inContextMenu) {
+      hideContextMenu();
+    }
   }
-  if(calendarPopup && !calendarPopup.contains(e.target) && calendarBtn && !calendarBtn.contains(e.target)){
-    calendarPopup.classList.remove('show');
+
+  // calendarPopup
+  if(calendarPopup){
+    const inCalendarPopup = path.some(el => el === calendarPopup);
+    const inCalendarBtn = path.some(el => el === calendarBtn);
+    if (!inCalendarPopup && !inCalendarBtn) {
+      calendarPopup.classList.remove('show');
+    }
   }
-  if(todayPopup && !todayPopup.contains(e.target) && todayBtn && !todayBtn.contains(e.target)){
-    todayPopup.classList.remove('show');
+
+  // todayPopup
+  if(todayPopup){
+    const inTodayPopup = path.some(el => el === todayPopup);
+    const inTodayBtn = path.some(el => el === todayBtn);
+    if (!inTodayPopup && !inTodayBtn) {
+      todayPopup.classList.remove('show');
+    }
   }
+
   // 所有工具子弹窗
   document.querySelectorAll('.tool-sub-popup').forEach(popup => {
-    if(!popup.contains(e.target)){
+    const inSubPopup = path.some(el => el === popup);
+    if (!inSubPopup) {
       popup.classList.remove('show');
     }
   });
 });
+
 
 // ===== 计算器 =====
 const calcDisplay = document.getElementById('calcDisplay');
