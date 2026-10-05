@@ -688,13 +688,6 @@ html,body{
   max-height:400px;
   overflow-y:auto;
   scrollbar-width:none;
-}.tools-popup{
-  left:36px;
-  bottom:80px;
-  width:280px;
-  max-height:400px;
-  overflow-y:auto;
-  scrollbar-width:none;
   z-index: 9999 !important;
   isolation: isolate;
 }
@@ -1714,6 +1707,7 @@ textarea::-webkit-scrollbar-thumb{
 
         </div>
       </div>
+    </div>
   </div>
   <div class="home-resize-handle" id="profileResizeHandle"></div>
 </div>
@@ -2446,7 +2440,7 @@ const infoPopup = document.getElementById('infoPopup');
 const closeBtn = document.getElementById('closeBtn');
 const likeBtn = document.getElementById('likeBtn');
 const likeCountEl = document.getElementById('likeCount');
-let liked = localStorage.getItem('bing_liked') === '1';
+let liked = localStorage.getItem('bing_liked_' + (currentPicInfo.picId || 'default')) === '1';
 let likeCount = 0;
 let apiOnline = false;
 async function loadLikeCount(){
@@ -2603,12 +2597,8 @@ function toggleMaximize(){
 let topZIndex = 100;
 function bringToFront(win){
   topZIndex++;
-  win.style.zIndex = topZIndex;function bringToFront(win){
-  topZIndex++;
   win.style.zIndex = topZIndex;
   win.style.isolation = 'isolate';
-}
-
 }
 homeWindow.addEventListener('mousedown', function(){ bringToFront(homeWindow); });
 
@@ -3397,10 +3387,8 @@ todayBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   renderToday();
   todayPopup.classList.toggle('show');
-  if(!todayPopup.classList.contains('weather-loaded')){
-    todayPopup.classList.add('weather-loaded');
-    requestLocation();
-  }
+  // 每次打开都更新天气
+  requestLocation();
 });
 todayClose.addEventListener('click', (e) => {
   e.stopPropagation();
@@ -3835,12 +3823,13 @@ document.getElementById('toolHash').addEventListener('click', function(e){e.stop
 
 // ===== 计时器 =====
 let timerInterval = null;
-let timerSeconds = 0;
-function formatTime(s){
-  const m = Math.floor(s/60);
-  const sec = Math.floor(s%60);
-  const ms = Math.floor((s%1)*10);
-  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0') + '.' + ms;
+let timerMs = 0;
+function formatTime(ms){
+  const totalSec = ms / 10;
+  const m = Math.floor(totalSec/60);
+  const sec = Math.floor(totalSec%60);
+  const tenth = ms % 10;
+  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0') + '.' + tenth;
 }
 document.getElementById('toolTimer').addEventListener('click', function(e){e.stopPropagation();
   document.getElementById('timerPopup').classList.add('show');
@@ -3854,8 +3843,8 @@ document.getElementById('timerStart').addEventListener('click', function(e){
   } else {
     this.textContent = '暂停';
     timerInterval = setInterval(function(){
-      timerSeconds += 0.1;
-      document.getElementById('timerDisplay').textContent = formatTime(timerSeconds);
+      timerMs++;
+      document.getElementById('timerDisplay').textContent = formatTime(timerMs);
     }, 100);
   }
 });
@@ -3863,7 +3852,7 @@ document.getElementById('timerReset').addEventListener('click', function(e){
   e.stopPropagation();
   clearInterval(timerInterval);
   timerInterval = null;
-  timerSeconds = 0;
+  timerMs = 0;
   document.getElementById('timerDisplay').textContent = '00:00.0';
   document.getElementById('timerStart').textContent = '开始';
 });
