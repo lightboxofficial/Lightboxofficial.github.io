@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NoTificians无闻小站-求索既无止，何处是归途</title>
+<title>NoTificians无闻小站-求索既无止，何处是归途updatedted</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -700,107 +700,62 @@ html,body{
 .popup-close:hover{
   background:rgba(255,255,255,0.35);
 }
-/* 工具弹窗 - 深色磨砂玻璃Windows窗口样式 */
-.tools-popup{
+/* 工具箱窗口 - 深色磨砂玻璃Windows窗口样式 */
+.tools-window{
   position:fixed;
   left:50%;
   top:50%;
   transform:translate(-50%,-50%);
-  width:min(85vw,420px);
-  height:auto;
-  max-height:80vh;
-  min-width:280px;
-  min-height:200px;
-  border-radius:12px;
+  width:min(85vw,600px);
+  height:min(75vh,500px);
+  min-width:320px;
+  min-height:280px;
+  max-width:96vw;
+  max-height:92vh;
+  border-radius:14px;
   overflow:hidden;
   background:rgba(16,18,24,0.93);
   backdrop-filter:blur(22px) saturate(120%);
   -webkit-backdrop-filter:blur(22px) saturate(120%);
   border:1px solid rgba(255,255,255,0.06);
-  box-shadow:0 20px 60px rgba(0,0,0,0.5);
-  z-index:100;
+  box-shadow:0 24px 70px rgba(0,0,0,0.5);
+  z-index:50;
   display:flex;
   flex-direction:column;
   opacity:0;
   visibility:hidden;
   transition:opacity 0.24s ease,visibility 0.24s ease;
-  padding:0;
-  bottom:auto;
 }
-.tools-popup.active{
+.tools-window.active{
   opacity:1;
   visibility:visible;
   pointer-events:auto;
 }
-.tools-popup .popup-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 16px;
-  font-size:14px;
-  font-weight:600;
-  color:rgba(255,255,255,0.9);
-  background:rgba(255,255,255,0.03);
-  border-bottom:1px solid rgba(255,255,255,0.06);
-  cursor:move;
-  user-select:none;
-  -webkit-user-select:none;
+.tools-window.maximized{
+  left:20px !important;
+  top:20px !important;
+  transform:none !important;
+  width:calc(100vw - 40px) !important;
+  height:calc(100vh - 110px) !important;
+  border-radius:14px;
 }
-.tools-popup .popup-header span{
-  display:flex;
-  align-items:center;
-  gap:8px;
+.tools-window .home-window-content{
+  flex:1;
+  overflow:hidden;
+  padding:16px;
 }
-.tools-popup .popup-header svg{
-  width:16px;
-  height:16px;
-  stroke:rgba(255,255,255,0.7);
-}
-.tools-popup .popup-close{
-  width:28px;
-  height:28px;
-  border-radius:6px;
-  border:none;
-  background:rgba(255,255,255,0.08);
-  color:rgba(255,255,255,0.8);
-  cursor:pointer;
-  font-size:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:background 0.2s, transform 0.15s;
-}
-.tools-popup .popup-close:hover{
-  background:rgba(255,255,255,0.15);
-  transform:scale(1.05);
-}
-.tools-popup .popup-close:active{
-  transform:scale(0.95);
-}
-.tools-popup .tools-grid{
+.tools-window .tools-grid{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(4,1fr);
   gap:10px;
-  padding:14px;
-  overflow-y:auto;
-  max-height:calc(80vh - 52px);
-  scrollbar-width:thin;
-  scrollbar-color:rgba(255,255,255,0.15) transparent;
+  height:100%;
+  overflow:hidden;
 }
-.tools-popup .tools-grid::-webkit-scrollbar{
-  width:6px;
-}
-.tools-popup .tools-grid::-webkit-scrollbar-track{
-  background:transparent;
-}
-.tools-popup .tools-grid::-webkit-scrollbar-thumb{
-  background:rgba(255,255,255,0.15);
-  border-radius:3px;
-}
-.tools-popup .tool-item{
+.tools-window .tool-item{
   display:flex;
   flex-direction:column;
   align-items:center;
+  justify-content:center;
   gap:6px;
   padding:14px 8px;
   border-radius:10px;
@@ -810,38 +765,27 @@ html,body{
   cursor:pointer;
   transition:background 0.2s, transform 0.15s, border-color 0.2s;
 }
-.tools-popup .tool-item:hover{
+.tools-window .tool-item:hover{
   background:rgba(255,255,255,0.08);
   border-color:rgba(255,255,255,0.12);
 }
-.tools-popup .tool-item:active{
+.tools-window .tool-item:active{
   transform:scale(0.95);
   background:rgba(255,255,255,0.12);
 }
-.tools-popup .tool-item svg{
+.tools-window .tool-item svg{
   width:22px;
   height:22px;
   stroke:rgba(255,255,255,0.7);
   transition:stroke 0.2s;
 }
-.tools-popup .tool-item:hover svg{
+.tools-window .tool-item:hover svg{
   stroke:rgba(255,255,255,0.9);
 }
-.tools-popup .tool-item span{
+.tools-window .tool-item span{
   font-size:11px;
   opacity:0.8;
   font-weight:500;
-}
-.tools-popup .tool-item.active::after{
-  content:'';
-  position:absolute;
-  bottom:4px;
-  left:50%;
-  transform:translateX(-50%);
-  width:4px;
-  height:4px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.8);
 }
 /* 计算器 */
 .calc-display{
@@ -1827,81 +1771,98 @@ textarea::-webkit-scrollbar-thumb{
   <div class="home-resize-handle" id="profileResizeHandle"></div>
 </div>
 <!-- 工具弹窗 -->
-<div class="popup tools-popup" id="toolsPopup">
-  <div class="popup-header">
-    <span>工具箱</span>
-    <button class="popup-close" id="toolsClose">✕</button>
+<div class="tools-window" id="toolsWindow">
+  <div class="home-window-header" id="toolsWindowHeader">
+    <div class="home-window-title">工具箱</div>
+    <div class="home-window-controls">
+      <button class="home-window-btn minimize" id="toolsMinimizeBtn" title="最小化">
+        <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M5 12h14"></path>
+        </svg>
+      </button>
+      <button class="home-window-btn maximize" id="toolsMaximizeBtn" title="最大化">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="4" width="16" height="16"></rect>
+        </svg>
+      </button>
+      <button class="home-window-btn close" id="toolsCloseBtn" title="关闭">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 6l12 12M18 6L6 18"></path>
+        </svg>
+      </button>
+    </div>
   </div>
-  <div class="tools-grid">
-    <button class="tool-item" id="toolBookmark" title="收藏夹">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-      </svg>
-      <span>收藏夹</span>
-    </button>
-    <button class="tool-item" id="toolCalendar" title="日历">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-        <line x1="16" y1="2" x2="16" y2="6"></line>
-        <line x1="8" y1="2" x2="8" y2="6"></line>
-        <line x1="3" y1="10" x2="21" y2="10"></line>
-      </svg>
-      <span>日历</span>
-    </button>
-    <button class="tool-item" id="toolToday" title="今日">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <polyline points="12 6 12 12 16 14"></polyline>
-      </svg>
-      <span>今日</span>
-    </button>
-    <button class="tool-item" id="toolCalculator" title="计算器">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-        <line x1="8" y1="6" x2="16" y2="6"></line>
-        <line x1="16" y1="14" x2="16.01" y2="14"></line>
-        <line x1="12" y1="14" x2="12.01" y2="14"></line>
-        <line x1="8" y1="14" x2="8.01" y2="14"></line>
-        <line x1="16" y1="18" x2="16.01" y2="18"></line>
-        <line x1="12" y1="18" x2="12.01" y2="18"></line>
-        <line x1="8" y1="18" x2="8.01" y2="18"></line>
-      </svg>
-      <span>计算器</span>
-    </button>
-    <button class="tool-item" id="toolBaseConvert" title="进制转换">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 7V4h16v3"></path>
-        <path d="M9 20h6"></path>
-        <path d="M12 4v16"></path>
-      </svg>
-      <span>进制转换</span>
-    </button>
-    <button class="tool-item" id="toolHash" title="哈希转换">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="4" y1="9" x2="20" y2="9"></line>
-        <line x1="4" y1="15" x2="20" y2="15"></line>
-        <line x1="10" y1="3" x2="8" y2="21"></line>
-        <line x1="16" y1="3" x2="14" y2="21"></line>
-      </svg>
-      <span>哈希转换</span>
-    </button>
-    <button class="tool-item" id="toolTimer" title="计时器">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="13" r="8"></circle>
-        <path d="M12 9v4l2 2"></path>
-        <path d="M5 3L2 6"></path>
-        <path d="M22 6l-3-3"></path>
-      </svg>
-      <span>计时器</span>
-    </button>
-    <button class="tool-item" id="toolColor" title="颜色转换">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <circle cx="12" cy="12" r="4"></circle>
-      </svg>
-      <span>颜色转换</span>
-    </button>
-    <button class="tool-item" id="toolCrypto" title="加解密工具">
+  <div class="home-window-content">
+    <div class="tools-grid">
+      <button class="tool-item" id="toolBookmark" title="收藏夹">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span>收藏夹</span>
+      </button>
+      <button class="tool-item" id="toolCalendar" title="日历">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>日历</span>
+      </button>
+      <button class="tool-item" id="toolToday" title="今日">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>今日</span>
+      </button>
+      <button class="tool-item" id="toolCalculator" title="计算器">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+          <line x1="8" y1="6" x2="16" y2="6"></line>
+          <line x1="16" y1="14" x2="16.01" y2="14"></line>
+          <line x1="12" y1="14" x2="12.01" y2="14"></line>
+          <line x1="8" y1="14" x2="8.01" y2="14"></line>
+          <line x1="16" y1="18" x2="16.01" y2="18"></line>
+          <line x1="12" y1="18" x2="12.01" y2="18"></line>
+          <line x1="8" y1="18" x2="8.01" y2="18"></line>
+        </svg>
+        <span>计算器</span>
+      </button>
+      <button class="tool-item" id="toolBaseConvert" title="进制转换">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7V4h16v3"></path>
+          <path d="M9 20h6"></path>
+          <path d="M12 4v16"></path>
+        </svg>
+        <span>进制转换</span>
+      </button>
+      <button class="tool-item" id="toolHash" title="哈希转换">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="9" x2="20" y2="9"></line>
+          <line x1="4" y1="15" x2="20" y2="15"></line>
+          <line x1="10" y1="3" x2="8" y2="21"></line>
+          <line x1="16" y1="3" x2="14" y2="21"></line>
+        </svg>
+        <span>哈希转换</span>
+      </button>
+      <button class="tool-item" id="toolTimer" title="计时器">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="13" r="8"></circle>
+          <path d="M12 9v4l2 2"></path>
+          <path d="M5 3L2 6"></path>
+          <path d="M22 6l-3-3"></path>
+        </svg>
+        <span>计时器</span>
+      </button>
+      <button class="tool-item" id="toolColor" title="颜色转换">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <circle cx="12" cy="12" r="4"></circle>
+        </svg>
+        <span>颜色转换</span>
+      </button>
+      <button class="tool-item" id="toolCrypto" title="加解密工具">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
@@ -1986,7 +1947,47 @@ textarea::-webkit-scrollbar-thumb{
       </svg>
       <span>经纬度</span>
     </button>
+    <button class="tool-item" id="toolNote" title="便签">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <line x1="10" y1="9" x2="8" y2="9"></line>
+      </svg>
+      <span>便签</span>
+    </button>
+    <button class="tool-item" id="toolTodo" title="待办清单">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"></path>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+      </svg>
+      <span>待办清单</span>
+    </button>
+    <button class="tool-item" id="toolUnitConvert" title="单位换算">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="17 1 21 5 17 9"></polyline>
+        <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+        <polyline points="7 23 3 19 7 15"></polyline>
+        <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+      </svg>
+      <span>单位换算</span>
+    </button>
+    <button class="tool-item" id="toolQR" title="二维码生成">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="8" height="8" rx="1"></rect>
+        <rect x="14" y="2" width="8" height="8" rx="1"></rect>
+        <rect x="2" y="14" width="8" height="8" rx="1"></rect>
+        <rect x="14" y="14" width="4" height="4" rx="1"></rect>
+        <line x1="22" y1="14" x2="22" y2="14.01"></line>
+        <line x1="18" y1="18" x2="18" y2="22"></line>
+        <line x1="22" y1="18" x2="22" y2="22"></line>
+      </svg>
+      <span>二维码</span>
+    </button>
   </div>
+  </div>
+  <div class="home-resize-handle" id="toolsResizeHandle"></div>
 </div>
 <!-- 计算器弹窗 -->
 <div class="popup tool-sub-popup" id="calculatorPopup">
@@ -3515,8 +3516,190 @@ todayPopup.addEventListener('click', (e) => {
 
 // ===== 工具弹窗 =====
 const toolsBtn = document.getElementById('toolsBtn');
-const toolsPopup = document.getElementById('toolsPopup');
-const toolsClose = document.getElementById('toolsClose');
+const toolsWindow = document.getElementById('toolsWindow');
+const toolsWindowHeader = document.getElementById('toolsWindowHeader');
+const toolsMinimizeBtn = document.getElementById('toolsMinimizeBtn');
+const toolsMaximizeBtn = document.getElementById('toolsMaximizeBtn');
+const toolsCloseBtn = document.getElementById('toolsCloseBtn');
+const toolsResizeHandle = document.getElementById('toolsResizeHandle');
+
+let toolsWindowMax = false;
+let toolsPrevRect = null;
+
+// 最小化
+toolsMinimizeBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  toolsWindow.classList.remove('active');
+});
+
+// 最大化/还原
+toolsMaximizeBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  if(toolsWindowMax){
+    toolsWindowMax = false;
+    toolsWindow.classList.remove('maximized');
+    if(toolsPrevRect){
+      toolsWindow.style.left = toolsPrevRect.left + 'px';
+      toolsWindow.style.top = toolsPrevRect.top + 'px';
+      toolsWindow.style.width = toolsPrevRect.width + 'px';
+      toolsWindow.style.height = toolsPrevRect.height + 'px';
+      toolsWindow.style.transform = 'none';
+    }
+  } else {
+    toolsPrevRect = toolsWindow.getBoundingClientRect();
+    toolsWindowMax = true;
+    toolsWindow.classList.add('maximized');
+  }
+});
+
+// 关闭
+toolsCloseBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  toolsWindow.classList.remove('active');
+  toolsWindowMax = false;
+  toolsWindow.classList.remove('maximized');
+  toolsWindow.style.transform = 'translate(-50%,-50%)';
+});
+
+// 工具箱窗口拖拽
+let toolsIsDrag = false;
+let toolsDragStartX, toolsDragStartY, toolsWinStartX, toolsWinStartY;
+toolsWindowHeader.addEventListener('mousedown', function(e){
+  if(e.target.closest('button')) return;
+  if(toolsWindowMax){
+    toolsPrevRect = toolsWindow.getBoundingClientRect();
+    toolsWindowMax = false;
+    toolsWindow.classList.remove('maximized');
+    toolsWindow.style.width = toolsPrevRect.width + 'px';
+    toolsWindow.style.height = toolsPrevRect.height + 'px';
+  }
+  toolsIsDrag = true;
+  toolsDragStartX = e.clientX;
+  toolsDragStartY = e.clientY;
+  const rect = toolsWindow.getBoundingClientRect();
+  toolsWinStartX = rect.left;
+  toolsWinStartY = rect.top;
+  toolsWindow.style.transition = 'none';
+  toolsWindow.style.transform = 'none';
+  toolsWindow.style.left = toolsWinStartX + 'px';
+  toolsWindow.style.top = toolsWinStartY + 'px';
+  bringToFront(toolsWindow);
+});
+document.addEventListener('mousemove', function(e){
+  if(!toolsIsDrag) return;
+  const dx = e.clientX - toolsDragStartX;
+  const dy = e.clientY - toolsDragStartY;
+  toolsWindow.style.left = Math.max(0, toolsWinStartX + dx) + 'px';
+  toolsWindow.style.top = Math.max(0, toolsWinStartY + dy) + 'px';
+});
+document.addEventListener('mouseup', function(){
+  if(toolsIsDrag){
+    toolsIsDrag = false;
+    toolsWindow.style.transition = 'opacity 0.24s ease, visibility 0.24s ease';
+  }
+});
+
+// 工具箱窗口触屏拖拽
+let toolsTouchDrag = false;
+let toolsTouchStartX, toolsTouchStartY, toolsTouchWinStartX, toolsTouchWinStartY;
+toolsWindowHeader.addEventListener('touchstart', function(e){
+  if(e.target.closest('button')) return;
+  if(toolsWindowMax){
+    toolsPrevRect = toolsWindow.getBoundingClientRect();
+    toolsWindowMax = false;
+    toolsWindow.classList.remove('maximized');
+    toolsWindow.style.width = toolsPrevRect.width + 'px';
+    toolsWindow.style.height = toolsPrevRect.height + 'px';
+  }
+  const touch = e.touches[0];
+  toolsTouchDrag = true;
+  toolsTouchStartX = touch.clientX;
+  toolsTouchStartY = touch.clientY;
+  const rect = toolsWindow.getBoundingClientRect();
+  toolsTouchWinStartX = rect.left;
+  toolsTouchWinStartY = rect.top;
+  toolsWindow.style.transition = 'none';
+  toolsWindow.style.transform = 'none';
+  toolsWindow.style.left = toolsTouchWinStartX + 'px';
+  toolsWindow.style.top = toolsTouchWinStartY + 'px';
+  bringToFront(toolsWindow);
+}, {passive: true});
+document.addEventListener('touchmove', function(e){
+  if(!toolsTouchDrag) return;
+  const touch = e.touches[0];
+  const dx = touch.clientX - toolsTouchStartX;
+  const dy = touch.clientY - toolsTouchStartY;
+  toolsWindow.style.left = Math.max(0, toolsTouchWinStartX + dx) + 'px';
+  toolsWindow.style.top = Math.max(0, toolsTouchWinStartY + dy) + 'px';
+}, {passive: true});
+document.addEventListener('touchend', function(){
+  if(toolsTouchDrag){
+    toolsTouchDrag = false;
+    toolsWindow.style.transition = 'opacity 0.24s ease, visibility 0.24s ease';
+  }
+});
+
+// 工具箱窗口缩放
+let toolsIsResize = false;
+let toolsResizeStartX, toolsResizeStartY, toolsResizeStartW, toolsResizeStartH;
+toolsResizeHandle.addEventListener('mousedown', function(e){
+  e.stopPropagation();
+  if(toolsWindowMax) return;
+  toolsIsResize = true;
+  toolsResizeStartX = e.clientX;
+  toolsResizeStartY = e.clientY;
+  const rect = toolsWindow.getBoundingClientRect();
+  toolsResizeStartW = rect.width;
+  toolsResizeStartH = rect.height;
+  toolsWindow.style.transition = 'none';
+});
+document.addEventListener('mousemove', function(e){
+  if(!toolsIsResize) return;
+  const dx = e.clientX - toolsResizeStartX;
+  const dy = e.clientY - toolsResizeStartY;
+  const newW = Math.max(320, toolsResizeStartW + dx);
+  const newH = Math.max(280, toolsResizeStartH + dy);
+  toolsWindow.style.width = newW + 'px';
+  toolsWindow.style.height = newH + 'px';
+});
+document.addEventListener('mouseup', function(){
+  if(toolsIsResize){
+    toolsIsResize = false;
+    toolsWindow.style.transition = 'opacity 0.24s ease, visibility 0.24s ease';
+  }
+});
+
+// 工具箱窗口点击置顶
+toolsWindow.addEventListener('mousedown', function(){ bringToFront(toolsWindow); });
+
+// 工具按钮点击
+toolsBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  if (toolsWindow.classList.contains('active')) {
+    toolsWindow.classList.remove('active');
+  } else {
+    document.querySelectorAll('.tool-sub-popup.show').forEach(p => p.classList.remove('show'));
+    toolsWindow.classList.add('active');
+    bringToFront(toolsWindow);
+    if(toolsWindowMax){
+      toolsWindow.classList.remove('maximized');
+      toolsWindowMax = false;
+    }
+    toolsWindow.style.left = '50%';
+    toolsWindow.style.top = '50%';
+    toolsWindow.style.transform = 'translate(-50%,-50%)';
+  }
+});
+
+// 点击外部关闭工具箱
+document.addEventListener('click', function(e) {
+  const path = e.composedPath();
+  const inToolsWindow = path.some(el => el === toolsWindow);
+  const inToolsBtn = path.some(el => el === toolsBtn);
+  if (!inToolsWindow && !inToolsBtn) {
+    toolsWindow.classList.remove('active');
+  }
+});
 
 // ===== 顶部时钟 =====
 function updateClock(){
@@ -3716,115 +3899,9 @@ document.querySelectorAll('.tool-sub-popup').forEach(function(popup){
   observer.observe(popup, {attributes:true, attributeFilter:['class']});
 });
 
-// 工具图标激活状态切换
-function toggleToolActive(toolId, popupId){
-  const tool = document.getElementById(toolId);
-  const popup = document.getElementById(popupId);
-  if(popup.classList.contains('active')){
-    popup.classList.remove('active');
-    tool.classList.remove('active');
-  } else {
-    popup.classList.add('active');
-    tool.classList.add('active');
-  }
-}
-
-toolsBtn.addEventListener('click', function(e){
-  e.stopPropagation();
-  // 切换显示状态
-  if (toolsPopup.classList.contains('active')) {
-    toolsPopup.classList.remove('active');
-  } else {
-    // 先关闭所有其他工具子弹窗，避免堆叠
-    document.querySelectorAll('.tool-sub-popup.show').forEach(p => p.classList.remove('show'));
-    toolsPopup.classList.add('active');
-    bringToFront(toolsPopup);
-    // 重置为居中位置
-    toolsPopup.style.left = '50%';
-    toolsPopup.style.top = '50%';
-    toolsPopup.style.transform = 'translate(-50%,-50%)';
-  }
-});
-
-toolsClose.addEventListener('click', function(e){
-  e.stopPropagation();
-  toolsPopup.classList.remove('active');
-});
-// 工具箱弹窗拖拽
-const toolsHeader = toolsPopup.querySelector('.popup-header');
-let toolsIsDrag = false;
-let toolsDragStartX, toolsDragStartY, toolsWinStartX, toolsWinStartY;
-toolsHeader.addEventListener('mousedown', function(e){
-  if(e.target.closest('button')) return;
-  toolsIsDrag = true;
-  toolsDragStartX = e.clientX;
-  toolsDragStartY = e.clientY;
-  const rect = toolsPopup.getBoundingClientRect();
-  toolsWinStartX = rect.left;
-  toolsWinStartY = rect.top;
-  toolsPopup.style.transition = 'none';
-  toolsPopup.style.transform = 'none';
-  toolsPopup.style.left = toolsWinStartX + 'px';
-  toolsPopup.style.top = toolsWinStartY + 'px';
-  bringToFront(toolsPopup);
-});
-document.addEventListener('mousemove', function(e){
-  if(!toolsIsDrag) return;
-  const dx = e.clientX - toolsDragStartX;
-  const dy = e.clientY - toolsDragStartY;
-  toolsPopup.style.left = Math.max(0, toolsWinStartX + dx) + 'px';
-  toolsPopup.style.top = Math.max(0, toolsWinStartY + dy) + 'px';
-});
-document.addEventListener('mouseup', function(){
-  if(toolsIsDrag){
-    toolsIsDrag = false;
-    toolsPopup.style.transition = 'opacity 0.24s ease, visibility 0.24s ease';
-  }
-});
-// 工具箱弹窗触屏拖拽支持
-let toolsTouchDrag = false;
-let toolsTouchStartX, toolsTouchStartY, toolsTouchWinStartX, toolsTouchWinStartY;
-toolsHeader.addEventListener('touchstart', function(e){
-  if(e.target.closest('button')) return;
-  const touch = e.touches[0];
-  toolsTouchDrag = true;
-  toolsTouchStartX = touch.clientX;
-  toolsTouchStartY = touch.clientY;
-  const rect = toolsPopup.getBoundingClientRect();
-  toolsTouchWinStartX = rect.left;
-  toolsTouchWinStartY = rect.top;
-  toolsPopup.style.transition = 'none';
-  toolsPopup.style.transform = 'none';
-  toolsPopup.style.left = toolsTouchWinStartX + 'px';
-  toolsPopup.style.top = toolsTouchWinStartY + 'px';
-  bringToFront(toolsPopup);
-}, {passive: true});
-document.addEventListener('touchmove', function(e){
-  if(!toolsTouchDrag) return;
-  const touch = e.touches[0];
-  const dx = touch.clientX - toolsTouchStartX;
-  const dy = touch.clientY - toolsTouchStartY;
-  toolsPopup.style.left = Math.max(0, toolsTouchWinStartX + dx) + 'px';
-  toolsPopup.style.top = Math.max(0, toolsTouchWinStartY + dy) + 'px';
-}, {passive: true});
-document.addEventListener('touchend', function(){
-  if(toolsTouchDrag){
-    toolsTouchDrag = false;
-    toolsPopup.style.transition = 'opacity 0.24s ease, visibility 0.24s ease';
-  }
-});
-// 工具箱窗口点击置顶
-toolsPopup.addEventListener('mousedown', function(){ bringToFront(toolsPopup); });
 // 所有弹窗点击外部关闭
 document.addEventListener('click', function(e) {
   const path = e.composedPath();
-
-  // 工具弹窗
-  const inToolsPopup = path.some(el => el === toolsPopup);
-  const inToolsBtn = path.some(el => el === toolsBtn);
-  if (!inToolsPopup && !inToolsBtn) {
-    toolsPopup.classList.remove('active');
-  }
 
   // 收藏夹
   if(bookmarkPopup){
