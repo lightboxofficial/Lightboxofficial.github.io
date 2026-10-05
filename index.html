@@ -552,10 +552,30 @@ html,body{
     bottom:80px;
   }
   .tools-popup{
-    left:20px !important;
-    right:20px !important;
+    left:16px !important;
+    right:16px !important;
     width:auto !important;
-    bottom:80px !important;
+    top:50% !important;
+    bottom:auto !important;
+    transform:translate(-50%,-50%) !important;
+    max-width:none !important;
+    min-width:0 !important;
+  }
+  .tools-popup .tools-grid{
+    grid-template-columns:repeat(3,1fr) !important;
+    gap:8px !important;
+    padding:12px !important;
+    max-height:65vh !important;
+  }
+  .tools-popup .tool-item{
+    padding:12px 6px !important;
+  }
+  .tools-popup .tool-item svg{
+    width:20px !important;
+    height:20px !important;
+  }
+  .tools-popup .tool-item span{
+    font-size:10px !important;
   }
   .tool-sub-popup{
     left:20px !important;
@@ -680,53 +700,148 @@ html,body{
 .popup-close:hover{
   background:rgba(255,255,255,0.35);
 }
-/* 工具弹窗 */
+/* 工具弹窗 - 深色磨砂玻璃Windows窗口样式 */
 .tools-popup{
-  left:36px;
-  bottom:80px;
-  width:280px;
-  max-height:400px;
-  overflow-y:auto;
-  scrollbar-width:none;
-  z-index: 9999 !important;
-  isolation: isolate;
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(85vw,420px);
+  height:auto;
+  max-height:80vh;
+  min-width:280px;
+  min-height:200px;
+  border-radius:12px;
+  overflow:hidden;
+  background:rgba(16,18,24,0.93);
+  backdrop-filter:blur(22px) saturate(120%);
+  -webkit-backdrop-filter:blur(22px) saturate(120%);
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  z-index:100;
+  display:flex;
+  flex-direction:column;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 0.24s ease,visibility 0.24s ease;
+  padding:0;
+  bottom:auto;
 }
-
-.tools-popup::-webkit-scrollbar{
-  display:none;
+.tools-popup.active{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
 }
-.tools-grid{
+.tools-popup .popup-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 16px;
+  font-size:14px;
+  font-weight:600;
+  color:rgba(255,255,255,0.9);
+  background:rgba(255,255,255,0.03);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  cursor:move;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.tools-popup .popup-header span{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.tools-popup .popup-header svg{
+  width:16px;
+  height:16px;
+  stroke:rgba(255,255,255,0.7);
+}
+.tools-popup .popup-close{
+  width:28px;
+  height:28px;
+  border-radius:6px;
+  border:none;
+  background:rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.8);
+  cursor:pointer;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background 0.2s, transform 0.15s;
+}
+.tools-popup .popup-close:hover{
+  background:rgba(255,255,255,0.15);
+  transform:scale(1.05);
+}
+.tools-popup .popup-close:active{
+  transform:scale(0.95);
+}
+.tools-popup .tools-grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:12px;
+  gap:10px;
+  padding:14px;
+  overflow-y:auto;
+  max-height:calc(80vh - 52px);
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,0.15) transparent;
 }
-.tool-item{
+.tools-popup .tools-grid::-webkit-scrollbar{
+  width:6px;
+}
+.tools-popup .tools-grid::-webkit-scrollbar-track{
+  background:transparent;
+}
+.tools-popup .tools-grid::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,0.15);
+  border-radius:3px;
+}
+.tools-popup .tool-item{
   display:flex;
   flex-direction:column;
   align-items:center;
   gap:6px;
-  padding:12px 8px;
+  padding:14px 8px;
   border-radius:10px;
-  border:none;
-  background:rgba(255,255,255,0.08);
-  color:#fff;
+  border:1px solid rgba(255,255,255,0.06);
+  background:rgba(255,255,255,0.04);
+  color:rgba(255,255,255,0.85);
   cursor:pointer;
-  transition:background 0.2s, transform 0.15s;
+  transition:background 0.2s, transform 0.15s, border-color 0.2s;
 }
-.tool-item:hover{
-  background:rgba(255,255,255,0.15);
+.tools-popup .tool-item:hover{
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(255,255,255,0.12);
 }
-.tool-item:active{
+.tools-popup .tool-item:active{
   transform:scale(0.95);
+  background:rgba(255,255,255,0.12);
 }
-.tool-item svg{
-  width:24px;
-  height:24px;
-  stroke:rgba(255,255,255,0.75);
+.tools-popup .tool-item svg{
+  width:22px;
+  height:22px;
+  stroke:rgba(255,255,255,0.7);
+  transition:stroke 0.2s;
 }
-.tool-item span{
-  font-size:12px;
+.tools-popup .tool-item:hover svg{
+  stroke:rgba(255,255,255,0.9);
+}
+.tools-popup .tool-item span{
+  font-size:11px;
   opacity:0.8;
+  font-weight:500;
+}
+.tools-popup .tool-item.active::after{
+  content:'';
+  position:absolute;
+  bottom:4px;
+  left:50%;
+  transform:translateX(-50%);
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.8);
 }
 /* 计算器 */
 .calc-display{
@@ -3605,11 +3720,11 @@ document.querySelectorAll('.tool-sub-popup').forEach(function(popup){
 function toggleToolActive(toolId, popupId){
   const tool = document.getElementById(toolId);
   const popup = document.getElementById(popupId);
-  if(popup.classList.contains('show')){
-    popup.classList.remove('show');
+  if(popup.classList.contains('active')){
+    popup.classList.remove('active');
     tool.classList.remove('active');
   } else {
-    popup.classList.add('show');
+    popup.classList.add('active');
     tool.classList.add('active');
   }
 }
@@ -3617,19 +3732,23 @@ function toggleToolActive(toolId, popupId){
 toolsBtn.addEventListener('click', function(e){
   e.stopPropagation();
   // 切换显示状态
-  if (toolsPopup.classList.contains('show')) {
-    toolsPopup.classList.remove('show');
+  if (toolsPopup.classList.contains('active')) {
+    toolsPopup.classList.remove('active');
   } else {
     // 先关闭所有其他工具子弹窗，避免堆叠
     document.querySelectorAll('.tool-sub-popup.show').forEach(p => p.classList.remove('show'));
-    toolsPopup.classList.add('show');
+    toolsPopup.classList.add('active');
     bringToFront(toolsPopup);
+    // 重置为居中位置
+    toolsPopup.style.left = '50%';
+    toolsPopup.style.top = '50%';
+    toolsPopup.style.transform = 'translate(-50%,-50%)';
   }
 });
 
 toolsClose.addEventListener('click', function(e){
   e.stopPropagation();
-  toolsPopup.classList.remove('show');
+  toolsPopup.classList.remove('active');
 });
 // 工具箱弹窗拖拽
 const toolsHeader = toolsPopup.querySelector('.popup-header');
@@ -3657,8 +3776,45 @@ document.addEventListener('mousemove', function(e){
   toolsPopup.style.top = Math.max(0, toolsWinStartY + dy) + 'px';
 });
 document.addEventListener('mouseup', function(){
-  toolsIsDrag = false;
+  if(toolsIsDrag){
+    toolsIsDrag = false;
+    toolsPopup.style.transition = 'opacity 0.24s ease, visibility 0.24s ease';
+  }
 });
+// 工具箱弹窗触屏拖拽支持
+let toolsTouchDrag = false;
+let toolsTouchStartX, toolsTouchStartY, toolsTouchWinStartX, toolsTouchWinStartY;
+toolsHeader.addEventListener('touchstart', function(e){
+  if(e.target.closest('button')) return;
+  const touch = e.touches[0];
+  toolsTouchDrag = true;
+  toolsTouchStartX = touch.clientX;
+  toolsTouchStartY = touch.clientY;
+  const rect = toolsPopup.getBoundingClientRect();
+  toolsTouchWinStartX = rect.left;
+  toolsTouchWinStartY = rect.top;
+  toolsPopup.style.transition = 'none';
+  toolsPopup.style.transform = 'none';
+  toolsPopup.style.left = toolsTouchWinStartX + 'px';
+  toolsPopup.style.top = toolsTouchWinStartY + 'px';
+  bringToFront(toolsPopup);
+}, {passive: true});
+document.addEventListener('touchmove', function(e){
+  if(!toolsTouchDrag) return;
+  const touch = e.touches[0];
+  const dx = touch.clientX - toolsTouchStartX;
+  const dy = touch.clientY - toolsTouchStartY;
+  toolsPopup.style.left = Math.max(0, toolsTouchWinStartX + dx) + 'px';
+  toolsPopup.style.top = Math.max(0, toolsTouchWinStartY + dy) + 'px';
+}, {passive: true});
+document.addEventListener('touchend', function(){
+  if(toolsTouchDrag){
+    toolsTouchDrag = false;
+    toolsPopup.style.transition = 'opacity 0.24s ease, visibility 0.24s ease';
+  }
+});
+// 工具箱窗口点击置顶
+toolsPopup.addEventListener('mousedown', function(){ bringToFront(toolsPopup); });
 // 所有弹窗点击外部关闭
 document.addEventListener('click', function(e) {
   const path = e.composedPath();
@@ -3667,7 +3823,7 @@ document.addEventListener('click', function(e) {
   const inToolsPopup = path.some(el => el === toolsPopup);
   const inToolsBtn = path.some(el => el === toolsBtn);
   if (!inToolsPopup && !inToolsBtn) {
-    toolsPopup.classList.remove('show');
+    toolsPopup.classList.remove('active');
   }
 
   // 收藏夹
