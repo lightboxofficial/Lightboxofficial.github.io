@@ -741,15 +741,19 @@ html,body{
 }
 .tools-window .home-window-content{
   flex:1;
-  overflow:hidden;
+  overflow-y:auto;
+  overflow-x:hidden;
   padding:16px;
+  scrollbar-width:none;
+}
+.tools-window .home-window-content::-webkit-scrollbar{
+  display:none;
 }
 .tools-window .tools-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:10px;
-  height:100%;
-  overflow:hidden;
+  min-height:fit-content;
 }
 .tools-window .tool-item{
   display:flex;
@@ -2372,6 +2376,94 @@ textarea::-webkit-scrollbar-thumb{
     <input type="text" id="geoAcc" readonly value="-">
   </div>
   <button class="confirm-btn" id="geoRefresh">重新定位</button>
+</div>
+<!-- 便签弹窗 -->
+<div class="popup tool-sub-popup" id="notePopup">
+  <div class="popup-header">
+    <span>便签</span>
+    <button class="popup-close" onclick="document.getElementById('notePopup').classList.remove('show')">✕</button>
+  </div>
+  <textarea id="noteContent" placeholder="在此输入便签内容..." style="width:100%;min-height:200px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:12px;color:#fff;font-size:14px;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+  <div style="display:flex;gap:8px;margin-top:10px;">
+    <button class="confirm-btn" id="noteSave" style="flex:1;">保存</button>
+    <button class="confirm-btn" id="noteClear" style="flex:1;background:rgba(255,80,80,0.3);">清空</button>
+  </div>
+</div>
+<!-- 待办清单弹窗 -->
+<div class="popup tool-sub-popup" id="todoPopup">
+  <div class="popup-header">
+    <span>待办清单</span>
+    <button class="popup-close" onclick="document.getElementById('todoPopup').classList.remove('show')">✕</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <input type="text" id="todoInput" placeholder="输入待办事项..." style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 12px;color:#fff;font-size:13px;">
+    <button class="confirm-btn" id="todoAdd" style="padding:8px 16px;">添加</button>
+  </div>
+  <div id="todoList" style="max-height:250px;overflow-y:auto;"></div>
+  <div style="display:flex;gap:8px;margin-top:10px;">
+    <button class="confirm-btn" id="todoClearDone" style="flex:1;background:rgba(255,80,80,0.3);">清除已完成</button>
+    <button class="confirm-btn" id="todoClearAll" style="flex:1;background:rgba(255,80,80,0.3);">清空全部</button>
+  </div>
+</div>
+<!-- 单位换算弹窗 -->
+<div class="popup tool-sub-popup" id="unitConvertPopup">
+  <div class="popup-header">
+    <span>单位换算</span>
+    <button class="popup-close" onclick="document.getElementById('unitConvertPopup').classList.remove('show')">✕</button>
+  </div>
+  <div class="form-group">
+    <label>换算类型</label>
+    <select id="unitType" class="search-box" style="margin-bottom:0">
+      <option value="length">长度</option>
+      <option value="weight">重量</option>
+      <option value="temperature">温度</option>
+      <option value="area">面积</option>
+      <option value="volume">体积</option>
+      <option value="speed">速度</option>
+      <option value="data">数据存储</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>输入数值</label>
+    <input type="number" id="unitInput" placeholder="输入数值..." step="any">
+  </div>
+  <div class="form-group">
+    <label>从单位</label>
+    <select id="unitFrom" class="search-box" style="margin-bottom:0"></select>
+  </div>
+  <div class="form-group">
+    <label>到单位</label>
+    <select id="unitTo" class="search-box" style="margin-bottom:0"></select>
+  </div>
+  <div class="form-group">
+    <label>换算结果</label>
+    <div class="result-box">
+      <span class="result-text" id="unitResult">-</span>
+      <button class="result-copy-btn" onclick="copyText(document.getElementById('unitResult').textContent)">复制</button>
+    </div>
+  </div>
+  <button class="confirm-btn" id="unitConvert">换算</button>
+</div>
+<!-- 二维码生成弹窗 -->
+<div class="popup tool-sub-popup" id="qrPopup">
+  <div class="popup-header">
+    <span>二维码生成</span>
+    <button class="popup-close" onclick="document.getElementById('qrPopup').classList.remove('show')">✕</button>
+  </div>
+  <div class="form-group">
+    <label>输入内容</label>
+    <textarea id="qrInput" placeholder="输入文本或链接..." style="width:100%;min-height:60px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px;color:#fff;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
+  </div>
+  <div class="form-group">
+    <label>二维码尺寸</label>
+    <select id="qrSize" class="search-box" style="margin-bottom:0">
+      <option value="150">小 (150x150)</option>
+      <option value="200" selected>中 (200x200)</option>
+      <option value="300">大 (300x300)</option>
+    </select>
+  </div>
+  <button class="confirm-btn" id="qrGenerate">生成二维码</button>
+  <div id="qrOutput" style="text-align:center;margin-top:14px;"></div>
 </div>
 <!-- 收藏夹弹窗 -->
 <div class="popup bookmark-popup" id="bookmarkPopup">
@@ -4600,6 +4692,187 @@ document.getElementById('toolGeo').addEventListener('click', function(e){e.stopP
   document.getElementById('geoPopup').classList.add('show');
   getLocation();
 });
+
+// ===== 便签功能 =====
+(function(){
+  var noteContent = document.getElementById('noteContent');
+  var savedNote = localStorage.getItem('user_note');
+  if(savedNote) noteContent.value = savedNote;
+  document.getElementById('noteSave').addEventListener('click', function(e){
+    e.stopPropagation();
+    localStorage.setItem('user_note', noteContent.value);
+    showToast('便签已保存');
+  });
+  document.getElementById('noteClear').addEventListener('click', function(e){
+    e.stopPropagation();
+    noteContent.value = '';
+    localStorage.removeItem('user_note');
+  });
+  document.getElementById('toolNote').addEventListener('click', function(e){
+    e.stopPropagation();
+    document.getElementById('notePopup').classList.add('show');
+  });
+})();
+
+// ===== 待办清单功能 =====
+(function(){
+  var todoList = [];
+  var savedTodos = localStorage.getItem('user_todos');
+  if(savedTodos) todoList = JSON.parse(savedTodos);
+  
+  function renderTodos(){
+    var container = document.getElementById('todoList');
+    container.innerHTML = '';
+    if(todoList.length === 0){
+      container.innerHTML = '<div style="text-align:center;opacity:0.5;padding:20px;">暂无待办事项</div>';
+      return;
+    }
+    todoList.forEach(function(item, index){
+      var div = document.createElement('div');
+      div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid rgba(255,255,255,0.06);';
+      div.innerHTML = '<input type="checkbox" ' + (item.done ? 'checked' : '') + ' style="width:16px;height:16px;cursor:pointer;">' +
+        '<span style="flex:1;' + (item.done ? 'text-decoration:line-through;opacity:0.5;' : '') + '">' + escapeHtml(item.text) + '</span>' +
+        '<button class="result-copy-btn" style="font-size:11px;padding:2px 6px;" data-idx="' + index + '">删除</button>';
+      div.querySelector('input').addEventListener('change', function(){
+        todoList[index].done = this.checked;
+        localStorage.setItem('user_todos', JSON.stringify(todoList));
+        renderTodos();
+      });
+      div.querySelector('button').addEventListener('click', function(){
+        todoList.splice(parseInt(this.dataset.idx), 1);
+        localStorage.setItem('user_todos', JSON.stringify(todoList));
+        renderTodos();
+      });
+      container.appendChild(div);
+    });
+  }
+  
+  function escapeHtml(text){
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  
+  document.getElementById('todoAdd').addEventListener('click', function(e){
+    e.stopPropagation();
+    var input = document.getElementById('todoInput');
+    var text = input.value.trim();
+    if(!text) return;
+    todoList.push({text: text, done: false});
+    localStorage.setItem('user_todos', JSON.stringify(todoList));
+    input.value = '';
+    renderTodos();
+  });
+  
+  document.getElementById('todoInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+      document.getElementById('todoAdd').click();
+    }
+  });
+  
+  document.getElementById('todoClearDone').addEventListener('click', function(e){
+    e.stopPropagation();
+    todoList = todoList.filter(function(item){ return !item.done; });
+    localStorage.setItem('user_todos', JSON.stringify(todoList));
+    renderTodos();
+  });
+  
+  document.getElementById('todoClearAll').addEventListener('click', function(e){
+    e.stopPropagation();
+    todoList = [];
+    localStorage.removeItem('user_todos');
+    renderTodos();
+  });
+  
+  document.getElementById('toolTodo').addEventListener('click', function(e){
+    e.stopPropagation();
+    renderTodos();
+    document.getElementById('todoPopup').classList.add('show');
+  });
+})();
+
+// ===== 单位换算功能 =====
+(function(){
+  var units = {
+    length: {m:1, km:1000, cm:0.01, mm:0.001, mi:1609.344, yd:0.9144, ft:0.3048, in:0.0254},
+    weight: {kg:1, g:0.001, mg:0.000001, t:1000, lb:0.453592, oz:0.0283495},
+    temperature: {C:'C', F:'F', K:'K'},
+    area: {m2:1, km2:1000000, cm2:0.0001, ha:10000, acre:4046.86, ft2:0.0929},
+    volume: {L:1, mL:0.001, m3:1000, cm3:0.001, gal:3.78541, qt:0.946353},
+    speed: {'m/s':1, 'km/h':0.277778, 'mph':0.44704, 'kn':0.514444},
+    data: {B:1, KB:1024, MB:1048576, GB:1073741824, TB:1099511627776}
+  };
+  var unitNames = {
+    length: {m:'米', km:'千米', cm:'厘米', mm:'毫米', mi:'英里', yd:'码', ft:'英尺', in:'英寸'},
+    weight: {kg:'千克', g:'克', mg:'毫克', t:'吨', lb:'磅', oz:'盎司'},
+    temperature: {C:'摄氏度 °C', F:'华氏度 °F', K:'开尔文 K'},
+    area: {m2:'平方米', km2:'平方千米', cm2:'平方厘米', ha:'公顷', acre:'英亩', ft2:'平方英尺'},
+    volume: {L:'升', mL:'毫升', m3:'立方米', cm3:'立方厘米', gal:'加仑', qt:'夸脱'},
+    speed: {'m/s':'米/秒', 'km/h':'千米/时', 'mph':'英里/时', 'kn':'节'},
+    data: {B:'字节', KB:'KB', MB:'MB', GB:'GB', TB:'TB'}
+  };
+  
+  function updateUnitSelects(){
+    var type = document.getElementById('unitType').value;
+    var fromSel = document.getElementById('unitFrom');
+    var toSel = document.getElementById('unitTo');
+    fromSel.innerHTML = '';
+    toSel.innerHTML = '';
+    var keys = Object.keys(units[type]);
+    keys.forEach(function(key, i){
+      fromSel.innerHTML += '<option value="' + key + '">' + unitNames[type][key] + '</option>';
+      toSel.innerHTML += '<option value="' + key + '"' + (i === 1 ? ' selected' : '') + '>' + unitNames[type][key] + '</option>';
+    });
+  }
+  
+  function convertUnit(){
+    var type = document.getElementById('unitType').value;
+    var val = parseFloat(document.getElementById('unitInput').value);
+    if(isNaN(val)){ document.getElementById('unitResult').textContent = '请输入有效数值'; return; }
+    var from = document.getElementById('unitFrom').value;
+    var to = document.getElementById('unitTo').value;
+    var result;
+    if(type === 'temperature'){
+      var celsius;
+      if(from === 'C') celsius = val;
+      else if(from === 'F') celsius = (val - 32) * 5/9;
+      else celsius = val - 273.15;
+      if(to === 'C') result = celsius;
+      else if(to === 'F') result = celsius * 9/5 + 32;
+      else result = celsius + 273.15;
+    } else {
+      var base = val * units[type][from];
+      result = base / units[type][to];
+    }
+    document.getElementById('unitResult').textContent = parseFloat(result.toFixed(8)) + ' ' + unitNames[type][to];
+  }
+  
+  document.getElementById('unitType').addEventListener('change', function(){ updateUnitSelects(); });
+  document.getElementById('unitConvert').addEventListener('click', function(e){ e.stopPropagation(); convertUnit(); });
+  document.getElementById('unitInput').addEventListener('keydown', function(e){ if(e.key === 'Enter') convertUnit(); });
+  document.getElementById('toolUnitConvert').addEventListener('click', function(e){
+    e.stopPropagation();
+    updateUnitSelects();
+    document.getElementById('unitConvertPopup').classList.add('show');
+  });
+})();
+
+// ===== 二维码生成功能 =====
+(function(){
+  document.getElementById('qrGenerate').addEventListener('click', function(e){
+    e.stopPropagation();
+    var text = document.getElementById('qrInput').value.trim();
+    if(!text){ document.getElementById('qrOutput').innerHTML = '<div style="opacity:0.5;padding:10px;">请输入内容</div>'; return; }
+    var size = document.getElementById('qrSize').value;
+    var url = 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&data=' + encodeURIComponent(text) + '&bgcolor=1a1c24&color=ffffff';
+    document.getElementById('qrOutput').innerHTML = '<img src="' + url + '" style="border-radius:8px;max-width:100%;" alt="二维码">' +
+      '<div style="margin-top:8px;"><button class="confirm-btn" onclick="window.open(\'' + url + '\', \'_blank\')">下载二维码</button></div>';
+  });
+  document.getElementById('toolQR').addEventListener('click', function(e){
+    e.stopPropagation();
+    document.getElementById('qrPopup').classList.add('show');
+  });
+})();
 
 </script>
 </body>
