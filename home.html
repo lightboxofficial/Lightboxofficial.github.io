@@ -23,7 +23,7 @@
     .dock-wrapper{
       position:fixed;
       left:50%;
-      bottom:-48px;
+      bottom:-56px;
       transform:translateX(-50%);
       display:flex;
       align-items:center;
@@ -35,13 +35,13 @@
       bottom:12px;
     }
     .dock-toggle{
-      width:36px;
-      height:36px;
+      width:40px;
+      height:40px;
       border-radius:50%;
-      background:rgba(12,12,16,0.7);
-      backdrop-filter:blur(24px) saturate(140%);
-      -webkit-backdrop-filter:blur(24px) saturate(140%);
-      border:1px solid rgba(255,255,255,0.03);
+      background:rgba(12,12,16,0.85);
+      backdrop-filter:blur(12px) saturate(180%) contrast(1.3) brightness(0.85);
+      -webkit-backdrop-filter:blur(12px) saturate(180%) contrast(1.3) brightness(0.85);
+      border:1px solid rgba(255,255,255,0.04);
       box-shadow:0 6px 18px rgba(0,0,0,0.55);
       display:flex;
       align-items:center;
@@ -49,9 +49,20 @@
       cursor:pointer;
       transition:background 0.2s;
       flex-shrink:0;
+      position:relative;
+      overflow:hidden;
+    }
+    .dock-toggle::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+      background-size:128px 128px;
+      mix-blend-mode:overlay;
+      pointer-events:none;
     }
     .dock-toggle:hover{
-      background:rgba(18,18,24,0.8);
+      background:rgba(18,18,24,0.9);
     }
     .dock-toggle:active{
       transform:scale(0.9);
@@ -64,29 +75,205 @@
       fill:none;
       stroke-linecap:round;
       stroke-linejoin:round;
+      position:relative;
+      z-index:1;
     }
     .dock{
-      height:32px;
-      border-radius:16px;
-      background:rgba(12,12,16,0.65);
-      backdrop-filter:blur(24px) saturate(140%);
-      -webkit-backdrop-filter:blur(24px) saturate(140%);
-      border:1px solid rgba(255,255,255,0.03);
+      height:40px;
+      border-radius:20px;
+      background:rgba(12,12,16,0.85);
+      backdrop-filter:blur(12px) saturate(180%) contrast(1.3) brightness(0.85);
+      -webkit-backdrop-filter:blur(12px) saturate(180%) contrast(1.3) brightness(0.85);
+      border:1px solid rgba(255,255,255,0.04);
       box-shadow:0 6px 18px rgba(0,0,0,0.5);
       display:flex;
       align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:0 12px;
+      justify-content:flex-start;
+      gap:6px;
+      padding:0 10px;
       overflow:hidden;
       width:0;
       opacity:0;
       transition:width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, padding 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position:relative;
+    }
+    .dock::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+      background-size:128px 128px;
+      mix-blend-mode:overlay;
+      pointer-events:none;
     }
     .dock.expanded{
       width:min(70vw,800px);
       opacity:1;
       padding:0 16px;
+    }
+    .dock-item{
+      width:32px;
+      height:32px;
+      border-radius:8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      transition:all 0.25s ease;
+      position:relative;
+      flex-shrink:0;
+    }
+    .dock-item:hover svg{
+      filter:brightness(1.2);
+    }
+    .dock-item:active{
+      transform:scale(0.9);
+    }
+    .dock-item svg{
+      width:18px;
+      height:18px;
+      stroke:#fff;
+      stroke-width:1.5;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      transition:filter 0.25s ease;
+    }
+    .dock-item.active::after{
+      content:'';
+      position:absolute;
+      bottom:-4px;
+      left:50%;
+      transform:translateX(-50%);
+      width:14px;
+      height:3px;
+      border-radius:2px;
+      background:#fff;
+    }
+    .dock-item.active svg{
+      filter:brightness(1.4) drop-shadow(0 0 4px rgba(255,255,255,0.5));
+    }
+    .app-window{
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:min(85vw,700px);
+      height:min(75vh,520px);
+      min-width:360px;
+      min-height:320px;
+      border-radius:14px;
+      overflow:hidden;
+      background:rgba(16,18,24,0.93);
+      backdrop-filter:blur(22px) saturate(120%);
+      -webkit-backdrop-filter:blur(22px) saturate(120%);
+      border:1px solid rgba(255,255,255,0.06);
+      box-shadow:0 24px 70px rgba(0,0,0,0.5);
+      z-index:50;
+      display:flex;
+      flex-direction:column;
+      opacity:0;
+      visibility:hidden;
+      transition:opacity 0.24s ease,visibility 0.24s ease;
+    }
+    .app-window.active{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto;
+    }
+    .app-window.maximized{
+      left:20px !important;
+      top:20px !important;
+      transform:none !important;
+      width:calc(100vw - 40px) !important;
+      height:calc(100vh - 110px) !important;
+    }
+    .window-header{
+      display:flex;
+      align-items:center;
+      padding:10px 14px;
+      background:rgba(0,0,0,0.15);
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      cursor:move;
+      user-select:none;
+      flex-shrink:0;
+    }
+    .window-header-left{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .window-header-logo{
+      width:20px;
+      height:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .window-header-logo svg{
+      width:16px;
+      height:16px;
+      stroke:#fff;
+      stroke-width:1.5;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .window-title{
+      font-size:13px;
+      font-weight:500;
+      color:rgba(255,255,255,0.85);
+      letter-spacing:0.5px;
+      font-family:'Georgia','Times New Roman',serif;
+    }
+    .window-controls{
+      margin-left:auto;
+      display:flex;
+      gap:6px;
+    }
+    .window-btn{
+      width:24px;
+      height:24px;
+      border-radius:6px;
+      border:none;
+      background:rgba(255,255,255,0.06);
+      color:rgba(255,255,255,0.7);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:all 0.15s ease;
+    }
+    .window-btn:hover{
+      background:rgba(255,255,255,0.12);
+      color:#fff;
+    }
+    .window-btn.close:hover{
+      background:rgba(255,80,80,0.6);
+    }
+    .window-btn svg{
+      width:12px;
+      height:12px;
+      stroke:currentColor;
+      stroke-width:2;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .window-content{
+      flex:1;
+      padding:20px;
+      overflow:hidden;
+      color:rgba(255,255,255,0.8);
+    }
+    .window-resize-handle{
+      position:absolute;
+      right:0;
+      bottom:0;
+      width:16px;
+      height:16px;
+      cursor:nwse-resize;
+      z-index:10;
     }
   </style>
 </head>
@@ -99,8 +286,119 @@
         <path d="M2 12l10 5 10-5"></path>
       </svg>
     </div>
-    <div class="dock" id="dock"></div>
+    <div class="dock" id="dock">
+      <div class="dock-item" id="dockHome" data-window="homeWindow">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockProfile" data-window="profileWindow">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockApps" data-window="appsWindow">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+        </svg>
+      </div>
+    </div>
   </div>
+
+  <div class="app-window" id="homeWindow">
+    <div class="window-header" id="homeWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <span class="window-title">主页</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="homeMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="homeMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="homeCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-content">
+      <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">主页内容区域</p>
+    </div>
+    <div class="window-resize-handle" id="homeResizeHandle"></div>
+  </div>
+
+  <div class="app-window" id="profileWindow">
+    <div class="window-header" id="profileWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <span class="window-title">个人</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="profileMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="profileMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="profileCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-content">
+      <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">个人内容区域</p>
+    </div>
+    <div class="window-resize-handle" id="profileResizeHandle"></div>
+  </div>
+
+  <div class="app-window" id="appsWindow">
+    <div class="window-header" id="appsWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+          </svg>
+        </div>
+        <span class="window-title">应用</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="appsMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="appsMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="appsCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-content">
+      <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">应用内容区域</p>
+    </div>
+    <div class="window-resize-handle" id="appsResizeHandle"></div>
+  </div>
+
   <script>
     async function loadBingWallpaper(){
       const jsonUrl = "https://lightboxofficial.github.io/Bing-Wallpaper-Action/data/zh-CN_update.json";
@@ -157,6 +455,143 @@
         dockWrapper.classList.remove('show');
       }
     });
+
+    var windows = {
+      homeWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
+      profileWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
+      appsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null}
+    };
+
+    var dockItems = {
+      homeWindow:document.getElementById('dockHome'),
+      profileWindow:document.getElementById('dockProfile'),
+      appsWindow:document.getElementById('dockApps')
+    };
+
+    function initWindow(winId){
+      var w = windows[winId];
+      w.el = document.getElementById(winId);
+      w.header = document.getElementById(winId + 'Header');
+      w.minBtn = document.getElementById(winId.replace('Window','') + 'MinBtn');
+      w.maxBtn = document.getElementById(winId.replace('Window','') + 'MaxBtn');
+      w.closeBtn = document.getElementById(winId.replace('Window','') + 'CloseBtn');
+      w.resizeHandle = document.getElementById(winId.replace('Window','') + 'ResizeHandle');
+
+      w.el.addEventListener('mousedown',function(){bringToFront(w.el);});
+
+      w.header.addEventListener('mousedown',function(e){
+        if(e.target.closest('button')) return;
+        if(w.max){
+          w.prevRect = w.el.getBoundingClientRect();
+          w.max = false;
+          w.el.classList.remove('maximized');
+          w.el.style.width = w.prevRect.width + 'px';
+          w.el.style.height = w.prevRect.height + 'px';
+        }
+        startDrag(e,w);
+      });
+
+      w.minBtn.addEventListener('click',function(){
+        w.el.classList.remove('active');
+        dockItems[winId].classList.remove('active');
+      });
+
+      w.maxBtn.addEventListener('click',function(){
+        w.max = !w.max;
+        if(w.max){
+          w.prevRect = w.el.getBoundingClientRect();
+          w.el.classList.add('maximized');
+        }else{
+          w.el.classList.remove('maximized');
+          if(w.prevRect){
+            w.el.style.width = w.prevRect.width + 'px';
+            w.el.style.height = w.prevRect.height + 'px';
+          }
+        }
+      });
+
+      w.closeBtn.addEventListener('click',function(){
+        w.el.classList.remove('active');
+        dockItems[winId].classList.remove('active');
+      });
+
+      w.resizeHandle.addEventListener('mousedown',function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        startResize(e,w);
+      });
+
+      dockItems[winId].addEventListener('click',function(){
+        if(w.el.classList.contains('active')){
+          w.el.classList.remove('active');
+          dockItems[winId].classList.remove('active');
+        }else{
+          w.el.classList.add('active');
+          dockItems[winId].classList.add('active');
+          bringToFront(w.el);
+        }
+      });
+    }
+
+    function bringToFront(el){
+      var allWindows = document.querySelectorAll('.app-window');
+      var maxZ = 50;
+      allWindows.forEach(function(w){
+        var z = parseInt(window.getComputedStyle(w).zIndex);
+        if(z > maxZ) maxZ = z;
+      });
+      el.style.zIndex = maxZ + 1;
+    }
+
+    function startDrag(e,w){
+      var startX = e.clientX;
+      var startY = e.clientY;
+      var rect = w.el.getBoundingClientRect();
+      var startLeft = rect.left;
+      var startTop = rect.top;
+      w.el.style.transition = 'none';
+      w.el.style.transform = 'none';
+      w.el.style.left = startLeft + 'px';
+      w.el.style.top = startTop + 'px';
+
+      function onMove(ev){
+        var dx = ev.clientX - startX;
+        var dy = ev.clientY - startY;
+        w.el.style.left = (startLeft + dx) + 'px';
+        w.el.style.top = (startTop + dy) + 'px';
+      }
+      function onUp(){
+        w.el.style.transition = '';
+        document.removeEventListener('mousemove',onMove);
+        document.removeEventListener('mouseup',onUp);
+      }
+      document.addEventListener('mousemove',onMove);
+      document.addEventListener('mouseup',onUp);
+    }
+
+    function startResize(e,w){
+      var startX = e.clientX;
+      var startY = e.clientY;
+      var startW = w.el.offsetWidth;
+      var startH = w.el.offsetHeight;
+
+      function onMove(ev){
+        var newW = Math.max(360,startW + (ev.clientX - startX));
+        var newH = Math.max(320,startH + (ev.clientY - startY));
+        w.el.style.width = newW + 'px';
+        w.el.style.height = newH + 'px';
+      }
+      function onUp(){
+        document.removeEventListener('mousemove',onMove);
+        document.removeEventListener('mouseup',onUp);
+      }
+      document.addEventListener('mousemove',onMove);
+      document.addEventListener('mouseup',onUp);
+    }
+
+    initWindow('homeWindow');
+    initWindow('profileWindow');
+    initWindow('appsWindow');
   </script>
 </body>
 </html>
