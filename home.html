@@ -23,12 +23,16 @@
     .dock-wrapper{
       position:fixed;
       left:50%;
-      bottom:12px;
+      bottom:-48px;
       transform:translateX(-50%);
       display:flex;
       align-items:center;
       gap:8px;
       z-index:100;
+      transition:bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .dock-wrapper.show{
+      bottom:12px;
     }
     .dock-toggle{
       width:36px;
@@ -43,7 +47,7 @@
       align-items:center;
       justify-content:center;
       cursor:pointer;
-      transition:background 0.2s, transform 0.15s;
+      transition:background 0.2s;
       flex-shrink:0;
     }
     .dock-toggle:hover{
@@ -60,10 +64,6 @@
       fill:none;
       stroke-linecap:round;
       stroke-linejoin:round;
-      transition:transform 0.3s ease;
-    }
-    .dock-toggle.collapsed svg{
-      transform:rotate(180deg);
     }
     .dock{
       height:32px;
@@ -81,7 +81,7 @@
       overflow:hidden;
       width:0;
       opacity:0;
-      transition:width 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
+      transition:width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, padding 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .dock.expanded{
       width:min(70vw,800px);
@@ -91,7 +91,7 @@
   </style>
 </head>
 <body>
-  <div class="dock-wrapper">
+  <div class="dock-wrapper" id="dockWrapper">
     <div class="dock-toggle" id="dockToggle">
       <svg viewBox="0 0 24 24">
         <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
@@ -124,13 +124,38 @@
     }
     loadBingWallpaper();
 
+    var dockWrapper = document.getElementById('dockWrapper');
     var dockToggle = document.getElementById('dockToggle');
     var dock = document.getElementById('dock');
     var isExpanded = false;
-    dockToggle.addEventListener('click', function(){
+    var isShowing = false;
+    var showThreshold = 80;
+    var hideThreshold = 150;
+
+    document.addEventListener('mousemove', function(e){
+      if(isExpanded) return;
+      var distFromBottom = window.innerHeight - e.clientY;
+      if(distFromBottom <= showThreshold && !isShowing){
+        isShowing = true;
+        dockWrapper.classList.add('show');
+      }else if(distFromBottom > hideThreshold && isShowing){
+        isShowing = false;
+        dockWrapper.classList.remove('show');
+      }
+    });
+
+    dockToggle.addEventListener('click', function(e){
+      e.stopPropagation();
       isExpanded = !isExpanded;
-      dock.classList.toggle('expanded', isExpanded);
-      dockToggle.classList.toggle('collapsed', !isExpanded);
+      if(isExpanded){
+        dock.classList.add('expanded');
+        dockWrapper.classList.add('show');
+        isShowing = true;
+      }else{
+        dock.classList.remove('expanded');
+        isShowing = false;
+        dockWrapper.classList.remove('show');
+      }
     });
   </script>
 </body>
