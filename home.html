@@ -162,13 +162,13 @@
       height:min(75vh,520px);
       min-width:360px;
       min-height:320px;
-      border-radius:14px;
+      border-radius:8px;
       overflow:hidden;
-      background:rgba(16,18,24,0.93);
-      backdrop-filter:blur(22px) saturate(120%);
-      -webkit-backdrop-filter:blur(22px) saturate(120%);
-      border:1px solid rgba(255,255,255,0.06);
-      box-shadow:0 24px 70px rgba(0,0,0,0.5);
+      background:rgba(10,10,14,0.92);
+      backdrop-filter:blur(20px) saturate(150%);
+      -webkit-backdrop-filter:blur(20px) saturate(150%);
+      border:1px solid rgba(255,255,255,0.05);
+      box-shadow:0 16px 48px rgba(0,0,0,0.55);
       z-index:50;
       display:flex;
       flex-direction:column;
@@ -191,8 +191,8 @@
     .window-header{
       display:flex;
       align-items:center;
-      padding:10px 14px;
-      background:rgba(0,0,0,0.15);
+      padding:8px 12px;
+      background:rgba(0,0,0,0.12);
       border-bottom:1px solid rgba(255,255,255,0.04);
       cursor:move;
       user-select:none;
@@ -275,6 +275,64 @@
       cursor:nwse-resize;
       z-index:10;
     }
+    .resize-edge{
+      position:absolute;
+      z-index:10;
+    }
+    .resize-edge.top{
+      top:-4px;
+      left:8px;
+      right:8px;
+      height:8px;
+      cursor:n-resize;
+    }
+    .resize-edge.bottom{
+      bottom:-4px;
+      left:8px;
+      right:8px;
+      height:8px;
+      cursor:s-resize;
+    }
+    .resize-edge.left{
+      left:-4px;
+      top:8px;
+      bottom:8px;
+      width:8px;
+      cursor:w-resize;
+    }
+    .resize-edge.right{
+      right:-4px;
+      top:8px;
+      bottom:8px;
+      width:8px;
+      cursor:e-resize;
+    }
+    .resize-corner{
+      position:absolute;
+      width:16px;
+      height:16px;
+      z-index:11;
+    }
+    .resize-corner.top-left{
+      top:-4px;
+      left:-4px;
+      cursor:nw-resize;
+    }
+    .resize-corner.top-right{
+      top:-4px;
+      right:-4px;
+      cursor:ne-resize;
+    }
+    .resize-corner.bottom-left{
+      bottom:-4px;
+      left:-4px;
+      cursor:sw-resize;
+    }
+    .resize-corner.bottom-right{
+      bottom:-4px;
+      right:-4px;
+      cursor:se-resize;
+    }
   </style>
 </head>
 <body>
@@ -307,6 +365,24 @@
           <rect x="14" y="14" width="7" height="7" rx="1"></rect>
         </svg>
       </div>
+      <div class="dock-item" id="dockProjects" data-window="projectsWindow">
+        <svg viewBox="0 0 24 24">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockAccount" data-window="accountWindow">
+        <svg viewBox="0 0 24 24">
+          <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+          <line x1="8" y1="21" x2="16" y2="21"></line>
+          <line x1="12" y1="17" x2="12" y2="21"></line>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockSettings" data-window="settingsWindow">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </div>
     </div>
   </div>
 
@@ -336,7 +412,14 @@
     <div class="window-content">
       <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">主页内容区域</p>
     </div>
-    <div class="window-resize-handle" id="homeResizeHandle"></div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
   </div>
 
   <div class="app-window" id="profileWindow">
@@ -365,7 +448,14 @@
     <div class="window-content">
       <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">个人内容区域</p>
     </div>
-    <div class="window-resize-handle" id="profileResizeHandle"></div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
   </div>
 
   <div class="app-window" id="appsWindow">
@@ -396,7 +486,122 @@
     <div class="window-content">
       <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">应用内容区域</p>
     </div>
-    <div class="window-resize-handle" id="appsResizeHandle"></div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="projectsWindow">
+    <div class="window-header" id="projectsWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <span class="window-title">项目</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="projectsMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="projectsMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="projectsCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-content">
+      <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">项目内容区域</p>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="accountWindow">
+    <div class="window-header" id="accountWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo">
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+        </div>
+        <span class="window-title">账户</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="accountMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="accountMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="accountCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-content">
+      <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">账户内容区域</p>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="settingsWindow">
+    <div class="window-header" id="settingsWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </div>
+        <span class="window-title">设置</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="settingsMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="settingsMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="settingsCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-content">
+      <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">设置内容区域</p>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
   </div>
 
   <script>
@@ -459,13 +664,19 @@
     var windows = {
       homeWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
       profileWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
-      appsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null}
+      appsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
+      projectsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
+      accountWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
+      settingsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null}
     };
 
     var dockItems = {
       homeWindow:document.getElementById('dockHome'),
       profileWindow:document.getElementById('dockProfile'),
-      appsWindow:document.getElementById('dockApps')
+      appsWindow:document.getElementById('dockApps'),
+      projectsWindow:document.getElementById('dockProjects'),
+      accountWindow:document.getElementById('dockAccount'),
+      settingsWindow:document.getElementById('dockSettings')
     };
 
     function initWindow(winId){
@@ -475,7 +686,6 @@
       w.minBtn = document.getElementById(winId.replace('Window','') + 'MinBtn');
       w.maxBtn = document.getElementById(winId.replace('Window','') + 'MaxBtn');
       w.closeBtn = document.getElementById(winId.replace('Window','') + 'CloseBtn');
-      w.resizeHandle = document.getElementById(winId.replace('Window','') + 'ResizeHandle');
 
       w.el.addEventListener('mousedown',function(){bringToFront(w.el);});
 
@@ -515,10 +725,21 @@
         dockItems[winId].classList.remove('active');
       });
 
-      w.resizeHandle.addEventListener('mousedown',function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        startResize(e,w);
+      var edges = w.el.querySelectorAll('.resize-edge');
+      var corners = w.el.querySelectorAll('.resize-corner');
+      edges.forEach(function(edge){
+        edge.addEventListener('mousedown',function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          startResizeEdge(e,w,edge);
+        });
+      });
+      corners.forEach(function(corner){
+        corner.addEventListener('mousedown',function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          startResizeCorner(e,w,corner);
+        });
       });
 
       dockItems[winId].addEventListener('click',function(){
@@ -557,8 +778,18 @@
       function onMove(ev){
         var dx = ev.clientX - startX;
         var dy = ev.clientY - startY;
-        w.el.style.left = (startLeft + dx) + 'px';
-        w.el.style.top = (startTop + dy) + 'px';
+        var newLeft = startLeft + dx;
+        var newTop = startTop + dy;
+        var winW = w.el.offsetWidth;
+        var winH = w.el.offsetHeight;
+        var maxLeft = window.innerWidth - winW;
+        var maxTop = window.innerHeight - winH;
+        if(newLeft < 0) newLeft = 0;
+        if(newLeft > maxLeft) newLeft = maxLeft;
+        if(newTop < 0) newTop = 0;
+        if(newTop > maxTop) newTop = maxTop;
+        w.el.style.left = newLeft + 'px';
+        w.el.style.top = newTop + 'px';
       }
       function onUp(){
         w.el.style.transition = '';
@@ -569,17 +800,73 @@
       document.addEventListener('mouseup',onUp);
     }
 
-    function startResize(e,w){
+    function startResizeEdge(e,w,edge){
+      var dir = edge.classList.contains('top') ? 'top' : 
+                edge.classList.contains('bottom') ? 'bottom' :
+                edge.classList.contains('left') ? 'left' : 'right';
       var startX = e.clientX;
       var startY = e.clientY;
       var startW = w.el.offsetWidth;
       var startH = w.el.offsetHeight;
+      var startLeft = w.el.offsetLeft;
+      var startTop = w.el.offsetTop;
 
       function onMove(ev){
-        var newW = Math.max(360,startW + (ev.clientX - startX));
-        var newH = Math.max(320,startH + (ev.clientY - startY));
-        w.el.style.width = newW + 'px';
-        w.el.style.height = newH + 'px';
+        var dx = ev.clientX - startX;
+        var dy = ev.clientY - startY;
+        if(dir === 'left'){
+          var newW = Math.max(360,startW - dx);
+          w.el.style.width = newW + 'px';
+          w.el.style.left = (startLeft + (startW - newW)) + 'px';
+        }else if(dir === 'right'){
+          var newW = Math.min(window.innerWidth - startLeft, Math.max(360,startW + dx));
+          w.el.style.width = newW + 'px';
+        }else if(dir === 'top'){
+          var newH = Math.max(320,startH - dy);
+          w.el.style.height = newH + 'px';
+          w.el.style.top = (startTop + (startH - newH)) + 'px';
+        }else if(dir === 'bottom'){
+          var newH = Math.min(window.innerHeight - startTop, Math.max(320,startH + dy));
+          w.el.style.height = newH + 'px';
+        }
+      }
+      function onUp(){
+        document.removeEventListener('mousemove',onMove);
+        document.removeEventListener('mouseup',onUp);
+      }
+      document.addEventListener('mousemove',onMove);
+      document.addEventListener('mouseup',onUp);
+    }
+
+    function startResizeCorner(e,w,corner){
+      var isTop = corner.classList.contains('top');
+      var isLeft = corner.classList.contains('left');
+      var startX = e.clientX;
+      var startY = e.clientY;
+      var startW = w.el.offsetWidth;
+      var startH = w.el.offsetHeight;
+      var startLeft = w.el.offsetLeft;
+      var startTop = w.el.offsetTop;
+
+      function onMove(ev){
+        var dx = ev.clientX - startX;
+        var dy = ev.clientY - startY;
+        if(isLeft){
+          var newW = Math.max(360,startW - dx);
+          w.el.style.width = newW + 'px';
+          w.el.style.left = (startLeft + (startW - newW)) + 'px';
+        }else{
+          var newW = Math.min(window.innerWidth - startLeft, Math.max(360,startW + dx));
+          w.el.style.width = newW + 'px';
+        }
+        if(isTop){
+          var newH = Math.max(320,startH - dy);
+          w.el.style.height = newH + 'px';
+          w.el.style.top = (startTop + (startH - newH)) + 'px';
+        }else{
+          var newH = Math.min(window.innerHeight - startTop, Math.max(320,startH + dy));
+          w.el.style.height = newH + 'px';
+        }
       }
       function onUp(){
         document.removeEventListener('mousemove',onMove);
@@ -592,6 +879,9 @@
     initWindow('homeWindow');
     initWindow('profileWindow');
     initWindow('appsWindow');
+    initWindow('projectsWindow');
+    initWindow('accountWindow');
+    initWindow('settingsWindow');
   </script>
 </body>
 </html>
