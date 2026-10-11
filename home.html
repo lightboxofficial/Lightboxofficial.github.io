@@ -163,7 +163,7 @@
       min-width:360px;
       min-height:320px;
       border-radius:8px;
-      overflow:hidden;
+      overflow:visible;
       background:rgba(10,10,14,0.92);
       backdrop-filter:blur(20px) saturate(150%);
       -webkit-backdrop-filter:blur(20px) saturate(150%);
@@ -176,17 +176,22 @@
       visibility:hidden;
       transition:opacity 0.24s ease,visibility 0.24s ease;
     }
+    .window-content{
+      flex:1;
+      overflow:hidden;
+      position:relative;
+    }
     .app-window.active{
       opacity:1;
       visibility:visible;
       pointer-events:auto;
     }
     .app-window.maximized{
-      left:20px !important;
-      top:20px !important;
+      left:4px !important;
+      top:4px !important;
       transform:none !important;
-      width:calc(100vw - 40px) !important;
-      height:calc(100vh - 110px) !important;
+      width:calc(100vw - 8px) !important;
+      height:calc(100vh - 76px) !important;
     }
     .window-header{
       display:flex;
@@ -381,6 +386,29 @@
         <svg viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockAnnounce" data-window="announceWindow">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          <line x1="7" y1="8" x2="17" y2="8"></line>
+          <line x1="7" y1="12" x2="17" y2="12"></line>
+          <line x1="7" y1="16" x2="13" y2="16"></line>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockExtend" data-window="extendWindow">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="#fff" stroke-width="1.5"></rect>
+          <line x1="12" y1="8" x2="12" y2="16"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockWidget" data-window="widgetWindow">
+        <svg viewBox="0 0 24 24">
+          <rect x="2" y="2" width="9" height="9" rx="2"></rect>
+          <rect x="13" y="2" width="9" height="5" rx="2"></rect>
+          <rect x="2" y="13" width="9" height="9" rx="2"></rect>
+          <rect x="13" y="9" width="9" height="13" rx="2"></rect>
         </svg>
       </div>
     </div>
@@ -604,6 +632,119 @@
     <div class="resize-corner bottom-right"></div>
   </div>
 
+  <div class="app-window" id="announceWindow">
+    <div class="window-header" id="announceWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <line x1="7" y1="8" x2="17" y2="8"></line>
+            <line x1="7" y1="12" x2="17" y2="12"></line>
+            <line x1="7" y1="16" x2="13" y2="16"></line>
+          </svg>
+        </div>
+        <span class="window-title">公告日志</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="announceMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="announceMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="announceCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-content">
+      <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">公告日志内容区域</p>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="extendWindow">
+    <div class="window-header" id="extendWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="#fff" stroke-width="1.5"></rect>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+        </div>
+        <span class="window-title">拓展</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="extendMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="extendMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="extendCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-content">
+      <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">拓展内容区域</p>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="widgetWindow">
+    <div class="window-header" id="widgetWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo">
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="2" width="9" height="9" rx="2"></rect>
+            <rect x="13" y="2" width="9" height="5" rx="2"></rect>
+            <rect x="2" y="13" width="9" height="9" rx="2"></rect>
+            <rect x="13" y="9" width="9" height="13" rx="2"></rect>
+          </svg>
+        </div>
+        <span class="window-title">小组件</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="widgetMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="widgetMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="widgetCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-content">
+      <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">小组件内容区域</p>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
   <script>
     async function loadBingWallpaper(){
       const jsonUrl = "https://lightboxofficial.github.io/Bing-Wallpaper-Action/data/zh-CN_update.json";
@@ -632,18 +773,27 @@
     var dock = document.getElementById('dock');
     var isExpanded = false;
     var isShowing = false;
-    var showThreshold = 80;
-    var hideThreshold = 150;
+    var showThreshold = 120;
+    var hideThreshold = 180;
+    var hideTimer = null;
 
     document.addEventListener('mousemove', function(e){
       if(isExpanded) return;
       var distFromBottom = window.innerHeight - e.clientY;
-      if(distFromBottom <= showThreshold && !isShowing){
-        isShowing = true;
-        dockWrapper.classList.add('show');
+      if(distFromBottom <= showThreshold){
+        if(hideTimer){
+          clearTimeout(hideTimer);
+          hideTimer = null;
+        }
+        if(!isShowing){
+          isShowing = true;
+          dockWrapper.classList.add('show');
+        }
       }else if(distFromBottom > hideThreshold && isShowing){
+        if(hideTimer) clearTimeout(hideTimer);
         isShowing = false;
         dockWrapper.classList.remove('show');
+        hideTimer = null;
       }
     });
 
@@ -656,8 +806,6 @@
         isShowing = true;
       }else{
         dock.classList.remove('expanded');
-        isShowing = false;
-        dockWrapper.classList.remove('show');
       }
     });
 
@@ -667,7 +815,10 @@
       appsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
       projectsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
       accountWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
-      settingsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null}
+      settingsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
+      announceWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
+      extendWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null},
+      widgetWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,resizeHandle:null,max:false,prevRect:null}
     };
 
     var dockItems = {
@@ -676,7 +827,10 @@
       appsWindow:document.getElementById('dockApps'),
       projectsWindow:document.getElementById('dockProjects'),
       accountWindow:document.getElementById('dockAccount'),
-      settingsWindow:document.getElementById('dockSettings')
+      settingsWindow:document.getElementById('dockSettings'),
+      announceWindow:document.getElementById('dockAnnounce'),
+      extendWindow:document.getElementById('dockExtend'),
+      widgetWindow:document.getElementById('dockWidget')
     };
 
     function initWindow(winId){
@@ -688,6 +842,17 @@
       w.closeBtn = document.getElementById(winId.replace('Window','') + 'CloseBtn');
 
       w.el.addEventListener('mousedown',function(){bringToFront(w.el);});
+
+      var origAdd = w.el.classList.add.bind(w.el.classList);
+      w.el.classList.add = function(cls){
+        if(cls === 'active' && w.el.style.transform === ''){
+          var rect = w.el.getBoundingClientRect();
+          w.el.style.left = rect.left + 'px';
+          w.el.style.top = rect.top + 'px';
+          w.el.style.transform = 'none';
+        }
+        origAdd(cls);
+      };
 
       w.header.addEventListener('mousedown',function(e){
         if(e.target.closest('button')) return;
@@ -804,12 +969,17 @@
       var dir = edge.classList.contains('top') ? 'top' : 
                 edge.classList.contains('bottom') ? 'bottom' :
                 edge.classList.contains('left') ? 'left' : 'right';
+      w.el.style.transition = 'none';
+      w.el.style.transform = 'none';
+      var rect = w.el.getBoundingClientRect();
       var startX = e.clientX;
       var startY = e.clientY;
-      var startW = w.el.offsetWidth;
-      var startH = w.el.offsetHeight;
-      var startLeft = w.el.offsetLeft;
-      var startTop = w.el.offsetTop;
+      var startW = rect.width;
+      var startH = rect.height;
+      var startLeft = rect.left;
+      var startTop = rect.top;
+      w.el.style.left = startLeft + 'px';
+      w.el.style.top = startTop + 'px';
 
       function onMove(ev){
         var dx = ev.clientX - startX;
@@ -831,6 +1001,7 @@
         }
       }
       function onUp(){
+        w.el.style.transition = '';
         document.removeEventListener('mousemove',onMove);
         document.removeEventListener('mouseup',onUp);
       }
@@ -841,12 +1012,17 @@
     function startResizeCorner(e,w,corner){
       var isTop = corner.classList.contains('top');
       var isLeft = corner.classList.contains('left');
+      w.el.style.transition = 'none';
+      w.el.style.transform = 'none';
+      var rect = w.el.getBoundingClientRect();
       var startX = e.clientX;
       var startY = e.clientY;
-      var startW = w.el.offsetWidth;
-      var startH = w.el.offsetHeight;
-      var startLeft = w.el.offsetLeft;
-      var startTop = w.el.offsetTop;
+      var startW = rect.width;
+      var startH = rect.height;
+      var startLeft = rect.left;
+      var startTop = rect.top;
+      w.el.style.left = startLeft + 'px';
+      w.el.style.top = startTop + 'px';
 
       function onMove(ev){
         var dx = ev.clientX - startX;
@@ -869,6 +1045,7 @@
         }
       }
       function onUp(){
+        w.el.style.transition = '';
         document.removeEventListener('mousemove',onMove);
         document.removeEventListener('mouseup',onUp);
       }
@@ -882,6 +1059,9 @@
     initWindow('projectsWindow');
     initWindow('accountWindow');
     initWindow('settingsWindow');
+    initWindow('announceWindow');
+    initWindow('extendWindow');
+    initWindow('widgetWindow');
   </script>
 </body>
 </html>
