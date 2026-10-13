@@ -35,9 +35,9 @@
       bottom:12px;
     }
     .dock-toggle{
-      width:40px;
-      height:40px;
-      border-radius:50%;
+      width:32px;
+      height:32px;
+      border-radius:8px;
       background:rgba(12,12,16,0.85);
       backdrop-filter:blur(12px) saturate(180%) contrast(1.3) brightness(0.85);
       -webkit-backdrop-filter:blur(12px) saturate(180%) contrast(1.3) brightness(0.85);
@@ -47,7 +47,7 @@
       align-items:center;
       justify-content:center;
       cursor:pointer;
-      transition:background 0.2s;
+      transition:all 0.2s;
       flex-shrink:0;
       position:relative;
       overflow:hidden;
@@ -68,9 +68,9 @@
       transform:scale(0.9);
     }
     .dock-toggle svg{
-      width:16px;
-      height:16px;
-      stroke:#fff;
+      width:18px;
+      height:18px;
+      stroke:rgba(255,255,255,0.85);
       stroke-width:1.5;
       fill:none;
       stroke-linecap:round;
@@ -107,9 +107,9 @@
       pointer-events:none;
     }
     .dock.expanded{
-      width:min(70vw,600px);
+      width:394px;
       opacity:1;
-      padding:0 16px;
+      padding:0 10px;
     }
     .dock-item{
       width:32px;
@@ -533,6 +533,13 @@
           <line x1="3" y1="12" x2="21" y2="12"></line>
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockMore">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/>
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+          <circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/>
         </svg>
       </div>
     </div>
@@ -1378,7 +1385,7 @@
     setTimeout(function(){
       dockWrapper.classList.add('show');
       isShowing = true;
-    },300);
+    },100);
 
     document.addEventListener('mousemove', function(e){
       if(isExpanded) return;
