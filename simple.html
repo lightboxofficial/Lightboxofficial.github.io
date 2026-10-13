@@ -414,9 +414,63 @@
       right:-4px;
       cursor:nwse-resize;
     }
+    .bg-clock{
+      position:fixed;
+      top:15%;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:1;
+      pointer-events:none;
+      text-align:center;
+      user-select:none;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+    .bg-clock-time{
+      display:flex;
+      align-items:center;
+      gap:2px;
+    }
+    .bg-clock-time .digit{
+      font-size:56px;
+      font-weight:700;
+      color:#fff;
+      width:38px;
+      text-align:center;
+      font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,sans-serif;
+      line-height:1;
+      letter-spacing:-1px;
+    }
+    .bg-clock-time .colon{
+      font-size:56px;
+      font-weight:700;
+      color:#fff;
+      width:18px;
+      text-align:center;
+      font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,sans-serif;
+      line-height:1;
+      animation:blink 1s step-end infinite;
+    }
+    @keyframes blink{
+      0%,50%{opacity:1;}
+      51%,100%{opacity:0;}
+    }
+    .bg-clock-date{
+      font-size:15px;
+      font-weight:400;
+      color:rgba(255,255,255,0.7);
+      letter-spacing:1px;
+      margin-top:10px;
+      white-space:nowrap;
+    }
   </style>
 </head>
 <body>
+  <div class="bg-clock" id="bgClock">
+    <div class="bg-clock-time" id="bgClockTime">00:00:00</div>
+    <div class="bg-clock-date" id="bgClockDate"></div>
+  </div>
   <div class="dock-wrapper" id="dockWrapper">
     <div class="dock-toggle" id="dockToggle">
       <svg viewBox="0 0 24 24">
@@ -1024,6 +1078,295 @@
   </div>
 
   <script>
+    async function loadBingWallpaper(){
+      const jsonUrl = "https://lightboxofficial.github.io/Bing-Wallpaper-Action/data/zh-CN_update.json";
+      try{
+        const resp = await fetch(jsonUrl);
+        const data = await resp.json();
+        if(data && data.images && data.images.length > 0){
+          const img = data.images[0];
+          const imgUrl = "https://cn.bing.com" + img.url;
+          const preload = new Image();
+          preload.onload = function(){
+            document.body.style.backgroundImage = `url(${imgUrl})`;
+          };
+          preload.src = imgUrl;
+          return;
+        }
+      }catch(e){
+        console.log('壁纸加载失败，使用默认背景');
+      }
+      document.body.style.background = '#111';
+    }
+    loadBingWallpaper();
+
+    var lunarInfo = [
+      0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
+      0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
+      0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
+      0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
+      0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
+      0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,
+      0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
+      0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,
+      0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
+      0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x05ac0,0x0ab60,0x096d5,0x092e0,
+      0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
+      0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
+      0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
+      0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
+      0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,
+      0x14b63,0x09370,0x049f8,0x04970,0x064b0,0x168a6,0x0ea50,0x06b20,0x1a6c4,0x0aae0,
+      0x092e0,0x0d2e3,0x0c960,0x0d557,0x0d4a0,0x0da50,0x05d55,0x056a0,0x0a6d0,0x055d4,
+      0x052d0,0x0a9b8,0x0a950,0x0b4a0,0x0b6a6,0x0ad50,0x055a0,0x0aba4,0x0a5b0,0x052b0,
+      0x0b273,0x06930,0x07337,0x06aa0,0x0ad50,0x14b55,0x04b60,0x0a570,0x054e4,0x0d160,
+      0x0e968,0x0d520,0x0daa0,0x16aa6,0x056d0,0x04ae0,0x0a9d4,0x0a4d0,0x0d150,0x0f252,
+      0x0d520
+    ];
+
+    var Gan = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    var Zhi = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    var lunarMonthName = ['正','二','三','四','五','六','七','八','九','十','冬','腊'];
+    var lunarDayName = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
+      '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+      '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
+
+    function lYearDays(y){
+      var sum = 348;
+      for(var i=0x8000;i>0x8;i>>=1) sum += (lunarInfo[y-1900] & i)?1:0;
+      return sum + leapDays(y);
+    }
+    function leapMonth(y){
+      return lunarInfo[y-1900] & 0xf;
+    }
+    function leapDays(y){
+      if(leapMonth(y)) return (lunarInfo[y-1900] & 0x10000)?30:29;
+      return 0;
+    }
+    function monthDays(y,m){
+      return (lunarInfo[y-1900] & (0x10000>>m))?30:29;
+    }
+    function toLunar(y,m,d){
+      var base = new Date(1900,0,31);
+      var today = new Date(y,m-1,d);
+      var offset = Math.floor((today - base) / 86400000);
+      var i, temp;
+      for(i=1900;i<2100;i++){
+        temp = lYearDays(i);
+        if(offset < temp) break;
+        offset -= temp;
+      }
+      var leap = leapMonth(i);
+      var isLeap = false;
+      var month;
+      for(month=1;month<13;month++){
+        if(leap > 0 && month === (leap+1) && !isLeap){
+          --month;
+          isLeap = true;
+          temp = leapDays(i);
+        }else{
+          temp = monthDays(i,month);
+        }
+        if(isLeap && month === (leap+1)) isLeap = false;
+        if(offset < temp) break;
+        offset -= temp;
+      }
+      var day = offset + 1;
+      return {year:i,month:month,day:day,isLeap:isLeap};
+    }
+    function getLunarDateString(lunar){
+      var str = '';
+      str += Gan[(lunar.year-4)%10];
+      str += Zhi[(lunar.year-4)%12];
+      str += '年';
+      str += lunar.isLeap?'闰':'';
+      str += lunarMonthName[lunar.month-1];
+      str += '月';
+      str += lunarDayName[lunar.day-1];
+      return str;
+    }
+
+    var holidays = {
+      '1-1':'元旦',
+      '1-4':'世界盲文日',
+      '1-10':'中国人民警察节',
+      '1-26':'国际海关日',
+      '1-27':'国际大屠杀纪念日',
+      '2-2':'世界湿地日',
+      '2-4':'世界癌症日',
+      '2-10':'世界传统医药日',
+      '2-13':'世界无线电日',
+      '2-14':'情人节',
+      '2-20':'世界社会公正日',
+      '2-21':'国际母语日',
+      '3-1':'零歧视日',
+      '3-3':'世界野生动植物日',
+      '3-5':'学雷锋纪念日',
+      '3-8':'妇女节',
+      '3-12':'植树节',
+      '3-15':'消费者权益日',
+      '3-20':'国际幸福日',
+      '3-21':'世界森林日',
+      '3-22':'世界水日',
+      '3-23':'世界气象日',
+      '3-24':'世界防治结核病日',
+      '4-1':'愚人节',
+      '4-2':'世界自闭症日',
+      '4-4':'国际地雷行动日',
+      '4-7':'世界卫生日',
+      '4-12':'世界航天日',
+      '4-15':'全民国家安全教育日',
+      '4-22':'世界地球日',
+      '4-23':'世界图书与版权日',
+      '4-25':'世界防治疟疾日',
+      '4-26':'世界知识产权日',
+      '4-28':'世界工作安全与健康日',
+      '5-1':'劳动节',
+      '5-3':'世界新闻自由日',
+      '5-4':'青年节',
+      '5-5':'世界手卫生日',
+      '5-8':'世界红十字日',
+      '5-11':'世界肥胖日',
+      '5-12':'国际护士节',
+      '5-15':'国际家庭日',
+      '5-17':'世界电信日',
+      '5-20':'世界计量日',
+      '5-21':'世界文化多样性日',
+      '5-22':'国际生物多样性日',
+      '5-25':'世界预防溺水日',
+      '5-29':'国际维和人员日',
+      '5-31':'世界无烟日',
+      '6-1':'儿童节',
+      '6-5':'世界环境日',
+      '6-6':'世界眼健康日',
+      '6-8':'世界海洋日',
+      '6-10':'世界手工艺日',
+      '6-12':'世界无童工日',
+      '6-14':'世界献血者日',
+      '6-15':'世界防治荒漠化日',
+      '6-17':'世界防治荒漠化和干旱日',
+      '6-20':'世界难民日',
+      '6-21':'国际瑜伽日',
+      '6-25':'世界海员日',
+      '6-26':'国际禁毒日',
+      '7-1':'建党节',
+      '7-11':'世界人口日',
+      '7-15':'世界青年技能日',
+      '7-18':'国际曼德拉日',
+      '7-28':'世界肝炎日',
+      '7-30':'世界打击人口贩运日',
+      '8-1':'建军节',
+      '8-9':'国际土著人民日',
+      '8-12':'国际青年日',
+      '8-19':'世界人道主义日',
+      '8-21':'国际纪念日',
+      '8-29':'国际核试验禁止日',
+      '9-5':'国际慈善日',
+      '9-8':'国际扫盲日',
+      '9-10':'教师节',
+      '9-12':'国际南南合作日',
+      '9-15':'国际民主日',
+      '9-16':'国际保护臭氧层日',
+      '9-21':'国际和平日',
+      '9-26':'世界避孕日',
+      '9-27':'世界旅游日',
+      '9-28':'世界狂犬病日',
+      '9-29':'世界心脏日',
+      '10-1':'国庆节',
+      '10-2':'国际非暴力日',
+      '10-4':'世界动物日',
+      '10-5':'世界教师日',
+      '10-8':'世界视觉日',
+      '10-10':'世界精神卫生日',
+      '10-11':'国际女童日',
+      '10-13':'国际减灾日',
+      '10-15':'国际农村妇女日',
+      '10-16':'世界粮食日',
+      '10-17':'国际消除贫困日',
+      '10-20':'世界骨质疏松日',
+      '10-24':'联合国日',
+      '10-27':'世界音像遗产日',
+      '10-31':'世界城市日',
+      '11-1':'万圣节',
+      '11-5':'世界海啸意识日',
+      '11-6':'国际防止战争武装冲突破坏自然环境日',
+      '11-9':'世界科学日',
+      '11-10':'世界青年日',
+      '11-14':'世界糖尿病日',
+      '11-16':'国际宽容日',
+      '11-17':'世界早产儿日',
+      '11-19':'世界厕所日',
+      '11-20':'世界儿童日',
+      '11-21':'世界电视日',
+      '11-25':'消除对妇女暴力国际日',
+      '11-29':'国际声援巴勒斯坦人民日',
+      '12-1':'世界艾滋病日',
+      '12-2':'废除奴隶制国际日',
+      '12-3':'国际残疾人日',
+      '12-5':'国际志愿者日',
+      '12-7':'国际民航日',
+      '12-9':'国际反腐败日',
+      '12-10':'人权日',
+      '12-11':'国际山地日',
+      '12-18':'国际移徙者日',
+      '12-25':'圣诞节'
+    };
+
+    var lunarHolidays = {
+      '1-1':'春节','1-15':'元宵节','5-5':'端午节','7-7':'七夕节',
+      '8-15':'中秋节','9-9':'重阳节','12-30':'除夕'
+    };
+
+    function getHoliday(m,d){
+      return holidays[m+'-'+d] || null;
+    }
+    function getLunarHoliday(m,d){
+      return lunarHolidays[m+'-'+d] || null;
+    }
+
+    function updateClock(){
+      var now = new Date();
+      var h = String(now.getHours()).padStart(2,'0');
+      var m = String(now.getMinutes()).padStart(2,'0');
+      var s = String(now.getSeconds()).padStart(2,'0');
+      var timeEl = document.getElementById('bgClockTime');
+      timeEl.innerHTML =
+        '<span class="digit">'+h[0]+'</span>'+
+        '<span class="digit">'+h[1]+'</span>'+
+        '<span class="colon">:</span>'+
+        '<span class="digit">'+m[0]+'</span>'+
+        '<span class="digit">'+m[1]+'</span>'+
+        '<span class="colon">:</span>'+
+        '<span class="digit">'+s[0]+'</span>'+
+        '<span class="digit">'+s[1]+'</span>';
+      
+      var year = now.getFullYear();
+      var month = now.getMonth() + 1;
+      var day = now.getDate();
+      var days = ['日','一','二','三','四','五','六'];
+      var weekDay = days[now.getDay()];
+      
+      var lunar = toLunar(year,month,day);
+      var lunarStr = getLunarDateString(lunar);
+      
+      var holiday = getHoliday(month,day);
+      var lunarHoliday = getLunarHoliday(lunar.month,lunar.day);
+      
+      var dateStr = year + '年' + month + '月' + day + '日 星期' + weekDay;
+      dateStr += ' ' + lunarStr;
+      if(lunarHoliday){
+        dateStr += ' ' + lunarHoliday;
+      }else if(holiday){
+        dateStr += ' ' + holiday;
+      }else{
+        dateStr += ' 平凡的一天';
+      }
+      
+      document.getElementById('bgClockDate').textContent = dateStr;
+    }
+    updateClock();
+    setInterval(updateClock,1000);
+
     var dockWrapper = document.getElementById('dockWrapper');
     var dock = document.getElementById('dock');
     var dockToggle = document.getElementById('dockToggle');
@@ -1069,8 +1412,7 @@
     function initWindow(winId){
       var w = windows[winId];
       w.el = document.getElementById(winId);
-      var headerId = winId.charAt(0).toUpperCase() + winId.slice(1);
-      w.header = document.getElementById(headerId + 'Header');
+      w.header = document.getElementById(winId + 'Header');
       w.minBtn = document.getElementById(winId.replace('Window','') + 'MinBtn');
       w.maxBtn = document.getElementById(winId.replace('Window','') + 'MaxBtn');
       w.closeBtn = document.getElementById(winId.replace('Window','') + 'CloseBtn');
