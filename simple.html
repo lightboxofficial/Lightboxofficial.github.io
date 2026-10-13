@@ -464,6 +464,120 @@
       margin-top:10px;
       white-space:nowrap;
     }
+
+    /* 窄屏适配 */
+    @media (max-width:1024px){
+      .app-window{
+        width:min(90vw,600px);
+        height:min(80vh,480px);
+      }
+    }
+
+    /* 手机端适配 */
+    @media (max-width:480px){
+      .bg-clock{
+        top:8%;
+      }
+      .bg-clock-time .digit{
+        font-size:36px;
+        width:24px;
+      }
+      .bg-clock-time .colon{
+        font-size:36px;
+        width:12px;
+      }
+      .bg-clock-date{
+        font-size:13px;
+      }
+      .app-window{
+        width:92vw;
+        height:80vh;
+        min-width:unset;
+        min-height:unset;
+        left:50%;
+        top:50%;
+        transform:translate(-50%,-50%);
+      }
+      .window-sidebar{
+        width:180px;
+      }
+      .window-sidebar-header h3{
+        font-size:14px;
+      }
+      .window-sidebar-item{
+        padding:8px 10px;
+        font-size:13px;
+      }
+      .window-sidebar-item svg{
+        width:16px;
+        height:16px;
+      }
+
+      /* 手机端折叠按钮：左上角 */
+      .dock-toggle{
+        position:fixed !important;
+        top:12px !important;
+        left:12px !important;
+        bottom:auto !important;
+        right:auto !important;
+        z-index:200;
+        width:36px;
+        height:36px;
+        border-radius:8px;
+      }
+
+      /* 手机端任务栏：左侧竖置 */
+      .dock-wrapper{
+        left:0 !important;
+        bottom:0 !important;
+        top:0 !important;
+        transform:none !important;
+        flex-direction:column !important;
+        gap:6px;
+        transition:left 0.3s ease;
+      }
+      .dock-wrapper.show{
+        bottom:0 !important;
+        left:0 !important;
+      }
+      .dock-wrapper.mobile-hidden{
+        left:-50px !important;
+      }
+
+      /* 手机端dock：竖条 */
+      .dock{
+        width:44px;
+        height:auto;
+        flex-direction:column;
+        border-radius:12px;
+        padding:6px 0;
+        opacity:1;
+        transition:opacity 0.3s ease;
+        gap:4px;
+      }
+      .dock.expanded{
+        width:44px;
+        opacity:1;
+        padding:6px 0;
+      }
+      .dock-item{
+        width:32px;
+        height:32px;
+        border-radius:8px;
+      }
+      .dock-item svg{
+        width:16px;
+        height:16px;
+      }
+      .dock-item.active::after{
+        bottom:auto;
+        top:50%;
+        left:-4px;
+        transform:translateY(-50%);
+        width:3px;
+        height:14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1485,13 +1599,18 @@
 
     dockToggle.addEventListener('click',function(e){
       e.stopPropagation();
-      isExpanded = !isExpanded;
-      if(isExpanded){
-        dock.classList.add('expanded');
-        dockWrapper.classList.add('show');
-        isShowing = true;
+      var isMobile = window.innerWidth <= 480;
+      if(isMobile){
+        dockWrapper.classList.toggle('mobile-hidden');
       }else{
-        dock.classList.remove('expanded');
+        isExpanded = !isExpanded;
+        if(isExpanded){
+          dock.classList.add('expanded');
+          dockWrapper.classList.add('show');
+          isShowing = true;
+        }else{
+          dock.classList.remove('expanded');
+        }
       }
     });
 
@@ -1650,13 +1769,12 @@
         var w = windows[winId];
         if(w && w.el){
           var wasActive = w.el.classList.contains('active');
-          Object.values(windows).forEach(function(win){
-            if(win.el) win.el.classList.remove('active');
-          });
-          dockItemsEls.forEach(function(di){ di.classList.remove('active'); });
           if(!wasActive){
             w.el.classList.add('active');
             item.classList.add('active');
+          }else{
+            w.el.classList.remove('active');
+            item.classList.remove('active');
           }
         }
       });
