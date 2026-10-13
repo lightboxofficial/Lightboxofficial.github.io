@@ -1192,7 +1192,7 @@
           Object.values(windows).forEach(function(win){
             if(win.el) win.el.classList.remove('active');
           });
-          dockItemsEls.forEach(function(di) di.classList.remove('active'));
+          dockItemsEls.forEach(function(di){ di.classList.remove('active'); });
           if(!wasActive){
             w.el.classList.add('active');
             item.classList.add('active');
