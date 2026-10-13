@@ -474,9 +474,8 @@
   <div class="dock-wrapper" id="dockWrapper">
     <div class="dock-toggle" id="dockToggle">
       <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="1"></circle>
-        <circle cx="19" cy="12" r="1"></circle>
-        <circle cx="5" cy="12" r="1"></circle>
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="none" stroke="currentColor" stroke-width="2"/>
+        <path d="M8 12l3 3 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
     <div class="dock" id="dock">
@@ -1370,18 +1369,56 @@
     var dockWrapper = document.getElementById('dockWrapper');
     var dock = document.getElementById('dock');
     var dockToggle = document.getElementById('dockToggle');
+    var isExpanded = false;
+    var isShowing = false;
+    var showThreshold = 120;
+    var hideThreshold = 180;
+    var hideTimer = null;
 
     setTimeout(function(){
       dockWrapper.classList.add('show');
+      isShowing = true;
     },300);
 
-    dockToggle.addEventListener('click',function(){
-      dock.classList.toggle('expanded');
+    document.addEventListener('mousemove', function(e){
+      if(isExpanded) return;
+      var distFromBottom = window.innerHeight - e.clientY;
+      if(distFromBottom <= showThreshold){
+        if(hideTimer){
+          clearTimeout(hideTimer);
+          hideTimer = null;
+        }
+        if(!isShowing){
+          dockWrapper.classList.add('show');
+          isShowing = true;
+        }
+      }else if(distFromBottom > hideThreshold){
+        if(isShowing && !hideTimer){
+          hideTimer = setTimeout(function(){
+            dockWrapper.classList.remove('show');
+            isShowing = false;
+            hideTimer = null;
+          }, 500);
+        }
+      }
+    });
+
+    dockToggle.addEventListener('click',function(e){
+      e.stopPropagation();
+      isExpanded = !isExpanded;
+      if(isExpanded){
+        dock.classList.add('expanded');
+        dockWrapper.classList.add('show');
+        isShowing = true;
+      }else{
+        dock.classList.remove('expanded');
+      }
     });
 
     document.addEventListener('click',function(e){
       if(!dock.contains(e.target) && !dockToggle.contains(e.target)){
         dock.classList.remove('expanded');
+        isExpanded = false;
       }
     });
 
