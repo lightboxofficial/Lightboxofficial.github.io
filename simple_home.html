@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>精简版首页</title>
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+    body{
+      min-height:100vh;
+      background:#111;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      overflow:hidden;
+      transition:background-image 0.5s ease;
+    }
+    .dock-wrapper{
+      position:fixed;
+      left:50%;
+      bottom:-56px;
+      transform:translateX(-50%);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      z-index:100;
+      transition:bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .dock-wrapper.show{
+      bottom:12px;
+    }
+    .dock-toggle{
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      background:rgba(12,12,16,0.85);
+      backdrop-filter:blur(12px) saturate(180%) contrast(1.3) brightness(0.85);
+      -webkit-backdrop-filter:blur(12px) saturate(180%) contrast(1.3) brightness(0.85);
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow:0 6px 18px rgba(0,0,0,0.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      transition:background 0.2s;
+      flex-shrink:0;
+      position:relative;
+      overflow:hidden;
+    }
+    .dock-toggle::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+      background-size:128px 128px;
+      mix-blend-mode:overlay;
+      pointer-events:none;
+    }
+    .dock-toggle:hover{
+      background:rgba(18,18,24,0.9);
+    }
+    .dock-toggle:active{
+      transform:scale(0.9);
+    }
+    .dock-toggle svg{
+      width:16px;
+      height:16px;
+      stroke:#fff;
+      stroke-width:1.5;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      position:relative;
+      z-index:1;
+    }
+    .dock{
+      height:40px;
+      border-radius:20px;
+      background:rgba(12,12,16,0.85);
+      backdrop-filter:blur(12px) saturate(180%) contrast(1.3) brightness(0.85);
+      -webkit-backdrop-filter:blur(12px) saturate(180%) contrast(1.3) brightness(0.85);
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow:0 6px 18px rgba(0,0,0,0.5);
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:6px;
+      padding:0 10px;
+      overflow:hidden;
+      width:0;
+      opacity:0;
+      transition:width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, padding 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position:relative;
+    }
+    .dock::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+      background-size:128px 128px;
+      mix-blend-mode:overlay;
+      pointer-events:none;
+    }
+    .dock.expanded{
+      width:min(70vw,600px);
+      opacity:1;
+      padding:0 16px;
+    }
+    .dock-item{
+      width:32px;
+      height:32px;
+      border-radius:8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      transition:all 0.25s ease;
+      position:relative;
+      flex-shrink:0;
+    }
+    .dock-item:hover svg{
+      filter:brightness(1.2);
+    }
+    .dock-item:active{
+      transform:scale(0.9);
+    }
+    .dock-item svg{
+      width:18px;
+      height:18px;
+      stroke:#fff;
+      stroke-width:1.5;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      transition:filter 0.25s ease;
+    }
+    .dock-item.active::after{
+      content:'';
+      position:absolute;
+      bottom:-4px;
+      left:50%;
+      transform:translateX(-50%);
+      width:14px;
+      height:3px;
+      border-radius:2px;
+      background:#fff;
+    }
+    .dock-item.active svg{
+      filter:brightness(1.4) drop-shadow(0 0 4px rgba(255,255,255,0.5));
+    }
+    .app-window{
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:min(85vw,700px);
+      height:min(75vh,520px);
+      min-width:360px;
+      min-height:320px;
+      border-radius:8px;
+      overflow:visible;
+      background:rgba(10,10,14,0.92);
+      backdrop-filter:blur(20px) saturate(150%);
+      -webkit-backdrop-filter:blur(20px) saturate(150%);
+      border:1px solid rgba(255,255,255,0.05);
+      box-shadow:0 16px 48px rgba(0,0,0,0.55);
+      z-index:50;
+      display:flex;
+      flex-direction:column;
+      opacity:0;
+      visibility:hidden;
+      transition:opacity 0.24s ease,visibility 0.24s ease;
+    }
+    .window-content{
+      flex:1;
+      overflow:hidden;
+      position:relative;
+    }
+    .app-window.active{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto;
+    }
+    .app-window.maximized{
+      left:4px !important;
+      top:4px !important;
+      transform:none !important;
+      width:calc(100vw - 8px) !important;
+      height:calc(100vh - 76px) !important;
+    }
+    .window-header{
+      display:flex;
+      align-items:center;
+      padding:8px 12px;
+      background:rgba(0,0,0,0.12);
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      cursor:move;
+      user-select:none;
+      flex-shrink:0;
+    }
+    .window-header-left{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .window-header-logo{
+      width:20px;
+      height:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      border-radius:4px;
+      transition:background 0.15s ease;
+    }
+    .window-header-logo:hover{
+      background:rgba(255,255,255,0.1);
+    }
+    .window-header-logo svg{
+      width:16px;
+      height:16px;
+      stroke:#fff;
+      stroke-width:1.5;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .window-title{
+      font-size:13px;
+      font-weight:500;
+      color:rgba(255,255,255,0.85);
+      letter-spacing:0.5px;
+      font-family:'Georgia','Times New Roman',serif;
+    }
+    .window-controls{
+      margin-left:auto;
+      display:flex;
+      gap:6px;
+    }
+    .window-btn{
+      width:24px;
+      height:24px;
+      border-radius:6px;
+      border:none;
+      background:rgba(255,255,255,0.06);
+      color:rgba(255,255,255,0.7);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:all 0.15s ease;
+    }
+    .window-btn:hover{
+      background:rgba(255,255,255,0.12);
+      color:#fff;
+    }
+    .window-btn.close:hover{
+      background:rgba(255,80,80,0.6);
+    }
+    .window-btn svg{
+      width:12px;
+      height:12px;
+      stroke:currentColor;
+      stroke-width:2;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .window-content{
+      flex:1;
+      padding:20px;
+      overflow:hidden;
+      color:rgba(255,255,255,0.8);
+    }
+    .window-body{
+      flex:1;
+      display:flex;
+      overflow:hidden;
+      position:relative;
+    }
+    .window-sidebar{
+      position:absolute;
+      top:0;
+      left:0;
+      bottom:0;
+      width:220px;
+      background:rgba(10,10,14,0.1);
+      border-right:1px solid rgba(255,255,255,0.06);
+      z-index:10;
+      transform:translateX(-100%);
+      transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display:flex;
+      flex-direction:column;
+      padding:16px 0;
+    }
+    .window-sidebar.open{
+      transform:translateX(0);
+    }
+    .window-sidebar-overlay{
+      position:absolute;
+      inset:0;
+      z-index:5;
+      display:none;
+    }
+    .window-sidebar-overlay.show{
+      display:block;
+    }
+    .window-sidebar-header{
+      padding:8px 16px 16px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      margin-bottom:8px;
+    }
+    .window-sidebar-header h3{
+      font-size:14px;
+      font-weight:600;
+      color:rgba(255,255,255,0.9);
+      letter-spacing:0.5px;
+    }
+    .window-sidebar-nav{
+      flex:1;
+      overflow-y:auto;
+      padding:4px 8px;
+    }
+    .window-sidebar-item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:6px;
+      cursor:pointer;
+      transition:background 0.15s ease;
+      color:rgba(255,255,255,0.7);
+      font-size:13px;
+      user-select:none;
+    }
+    .window-sidebar-item:hover{
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+    }
+    .window-sidebar-item.active{
+      background:rgba(255,255,255,0.12);
+      color:#fff;
+    }
+    .window-sidebar-item svg{
+      width:16px;
+      height:16px;
+      stroke:currentColor;
+      stroke-width:1.5;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      flex-shrink:0;
+    }
+    .resize-edge{
+      position:absolute;
+      z-index:10;
+    }
+    .resize-edge.top{
+      top:-4px;
+      left:8px;
+      right:8px;
+      height:8px;
+      cursor:n-resize;
+    }
+    .resize-edge.bottom{
+      bottom:-4px;
+      left:8px;
+      right:8px;
+      height:8px;
+      cursor:s-resize;
+    }
+    .resize-edge.left{
+      left:-4px;
+      top:8px;
+      bottom:8px;
+      width:8px;
+      cursor:w-resize;
+    }
+    .resize-edge.right{
+      right:-4px;
+      top:8px;
+      bottom:8px;
+      width:8px;
+      cursor:e-resize;
+    }
+    .resize-corner{
+      position:absolute;
+      width:16px;
+      height:16px;
+      z-index:11;
+    }
+    .resize-corner.top-left{
+      top:-4px;
+      left:-4px;
+      cursor:nwse-resize;
+    }
+    .resize-corner.top-right{
+      top:-4px;
+      right:-4px;
+      cursor:nesw-resize;
+    }
+    .resize-corner.bottom-left{
+      bottom:-4px;
+      left:-4px;
+      cursor:nesw-resize;
+    }
+    .resize-corner.bottom-right{
+      bottom:-4px;
+      right:-4px;
+      cursor:nwse-resize;
+    }
+  </style>
+</head>
+<body>
+  <div class="dock-wrapper" id="dockWrapper">
+    <div class="dock-toggle" id="dockToggle">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="1"></circle>
+        <circle cx="19" cy="12" r="1"></circle>
+        <circle cx="5" cy="12" r="1"></circle>
+      </svg>
+    </div>
+    <div class="dock" id="dock">
+      <div class="dock-item" id="dockHome" data-window="homeWindow">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockApps" data-window="appsWindow">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockProjects" data-window="projectsWindow">
+        <svg viewBox="0 0 24 24">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockProfile" data-window="profileWindow">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockAccount" data-window="accountWindow">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+          <line x1="12" y1="10" x2="12" y2="20"></line>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockSettings" data-window="settingsWindow">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockBlog" data-window="blogWindow">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockChat" data-window="chatWindow">
+        <svg viewBox="0 0 24 24">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </div>
+      <div class="dock-item" id="dockMenu" data-window="menuWindow">
+        <svg viewBox="0 0 24 24">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-window" id="homeWindow">
+    <div class="window-header" id="homeWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo" data-sidebar-toggle="homeWindow">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <span class="window-title">首页</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="homeMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="homeMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="homeCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="window-sidebar" id="homeSidebar">
+        <div class="window-sidebar-header"><h3>首页</h3></div>
+        <div class="window-sidebar-nav">
+          <div class="window-sidebar-item active">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span>网站首页</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>个人首页</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            <span>实时面板</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span>关于网站</span>
+          </div>
+        </div>
+      </div>
+      <div class="window-sidebar-overlay" id="homeSidebarOverlay"></div>
+      <div class="window-content">
+        <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">首页内容区域</p>
+      </div>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="appsWindow">
+    <div class="window-header" id="appsWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo" data-sidebar-toggle="appsWindow">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </div>
+        <span class="window-title">应用</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="appsMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="appsMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="appsCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="window-sidebar" id="appsSidebar">
+        <div class="window-sidebar-header"><h3>应用</h3></div>
+        <div class="window-sidebar-nav">
+          <div class="window-sidebar-item active">
+            <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            <span>项目应用</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            <span>自带工具</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="#fff" stroke-width="1.5"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            <span>扩展内容</span>
+          </div>
+        </div>
+      </div>
+      <div class="window-sidebar-overlay" id="appsSidebarOverlay"></div>
+      <div class="window-content">
+        <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">应用内容区域</p>
+      </div>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="projectsWindow">
+    <div class="window-header" id="projectsWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo" data-sidebar-toggle="projectsWindow">
+          <svg viewBox="0 0 24 24">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <span class="window-title">项目</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="projectsMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="projectsMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="projectsCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="window-sidebar" id="projectsSidebar">
+        <div class="window-sidebar-header"><h3>项目</h3></div>
+        <div class="window-sidebar-nav">
+          <div class="window-sidebar-item active">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <span>应用项目</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            <span>其他项目</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+            <span>赤石项目</span>
+          </div>
+        </div>
+      </div>
+      <div class="window-sidebar-overlay" id="projectsSidebarOverlay"></div>
+      <div class="window-content">
+        <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">项目内容区域</p>
+      </div>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="profileWindow">
+    <div class="window-header" id="profileWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo" data-sidebar-toggle="profileWindow">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <span class="window-title">个人</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="profileMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="profileMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="profileCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="window-sidebar" id="profileSidebar">
+        <div class="window-sidebar-header"><h3>个人</h3></div>
+        <div class="window-sidebar-nav">
+          <div class="window-sidebar-item active">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>个人主页</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>组织主页</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            <span>人际关系</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            <span>友情链接</span>
+          </div>
+        </div>
+      </div>
+      <div class="window-sidebar-overlay" id="profileSidebarOverlay"></div>
+      <div class="window-content">
+        <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">个人内容区域</p>
+      </div>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="accountWindow">
+    <div class="window-header" id="accountWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo" data-sidebar-toggle="accountWindow">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+            <line x1="12" y1="10" x2="12" y2="20"></line>
+          </svg>
+        </div>
+        <span class="window-title">账户</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="accountMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="accountMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="accountCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="window-sidebar" id="accountSidebar">
+        <div class="window-sidebar-header"><h3>账户</h3></div>
+        <div class="window-sidebar-nav">
+          <div class="window-sidebar-item active">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>账户资料</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <span>账户查看</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>账户设置</span>
+          </div>
+        </div>
+      </div>
+      <div class="window-sidebar-overlay" id="accountSidebarOverlay"></div>
+      <div class="window-content">
+        <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">账户内容区域</p>
+      </div>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="settingsWindow">
+    <div class="window-header" id="settingsWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo" data-sidebar-toggle="settingsWindow">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </div>
+        <span class="window-title">设置</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="settingsMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="settingsMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="settingsCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="window-sidebar" id="settingsSidebar">
+        <div class="window-sidebar-header"><h3>设置</h3></div>
+        <div class="window-sidebar-nav">
+          <div class="window-sidebar-item active">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+            <span>外观设置</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>通用设置</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            <span>应用设置</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="#fff" stroke-width="1.5"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            <span>拓展设置</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>安全设置</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span>语言与地区</span>
+          </div>
+        </div>
+      </div>
+      <div class="window-sidebar-overlay" id="settingsSidebarOverlay"></div>
+      <div class="window-content">
+        <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">设置内容区域</p>
+      </div>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="blogWindow">
+    <div class="window-header" id="blogWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo" data-sidebar-toggle="blogWindow">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+        </div>
+        <span class="window-title">博客</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="blogMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="blogMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="blogCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="window-sidebar" id="blogSidebar">
+        <div class="window-sidebar-header"><h3>博客</h3></div>
+        <div class="window-sidebar-nav">
+          <div class="window-sidebar-item active">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span>公告栏</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>日志</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>公共博客</span>
+          </div>
+        </div>
+      </div>
+      <div class="window-sidebar-overlay" id="blogSidebarOverlay"></div>
+      <div class="window-content">
+        <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">博客内容区域</p>
+      </div>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="chatWindow">
+    <div class="window-header" id="chatWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo" data-sidebar-toggle="chatWindow">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <span class="window-title">聊天</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="chatMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="chatMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="chatCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="window-sidebar" id="chatSidebar">
+        <div class="window-sidebar-header"><h3>聊天</h3></div>
+        <div class="window-sidebar-nav">
+          <div class="window-sidebar-item active">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>好友</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>发现</span>
+          </div>
+        </div>
+      </div>
+      <div class="window-sidebar-overlay" id="chatSidebarOverlay"></div>
+      <div class="window-content">
+        <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">聊天内容区域</p>
+      </div>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <div class="app-window" id="menuWindow">
+    <div class="window-header" id="menuWindowHeader">
+      <div class="window-header-left">
+        <div class="window-header-logo" data-sidebar-toggle="menuWindow">
+          <svg viewBox="0 0 24 24">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </div>
+        <span class="window-title">菜单</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" id="menuMinBtn" title="最小化">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" id="menuMaxBtn" title="最大化">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" id="menuCloseBtn" title="关闭">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="window-sidebar" id="menuSidebar">
+        <div class="window-sidebar-header"><h3>菜单</h3></div>
+        <div class="window-sidebar-nav">
+          <div class="window-sidebar-item active">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            <span>小组件</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span>通知中心</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>快捷设置</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+            <span>显示设置</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <span>声音控制</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span>网络状态</span>
+          </div>
+          <div class="window-sidebar-item">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            <span>系统信息</span>
+          </div>
+        </div>
+      </div>
+      <div class="window-sidebar-overlay" id="menuSidebarOverlay"></div>
+      <div class="window-content">
+        <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">菜单内容区域</p>
+      </div>
+    </div>
+    <div class="resize-edge top"></div>
+    <div class="resize-edge bottom"></div>
+    <div class="resize-edge left"></div>
+    <div class="resize-edge right"></div>
+    <div class="resize-corner top-left"></div>
+    <div class="resize-corner top-right"></div>
+    <div class="resize-corner bottom-left"></div>
+    <div class="resize-corner bottom-right"></div>
+  </div>
+
+  <script>
+    var dockWrapper = document.getElementById('dockWrapper');
+    var dock = document.getElementById('dock');
+    var dockToggle = document.getElementById('dockToggle');
+
+    setTimeout(function(){
+      dockWrapper.classList.add('show');
+    },300);
+
+    dockToggle.addEventListener('click',function(){
+      dock.classList.toggle('expanded');
+    });
+
+    document.addEventListener('click',function(e){
+      if(!dock.contains(e.target) && !dockToggle.contains(e.target)){
+        dock.classList.remove('expanded');
+      }
+    });
+
+    var windows = {
+      homeWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
+      appsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
+      projectsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
+      profileWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
+      accountWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
+      settingsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
+      blogWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
+      chatWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
+      menuWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null}
+    };
+
+    var dockItems = {
+      homeWindow:document.getElementById('dockHome'),
+      appsWindow:document.getElementById('dockApps'),
+      projectsWindow:document.getElementById('dockProjects'),
+      profileWindow:document.getElementById('dockProfile'),
+      accountWindow:document.getElementById('dockAccount'),
+      settingsWindow:document.getElementById('dockSettings'),
+      blogWindow:document.getElementById('dockBlog'),
+      chatWindow:document.getElementById('dockChat'),
+      menuWindow:document.getElementById('dockMenu')
+    };
+
+    function initWindow(winId){
+      var w = windows[winId];
+      w.el = document.getElementById(winId);
+      var headerId = winId.charAt(0).toUpperCase() + winId.slice(1);
+      w.header = document.getElementById(headerId + 'Header');
+      w.minBtn = document.getElementById(winId.replace('Window','') + 'MinBtn');
+      w.maxBtn = document.getElementById(winId.replace('Window','') + 'MaxBtn');
+      w.closeBtn = document.getElementById(winId.replace('Window','') + 'CloseBtn');
+
+      w.closeBtn.addEventListener('click',function(){
+        w.el.classList.remove('active');
+        if(dockItems[winId]) dockItems[winId].classList.remove('active');
+      });
+
+      w.minBtn.addEventListener('click',function(){
+        w.el.classList.remove('active');
+      });
+
+      w.maxBtn.addEventListener('click',function(){
+        if(!w.max){
+          w.prevRect = {
+            left:w.el.style.left,
+            top:w.el.style.top,
+            width:w.el.style.width,
+            height:w.el.style.height,
+            transform:w.el.style.transform
+          };
+          w.el.classList.add('maximized');
+          w.max = true;
+        } else {
+          w.el.classList.remove('maximized');
+          w.max = false;
+        }
+      });
+
+      w.header.addEventListener('mousedown',function(e){
+        if(e.target.closest('button')) return;
+        if(e.target.closest('[data-sidebar-toggle]')) return;
+        if(w.max) return;
+        startDrag(e,w);
+      });
+
+      function startDrag(e,w){
+        e.preventDefault();
+        var rect = w.el.getBoundingClientRect();
+        var startX = e.clientX;
+        var startY = e.clientY;
+        var startLeft = rect.left;
+        var startTop = rect.top;
+
+        function onMove(e){
+          var dx = e.clientX - startX;
+          var dy = e.clientY - startY;
+          w.el.style.left = (startLeft + dx) + 'px';
+          w.el.style.top = (startTop + dy) + 'px';
+          w.el.style.transform = 'none';
+        }
+
+        function onUp(){
+          document.removeEventListener('mousemove',onMove);
+          document.removeEventListener('mouseup',onUp);
+        }
+
+        document.addEventListener('mousemove',onMove);
+        document.addEventListener('mouseup',onUp);
+      }
+
+      var resizeEdges = w.el.querySelectorAll('.resize-edge, .resize-corner');
+      resizeEdges.forEach(function(edge){
+        edge.addEventListener('mousedown',function(e){
+          if(w.max) return;
+          startResize(e,w,edge);
+        });
+      });
+
+      function startResize(e,w,edge){
+        e.preventDefault();
+        e.stopPropagation();
+        var startX = e.clientX;
+        var startY = e.clientY;
+        var startWidth = w.el.offsetWidth;
+        var startHeight = w.el.offsetHeight;
+        var startLeft = w.el.offsetLeft;
+        var startTop = w.el.offsetTop;
+        var isLeft = edge.classList.contains('left') || edge.classList.contains('top-left') || edge.classList.contains('bottom-left');
+        var isTop = edge.classList.contains('top') || edge.classList.contains('top-left') || edge.classList.contains('top-right');
+        var isRight = edge.classList.contains('right') || edge.classList.contains('top-right') || edge.classList.contains('bottom-right');
+        var isBottom = edge.classList.contains('bottom') || edge.classList.contains('bottom-left') || edge.classList.contains('bottom-right');
+
+        function onMove(e){
+          var dx = e.clientX - startX;
+          var dy = e.clientY - startY;
+          if(isRight) w.el.style.width = Math.max(360,startWidth + dx) + 'px';
+          if(isBottom) w.el.style.height = Math.max(320,startHeight + dy) + 'px';
+          if(isLeft){
+            var newWidth = Math.max(360,startWidth - dx);
+            w.el.style.width = newWidth + 'px';
+            w.el.style.left = (startLeft + startWidth - newWidth) + 'px';
+          }
+          if(isTop){
+            var newHeight = Math.max(320,startHeight - dy);
+            w.el.style.height = newHeight + 'px';
+            w.el.style.top = (startTop + startHeight - newHeight) + 'px';
+          }
+        }
+
+        function onUp(){
+          document.removeEventListener('mousemove',onMove);
+          document.removeEventListener('mouseup',onUp);
+        }
+
+        document.addEventListener('mousemove',onMove);
+        document.addEventListener('mouseup',onUp);
+      }
+    }
+
+    var dockItemsEls = document.querySelectorAll('.dock-item');
+    dockItemsEls.forEach(function(item){
+      item.addEventListener('click',function(){
+        var winId = item.getAttribute('data-window');
+        var w = windows[winId];
+        if(w && w.el){
+          var wasActive = w.el.classList.contains('active');
+          Object.values(windows).forEach(function(win){
+            if(win.el) win.el.classList.remove('active');
+          });
+          dockItemsEls.forEach(function(di) di.classList.remove('active'));
+          if(!wasActive){
+            w.el.classList.add('active');
+            item.classList.add('active');
+          }
+        }
+      });
+    });
+
+    initWindow('homeWindow');
+    initWindow('appsWindow');
+    initWindow('projectsWindow');
+    initWindow('profileWindow');
+    initWindow('accountWindow');
+    initWindow('settingsWindow');
+    initWindow('blogWindow');
+    initWindow('chatWindow');
+    initWindow('menuWindow');
+
+    var sidebarToggles = document.querySelectorAll('[data-sidebar-toggle]');
+    sidebarToggles.forEach(function(toggle){
+      toggle.addEventListener('click',function(e){
+        e.stopPropagation();
+        var winId = toggle.getAttribute('data-sidebar-toggle');
+        var sidebar = document.getElementById(winId.replace('Window','') + 'Sidebar');
+        var overlay = document.getElementById(winId.replace('Window','') + 'SidebarOverlay');
+        if(sidebar && overlay){
+          var isOpen = sidebar.classList.contains('open');
+          if(isOpen){
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+          } else {
+            sidebar.classList.add('open');
+            overlay.classList.add('show');
+          }
+        }
+      });
+    });
+
+    var overlays = document.querySelectorAll('.window-sidebar-overlay');
+    overlays.forEach(function(overlay){
+      overlay.addEventListener('click',function(){
+        var sidebar = overlay.parentElement.querySelector('.window-sidebar');
+        if(sidebar){
+          sidebar.classList.remove('open');
+          overlay.classList.remove('show');
+        }
+      });
+    });
+
+    var sidebarItems = document.querySelectorAll('.window-sidebar-item');
+    sidebarItems.forEach(function(item){
+      item.addEventListener('click',function(){
+        var sidebar = item.closest('.window-sidebar');
+        if(sidebar){
+          sidebar.querySelectorAll('.window-sidebar-item').forEach(function(i){
+            i.classList.remove('active');
+          });
+          item.classList.add('active');
+          sidebar.classList.remove('open');
+          var overlay = sidebar.parentElement.querySelector('.window-sidebar-overlay');
+          if(overlay) overlay.classList.remove('show');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
