@@ -429,6 +429,361 @@
       right:-4px;
       cursor:nwse-resize;
     }
+
+    /* 首页面板样式 */
+    .home-panel{
+      display:none;
+      height:100%;
+      overflow-y:auto;
+      padding:0 4px;
+    }
+    .home-panel.active{
+      display:block;
+    }
+    .home-panel-header{
+      margin-bottom:24px;
+      padding-bottom:16px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .home-panel-header h2{
+      font-size:22px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:6px;
+    }
+    .home-panel-header p{
+      font-size:14px;
+      color:rgba(255,255,255,0.5);
+    }
+    .home-panel-body{
+      color:rgba(255,255,255,0.8);
+      line-height:1.7;
+    }
+
+    /* 欢迎卡片 */
+    .welcome-card{
+      display:flex;
+      gap:16px;
+      padding:20px;
+      background:rgba(255,255,255,0.04);
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.06);
+      margin-bottom:20px;
+    }
+    .welcome-icon{
+      width:48px;
+      height:48px;
+      border-radius:10px;
+      background:rgba(255,255,255,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+    .welcome-icon svg{
+      width:24px;
+      height:24px;
+      stroke:rgba(255,255,255,0.7);
+    }
+    .welcome-text h3{
+      font-size:18px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:8px;
+    }
+    .welcome-text p{
+      font-size:14px;
+      color:rgba(255,255,255,0.7);
+      margin-bottom:4px;
+    }
+
+    /* 快速统计 */
+    .quick-stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+    .stat-item{
+      text-align:center;
+      padding:16px 8px;
+      background:rgba(255,255,255,0.04);
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    .stat-value{
+      font-size:24px;
+      font-weight:700;
+      color:#fff;
+      margin-bottom:4px;
+    }
+    .stat-label{
+      font-size:12px;
+      color:rgba(255,255,255,0.5);
+    }
+
+    /* 个人介绍卡片 */
+    .profile-intro-card{
+      display:flex;
+      gap:20px;
+      padding:24px;
+      background:rgba(255,255,255,0.04);
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    .profile-avatar-placeholder{
+      width:80px;
+      height:80px;
+      border-radius:12px;
+      background:rgba(255,255,255,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+    .profile-avatar-placeholder svg{
+      width:40px;
+      height:40px;
+      stroke:rgba(255,255,255,0.5);
+    }
+    .profile-intro-text h3{
+      font-size:20px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:8px;
+    }
+    .profile-tag{
+      font-size:13px;
+      color:rgba(255,255,255,0.6);
+      margin-bottom:12px;
+    }
+    .profile-desc{
+      font-size:14px;
+      color:rgba(255,255,255,0.75);
+      margin-bottom:12px;
+      line-height:1.7;
+    }
+    .profile-motto{
+      font-size:13px;
+      color:rgba(255,255,255,0.6);
+      font-style:italic;
+    }
+
+    /* 实时状态 */
+    .live-status-card{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      padding:20px;
+      background:rgba(255,255,255,0.04);
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.06);
+      margin-bottom:16px;
+    }
+    .status-indicator{
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      flex-shrink:0;
+    }
+    .status-indicator.online{
+      background:#4ade80;
+      box-shadow:0 0 8px rgba(74,222,128,0.5);
+    }
+    .status-info h3{
+      font-size:16px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:4px;
+    }
+    .status-info p{
+      font-size:13px;
+      color:rgba(255,255,255,0.6);
+    }
+    .live-metrics{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+    }
+    .metric-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:16px;
+      background:rgba(255,255,255,0.04);
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    .metric-icon{
+      width:36px;
+      height:36px;
+      border-radius:8px;
+      background:rgba(255,255,255,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+    .metric-icon svg{
+      width:18px;
+      height:18px;
+      stroke:rgba(255,255,255,0.7);
+    }
+    .metric-value{
+      font-size:15px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:2px;
+    }
+    .metric-label{
+      font-size:12px;
+      color:rgba(255,255,255,0.5);
+    }
+
+    /* 关于网站板块 */
+    .about-section{
+      margin-bottom:28px;
+      padding-bottom:28px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .about-section:last-child{
+      border-bottom:none;
+      margin-bottom:0;
+      padding-bottom:0;
+    }
+    .about-section-header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .about-section-icon{
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      background:rgba(255,255,255,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+    .about-section-icon svg{
+      width:20px;
+      height:20px;
+      stroke:rgba(255,255,255,0.7);
+    }
+    .about-section-header h3{
+      font-size:18px;
+      font-weight:600;
+      color:#fff;
+      margin:0;
+    }
+    .about-section-content{
+      color:rgba(255,255,255,0.75);
+      font-size:14px;
+      line-height:1.8;
+    }
+    .about-section-content p{
+      margin-bottom:12px;
+    }
+    .about-section-content strong{
+      color:rgba(255,255,255,0.95);
+      font-weight:600;
+    }
+
+    /* 原因列表 */
+    .about-reasons{
+      margin-top:16px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+    .reason-item{
+      display:flex;
+      gap:12px;
+      padding:16px;
+      background:rgba(255,255,255,0.04);
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    .reason-icon{
+      font-size:24px;
+      flex-shrink:0;
+    }
+    .reason-text h4{
+      font-size:15px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:6px;
+    }
+    .reason-text p{
+      font-size:13px;
+      color:rgba(255,255,255,0.7);
+      margin-bottom:6px;
+    }
+
+    /* 使用指南 */
+    .guide-section,
+    .disclaimer-section,
+    .contact-section{
+      margin-bottom:20px;
+    }
+    .guide-section h4,
+    .disclaimer-section h4,
+    .contact-section h4{
+      font-size:15px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:10px;
+    }
+    .guide-list,
+    .disclaimer-list,
+    .contact-list{
+      list-style:none;
+      padding:0;
+      margin:0;
+    }
+    .guide-list li,
+    .disclaimer-list li,
+    .contact-list li{
+      padding:8px 0 8px 20px;
+      position:relative;
+      font-size:13px;
+      color:rgba(255,255,255,0.7);
+      line-height:1.7;
+    }
+    .guide-list li::before,
+    .disclaimer-list li::before,
+    .contact-list li::before{
+      content:'';
+      position:absolute;
+      left:0;
+      top:14px;
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:rgba(255,255,255,0.3);
+    }
+    .guide-list li strong,
+    .disclaimer-list li strong,
+    .contact-list li strong{
+      color:rgba(255,255,255,0.9);
+    }
+    .contact-note{
+      font-size:13px;
+      color:rgba(255,255,255,0.5);
+      font-style:italic;
+      margin-top:8px;
+    }
+    .about-section-content a{
+      color:rgba(120,170,255,0.9);
+      text-decoration:none;
+      transition:color 0.2s;
+    }
+    .about-section-content a:hover{
+      color:#fff;
+      text-decoration:underline;
+    }
+
     .bg-clock{
       position:fixed;
       top:15%;
@@ -729,7 +1084,230 @@
       </div>
       <div class="window-sidebar-overlay" id="homeSidebarOverlay"></div>
       <div class="window-content">
-        <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">首页内容区域</p>
+        <div class="home-panel active" data-panel="homeSite">
+          <div class="home-panel-header">
+            <h2>网站首页</h2>
+            <p>欢迎来到 NoTificians无闻 的小站</p>
+          </div>
+          <div class="home-panel-body">
+            <div class="welcome-card">
+              <div class="welcome-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+              </div>
+              <div class="welcome-text">
+                <h3>你好，陌生人 👋</h3>
+                <p>这里是 NoTificians无闻 的个人集成网站，一个初二牲在代码世界里折腾出来的小天地。</p>
+                <p>点击上方侧边栏的图标，探索更多功能吧～</p>
+              </div>
+            </div>
+            <div class="quick-stats">
+              <div class="stat-item">
+                <div class="stat-value">∞</div>
+                <div class="stat-label">可能性</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">在线</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">100%</div>
+                <div class="stat-label">用爱发电</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-panel" data-panel="profileHome">
+          <div class="home-panel-header">
+            <h2>个人首页</h2>
+            <p>关于 NoTificians无闻 的一切</p>
+          </div>
+          <div class="home-panel-body">
+            <div class="profile-intro-card">
+              <div class="profile-avatar-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div class="profile-intro-text">
+                <h3>NoTificians无闻</h3>
+                <p class="profile-tag">中学牲 / B站野生UP主 / 编程猫佛系选手</p>
+                <p class="profile-desc">
+                  一个在"苟且偷生"的代码打工人，梦想是成为"躺着也能把钱赚了"的咸鱼之王。<br>
+                  熟练掌握 Ctrl+C/V，略懂 Python 和 C++，终极奥义是用30行代码实现别人100行功能——然后花200行修复它。
+                </p>
+                <p class="profile-motto">💡 人生信条："代码写得好，不如PPT做得骚"</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-panel" data-panel="livePanel">
+          <div class="home-panel-header">
+            <h2>实时面板</h2>
+            <p>当前状态与数据</p>
+          </div>
+          <div class="home-panel-body">
+            <div class="live-status-card">
+              <div class="status-indicator online"></div>
+              <div class="status-info">
+                <h3>网站运行中</h3>
+                <p>服务器状态：正常 | 最后更新：<span id="lastUpdate">--</span></p>
+              </div>
+            </div>
+            <div class="live-metrics">
+              <div class="metric-item">
+                <div class="metric-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+                <div class="metric-text">
+                  <div class="metric-value" id="liveTime">--:--:--</div>
+                  <div class="metric-label">当前时间</div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                </div>
+                <div class="metric-text">
+                  <div class="metric-value">地球 Online</div>
+                  <div class="metric-label">服务器位置</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-panel" data-panel="aboutSite">
+          <div class="home-panel-header">
+            <h2>关于网站</h2>
+            <p>这个网站的来龙去脉</p>
+          </div>
+          <div class="home-panel-body">
+            <div class="about-section">
+              <div class="about-section-header">
+                <div class="about-section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                </div>
+                <h3>🤔 这个网站是什么？</h3>
+              </div>
+              <div class="about-section-content">
+                <p>
+                  简单来说，这是一个<strong>初二牲</strong>（也就是我）在写作业的间隙（以及熬夜的深夜）折腾出来的<strong>个人网站集成体</strong>。
+                </p>
+                <p>
+                  它不是什么大厂出品，也没有专业的UI团队——只有一个头发还算茂密的假程序员，在键盘上敲敲打打，试图把一堆零散的功能塞进一个看起来还不错的壳子里。
+                </p>
+                <p>
+                  你可以在这里找到我的个人主页、项目展示、博客日志，还有一些我自己写着玩的小工具。说白了，这就是我的<strong>数字自留地</strong>——种什么长什么，长不长得出来随缘。
+                </p>
+              </div>
+            </div>
+
+            <div class="about-section">
+              <div class="about-section-header">
+                <div class="about-section-icon why-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                  </svg>
+                </div>
+                <h3>💡 为什么创立这个网站？</h3>
+              </div>
+              <div class="about-section-content">
+                <p>
+                  原因嘛，其实挺简单的——<strong>懒</strong>。
+                </p>
+                <p>
+                  你看，每次要找个什么东西，得打开这个网站、登录那个平台、翻半天收藏夹……太麻烦了。与其每次都在互联网的海洋里大海捞针，不如自己建个<strong>一站式码头</strong>，把所有东西都停在这儿。
+                </p>
+                <p>
+                  但"懒"只是表象，真正的动机是这三个词：
+                </p>
+                <div class="about-reasons">
+                  <div class="reason-item">
+                    <div class="reason-icon">⚡</div>
+                    <div class="reason-text">
+                      <h4>便捷</h4>
+                      <p>把散落在各处的内容整合到一个地方，不用在十几个标签页之间反复横跳。一个窗口，全部搞定。</p>
+                    </div>
+                  </div>
+                  <div class="reason-item">
+                    <div class="reason-icon">🚀</div>
+                    <div class="reason-text">
+                      <h4>快速</h4>
+                      <p>没有花里胡哨的加载动画，没有"再等3秒广告马上开始"——打开就是内容，点哪去哪，绝不拖泥带水。</p>
+                    </div>
+                  </div>
+                  <div class="reason-item">
+                    <div class="reason-icon">🌍</div>
+                    <div class="reason-text">
+                      <h4>给所有人一个空间</h4>
+                      <p>这个网站不只是给我自己用的。每一个来到这里的人，都能找到感兴趣的东西。也许是一段代码，也许是一篇博客，也许只是觉得"哦，原来还有人跟我一样在折腾这些没用的东西"——那就够了。</p>
+                      <p>互联网本该是开放的、自由的、属于每个人的。我只是在自己的小角落里，试着还原它本来的样子。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="about-section">
+              <div class="about-section-header">
+                <div class="about-section-icon how-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                  </svg>
+                </div>
+                <h3>📋 怎么办？—— 使用指南 & 免责声明</h3>
+              </div>
+              <div class="about-section-content">
+                <div class="guide-section">
+                  <h4>🧭 怎么用这个网站？</h4>
+                  <ul class="guide-list">
+                    <li><strong>导航：</strong>点击底部 Dock 栏的图标打开对应窗口，点击窗口左上角的 Logo 可展开侧边栏查看更多子页面。</li>
+                    <li><strong>窗口操作：</strong>每个窗口都可以拖拽移动、拉伸调整大小，右上角有最小化/最大化/关闭按钮。</li>
+                    <li><strong>手机端：</strong>左上角的折叠按钮可以展开/收起 Dock 栏，竖屏模式下窗口会自动适配屏幕。</li>
+                    <li><strong>工具箱：</strong>部分窗口内置了实用工具（计算器、日历、便签等），在侧边栏或应用列表里找找看。</li>
+                  </ul>
+                </div>
+
+                <div class="disclaimer-section">
+                  <h4>⚠️ 免责声明（必看！）</h4>
+                  <ul class="disclaimer-list">
+                    <li><strong>代码质量：</strong>本站代码可能存在大量"魔法注释"和"祖传代码"，使用前请自备护目镜和防毒面具。</li>
+                    <li><strong>BUG 处理：</strong>若发现任何 BUG，请温柔地告诉我，我会用"下次一定改"的真诚眼神凝视你。</li>
+                    <li><strong>内容责任：</strong>站内所有内容由我本人（NoTificians无闻）独立创作，不代表任何组织、机构或外星文明的立场。</li>
+                    <li><strong>使用风险：</strong>使用本站服务产生的任何后果（包括但不限于笑出腹肌、熬夜上瘾、突然想学编程等）均由用户自行承担。</li>
+                    <li><strong>隐私保护：</strong>本站不收集、不存储、不出售任何用户数据。你看了什么、点了什么、停留了多久——我都不知道，也不想知道。</li>
+                    <li><strong>最终解释权：</strong>归 NoTificians无闻 所有。如有争议</li>
+                  </ul>
+                </div>
+
+                <div class="contact-section">
+                  <h4>📬 联系我</h4>
+                  <p>有问题？有建议？单纯想找人聊聊代码和人生？欢迎通过以下方式找到我：</p>
+                  <ul class="contact-list">
+                    <li>📧 邮箱：lightboxofficial@163.com / lightboxofficial@outlook.com</li>
+                    <li>🐧 QQ：3896653459（加好友必发"啊米诺斯"）</li>
+                    <li>📺 B站：<a href="https://space.bilibili.com/3546714772343354" target="_blank">@NoTificians无闻</a></li>
+                    <li>🐙 GitHub：<a href="https://github.com/lightboxofficial" target="_blank">@lightboxofficial</a></li>
+                  </ul>
+                  <p class="contact-note">虽然我可能三天后才回……但只要你留言，我一定会看。🌙</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="resize-edge top"></div>
@@ -1583,6 +2161,23 @@
     updateClock();
     setInterval(updateClock,1000);
 
+    // 更新实时面板时间
+    function updateLiveTime(){
+      var now = new Date();
+      var h = String(now.getHours()).padStart(2,'0');
+      var m = String(now.getMinutes()).padStart(2,'0');
+      var s = String(now.getSeconds()).padStart(2,'0');
+      var liveTimeEl = document.getElementById('liveTime');
+      if(liveTimeEl) liveTimeEl.textContent = h + ':' + m + ':' + s;
+      var lastUpdateEl = document.getElementById('lastUpdate');
+      if(lastUpdateEl){
+        var dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + h + ':' + m;
+        lastUpdateEl.textContent = dateStr;
+      }
+    }
+    updateLiveTime();
+    setInterval(updateLiveTime,1000);
+
     var dockWrapper = document.getElementById('dockWrapper');
     var dock = document.getElementById('dock');
     var dockToggle = document.getElementById('dockToggle');
@@ -1874,6 +2469,29 @@
           sidebar.classList.remove('open');
           var overlay = sidebar.parentElement.querySelector('.window-sidebar-overlay');
           if(overlay) overlay.classList.remove('show');
+          
+          // 首页窗口特殊处理：切换面板
+          var sidebarId = sidebar.id;
+          if(sidebarId === 'homeSidebar'){
+            var itemText = item.querySelector('span').textContent.trim();
+            var panelMap = {
+              '网站首页': 'homeSite',
+              '个人首页': 'profileHome',
+              '实时面板': 'livePanel',
+              '关于网站': 'aboutSite'
+            };
+            var targetPanel = panelMap[itemText];
+            if(targetPanel){
+              var contentArea = sidebar.parentElement.querySelector('.window-content');
+              if(contentArea){
+                contentArea.querySelectorAll('.home-panel').forEach(function(panel){
+                  panel.classList.remove('active');
+                });
+                var target = contentArea.querySelector('[data-panel="' + targetPanel + '"]');
+                if(target) target.classList.add('active');
+              }
+            }
+          }
         }
       });
     });
