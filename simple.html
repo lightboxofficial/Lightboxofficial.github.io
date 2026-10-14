@@ -429,6 +429,153 @@
       right:-4px;
       cursor:nwse-resize;
     }
+
+    /* 首页面板样式 */
+    .home-panel{
+      display:none;
+      height:100%;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:0 4px;
+    }
+    .home-panel::-webkit-scrollbar{
+      display:none;
+    }
+    .home-panel{
+      -ms-overflow-style:none;
+      scrollbar-width:none;
+    }
+    .home-panel.active{
+      display:block;
+    }
+    .home-panel-header{
+      margin-bottom:24px;
+      padding-bottom:16px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .home-panel-header h2{
+      font-size:22px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:6px;
+    }
+    .home-panel-header p{
+      font-size:14px;
+      color:rgba(255,255,255,0.5);
+    }
+    .home-panel-body{
+      color:rgba(255,255,255,0.8);
+      line-height:1.7;
+    }
+
+    /* 欢迎卡片 */
+    .welcome-card{
+      padding:28px 24px;
+      background:rgba(255,255,255,0.06);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.1);
+      margin-bottom:20px;
+      text-align:center;
+    }
+    .welcome-card h3{
+      font-size:26px;
+      font-weight:700;
+      color:#fff;
+      margin-bottom:8px;
+      letter-spacing:1px;
+    }
+    .welcome-card p{
+      font-size:14px;
+      color:rgba(255,255,255,0.6);
+    }
+
+    /* 统计卡片 */
+    .stats-card{
+      padding:24px;
+      background:rgba(255,255,255,0.04);
+      backdrop-filter:blur(15px);
+      -webkit-backdrop-filter:blur(15px);
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.08);
+      margin-bottom:20px;
+    }
+    .stats-card h4{
+      font-size:16px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:16px;
+    }
+
+    /* 主题统计网格 */
+    .theme-stats{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+      margin-bottom:24px;
+    }
+    .theme-stat-item{
+      padding:16px;
+      background:rgba(255,255,255,0.04);
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.06);
+      text-align:center;
+    }
+    .theme-stat-value{
+      font-size:28px;
+      font-weight:700;
+      color:#fff;
+      margin-bottom:4px;
+    }
+    .theme-stat-label{
+      font-size:12px;
+      color:rgba(255,255,255,0.5);
+    }
+
+    /* 技术统计条 */
+    .tech-stats{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    .tech-stat-row{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .tech-stat-label{
+      font-size:13px;
+      color:rgba(255,255,255,0.7);
+      min-width:90px;
+      flex-shrink:0;
+    }
+    .tech-stat-bar{
+      flex:1;
+      height:8px;
+      background:rgba(255,255,255,0.08);
+      border-radius:4px;
+      overflow:hidden;
+    }
+    .tech-stat-fill{
+      height:100%;
+      border-radius:4px;
+      transition:width 1s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .tech-stat-fill.blue{background:linear-gradient(90deg,#3b82f6,#60a5fa);}
+    .tech-stat-fill.green{background:linear-gradient(90deg,#22c55e,#4ade80);}
+    .tech-stat-fill.purple{background:linear-gradient(90deg,#8b5cf6,#a78bfa);}
+    .tech-stat-fill.orange{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+    .tech-stat-fill.pink{background:linear-gradient(90deg,#ec4899,#f472b6);}
+    .tech-stat-fill.cyan{background:linear-gradient(90deg,#06b6d4,#22d3ee);}
+    .tech-stat-percent{
+      font-size:12px;
+      color:rgba(255,255,255,0.5);
+      min-width:36px;
+      text-align:right;
+      flex-shrink:0;
+    }
+
     .bg-clock{
       position:fixed;
       top:15%;
@@ -709,19 +856,19 @@
       <div class="window-sidebar" id="homeSidebar">
         <div class="window-sidebar-header"><h3>首页</h3></div>
         <div class="window-sidebar-nav">
-          <div class="window-sidebar-item active">
+          <div class="window-sidebar-item active" data-panel="homeSite">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
             <span>网站首页</span>
           </div>
-          <div class="window-sidebar-item">
+          <div class="window-sidebar-item" data-panel="profileHome">
             <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             <span>个人首页</span>
           </div>
-          <div class="window-sidebar-item">
+          <div class="window-sidebar-item" data-panel="livePanel">
             <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
             <span>实时面板</span>
           </div>
-          <div class="window-sidebar-item">
+          <div class="window-sidebar-item" data-panel="aboutSite">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
             <span>关于网站</span>
           </div>
@@ -729,7 +876,93 @@
       </div>
       <div class="window-sidebar-overlay" id="homeSidebarOverlay"></div>
       <div class="window-content">
-        <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">首页内容区域</p>
+        <!-- 网站首页面板 -->
+        <div class="home-panel active" data-panel="homeSite">
+          <div class="home-panel-header">
+            <h2>网站首页</h2>
+            <p>Notificiansclub 概览</p>
+          </div>
+          <div class="home-panel-body">
+            <div class="welcome-card">
+              <h3>Hi！欢迎来到 Notificiansclub</h3>
+              <p>一个由普通初二学生折腾出来的个人网站集成</p>
+            </div>
+            <div class="stats-card">
+              <h4> 网站数据一览</h4>
+              <div class="theme-stats">
+                <div class="theme-stat-item">
+                  <div class="theme-stat-value" style="color:#60a5fa;">∞</div>
+                  <div class="theme-stat-label">可能性</div>
+                </div>
+                <div class="theme-stat-item">
+                  <div class="theme-stat-value" style="color:#4ade80;">24/7</div>
+                  <div class="theme-stat-label">在线</div>
+                </div>
+                <div class="theme-stat-item">
+                  <div class="theme-stat-value" style="color:#fbbf24;">92%</div>
+                  <div class="theme-stat-label">便捷</div>
+                </div>
+                <div class="theme-stat-item">
+                  <div class="theme-stat-value" style="color:#f472b6;">88%</div>
+                  <div class="theme-stat-label">直观</div>
+                </div>
+              </div>
+              <h4>️ 技术指标</h4>
+              <div class="tech-stats">
+                <div class="tech-stat-row">
+                  <span class="tech-stat-label">创新性</span>
+                  <div class="tech-stat-bar"><div class="tech-stat-fill blue" data-width="85"></div></div>
+                  <span class="tech-stat-percent">85%</span>
+                </div>
+                <div class="tech-stat-row">
+                  <span class="tech-stat-label">可维护性</span>
+                  <div class="tech-stat-bar"><div class="tech-stat-fill green" data-width="78"></div></div>
+                  <span class="tech-stat-percent">78%</span>
+                </div>
+                <div class="tech-stat-row">
+                  <span class="tech-stat-label">前端稳定性</span>
+                  <div class="tech-stat-bar"><div class="tech-stat-fill purple" data-width="82"></div></div>
+                  <span class="tech-stat-percent">82%</span>
+                </div>
+                <div class="tech-stat-row">
+                  <span class="tech-stat-label">后端稳定性</span>
+                  <div class="tech-stat-bar"><div class="tech-stat-fill orange" data-width="75"></div></div>
+                  <span class="tech-stat-percent">75%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 个人首页面板 -->
+        <div class="home-panel" data-panel="profileHome">
+          <div class="home-panel-header">
+            <h2>个人首页</h2>
+            <p>关于我</p>
+          </div>
+          <div class="home-panel-body">
+            <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">个人首页内容区域</p>
+          </div>
+        </div>
+        <!-- 实时面板 -->
+        <div class="home-panel" data-panel="livePanel">
+          <div class="home-panel-header">
+            <h2>实时面板</h2>
+            <p>实时数据</p>
+          </div>
+          <div class="home-panel-body">
+            <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">实时面板内容区域</p>
+          </div>
+        </div>
+        <!-- 关于网站面板 -->
+        <div class="home-panel" data-panel="aboutSite">
+          <div class="home-panel-header">
+            <h2>关于网站</h2>
+            <p>了解更多</p>
+          </div>
+          <div class="home-panel-body">
+            <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">关于网站内容区域</p>
+          </div>
+        </div>
       </div>
     </div>
     <div class="resize-edge top"></div>
@@ -1874,9 +2107,51 @@
           sidebar.classList.remove('open');
           var overlay = sidebar.parentElement.querySelector('.window-sidebar-overlay');
           if(overlay) overlay.classList.remove('show');
+          // 面板切换
+          var windowContent = sidebar.parentElement.querySelector('.window-content');
+          if(windowContent){
+            var panelName = item.getAttribute('data-panel');
+            if(panelName){
+              windowContent.querySelectorAll('.home-panel').forEach(function(p){
+                p.classList.remove('active');
+              });
+              var target = windowContent.querySelector('.home-panel[data-panel="'+panelName+'"]');
+              if(target){
+                target.classList.add('active');
+              }
+            }
+          }
         }
       });
     });
+
+    // 统计条动画
+    function animateStatBars(){
+      var fills = document.querySelectorAll('.tech-stat-fill');
+      fills.forEach(function(fill){
+        var w = fill.getAttribute('data-width');
+        if(w){
+          fill.style.width = w + '%';
+        }
+      });
+    }
+    // 首页窗口打开时触发动画
+    var homeWindow = document.getElementById('homeWindow');
+    if(homeWindow){
+      var observer = new MutationObserver(function(mutations){
+        mutations.forEach(function(m){
+          if(m.attributeName === 'style'){
+            var display = homeWindow.style.display;
+            if(display !== 'none'){
+              setTimeout(animateStatBars,300);
+            }
+          }
+        });
+      });
+      observer.observe(homeWindow,{attributes:true});
+    }
+    // 初始加载也执行一次
+    setTimeout(animateStatBars,500);
   </script>
 </body>
 </html>
