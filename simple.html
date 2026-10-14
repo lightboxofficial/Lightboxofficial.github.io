@@ -50,25 +50,17 @@
       align-items:center;
       justify-content:center;
       cursor:pointer;
-      transition:all 0.2s;
+      transition:transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
       flex-shrink:0;
       position:relative;
       overflow:hidden;
     }
-    .dock-toggle::before{
-      content:'';
-      position:absolute;
-      inset:0;
-      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
-      background-size:128px 128px;
-      mix-blend-mode:overlay;
-      pointer-events:none;
-    }
     .dock-toggle:hover{
+      transform:scale(1.08);
       background:rgba(18,18,24,0.9);
     }
     .dock-toggle:active{
-      transform:scale(0.9);
+      transform:scale(0.92);
     }
     .dock-toggle svg{
       width:18px;
@@ -122,15 +114,18 @@
       align-items:center;
       justify-content:center;
       cursor:pointer;
-      transition:all 0.25s ease;
+      transition:transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
       position:relative;
       flex-shrink:0;
+    }
+    .dock-item:hover{
+      transform:scale(1.08);
     }
     .dock-item:hover svg{
       filter:brightness(1.2);
     }
     .dock-item:active{
-      transform:scale(0.9);
+      transform:scale(0.92);
     }
     .dock-item svg{
       width:18px;
@@ -160,7 +155,7 @@
       position:fixed;
       left:50%;
       top:50%;
-      transform:translate(-50%,-50%);
+      transform:translate(-50%,-50%) scale(0.92);
       width:min(85vw,700px);
       height:min(75vh,520px);
       min-width:360px;
@@ -177,7 +172,16 @@
       flex-direction:column;
       opacity:0;
       visibility:hidden;
-      transition:opacity 0.24s ease,visibility 0.24s ease;
+      pointer-events:none;
+      transition:opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1), 
+                 visibility 0.28s cubic-bezier(0.22, 1, 0.36, 1), 
+                 transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .app-window.active{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto;
+      transform:translate(-50%,-50%) scale(1);
     }
     .window-content{
       flex:1;
@@ -219,7 +223,7 @@
       justify-content:center;
       cursor:pointer;
       border-radius:4px;
-      transition:background 0.15s ease;
+      transition:background 0.12s ease;
     }
     .window-header-logo:hover{
       background:rgba(255,255,255,0.1);
@@ -256,11 +260,15 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      transition:all 0.15s ease;
+      transition:background 0.12s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .window-btn:hover{
+      transform:scale(1.15);
       background:rgba(255,255,255,0.12);
       color:#fff;
+    }
+    .window-btn:active{
+      transform:scale(0.9);
     }
     .window-btn.close:hover{
       background:rgba(255,80,80,0.6);
@@ -296,7 +304,7 @@
       border-right:1px solid rgba(255,255,255,0.06);
       z-index:10;
       transform:translateX(-100%);
-      transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition:transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
       display:flex;
       flex-direction:column;
       padding:16px 0;
@@ -336,7 +344,7 @@
       padding:10px 12px;
       border-radius:6px;
       cursor:pointer;
-      transition:background 0.15s ease;
+      transition:background 0.12s ease, color 0.12s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
       color:rgba(255,255,255,0.7);
       font-size:13px;
       user-select:none;
@@ -344,6 +352,10 @@
     .window-sidebar-item:hover{
       background:rgba(255,255,255,0.08);
       color:#fff;
+      transform:scale(1.02);
+    }
+    .window-sidebar-item:active{
+      transform:scale(0.97);
     }
     .window-sidebar-item.active{
       background:rgba(255,255,255,0.12);
