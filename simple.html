@@ -34,6 +34,9 @@
     .dock-wrapper.show{
       bottom:12px;
     }
+    .dock-wrapper.dock-pinned{
+      bottom:12px !important;
+    }
     .dock-toggle{
       width:32px;
       height:32px;
@@ -526,37 +529,45 @@
         border-radius:8px;
       }
 
-      /* 手机端任务栏：左侧竖置 */
+      /* 手机端任务栏：从折叠图标正下方展开 */
       .dock-wrapper{
-        left:0 !important;
-        bottom:0 !important;
-        top:0 !important;
+        left:12px !important;
+        top:54px !important;
+        bottom:auto !important;
         transform:none !important;
         flex-direction:column !important;
-        gap:6px;
-        transition:left 0.3s ease;
+        gap:4px;
+        transition:opacity 0.3s ease, transform 0.3s ease;
+        opacity:0;
+        transform:translateY(-10px);
+        pointer-events:none;
       }
       .dock-wrapper.show{
-        bottom:0 !important;
-        left:0 !important;
+        opacity:1;
+        transform:translateY(0);
+        pointer-events:auto;
       }
-      .dock-wrapper.mobile-hidden{
-        left:-50px !important;
+      .dock-wrapper.dock-pinned{
+        opacity:1 !important;
+        transform:translateY(0) !important;
+        pointer-events:auto !important;
       }
 
       /* 手机端dock：竖条 */
       .dock{
         width:44px;
-        height:auto;
+        height:0;
         flex-direction:column;
         border-radius:12px;
         padding:6px 0;
-        opacity:1;
-        transition:opacity 0.3s ease;
+        opacity:0;
+        transition:height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
         gap:4px;
+        overflow:hidden;
       }
       .dock.expanded{
         width:44px;
+        height:auto;
         opacity:1;
         padding:6px 0;
       }
@@ -1565,6 +1576,7 @@
     var dockToggle = document.getElementById('dockToggle');
     var isExpanded = false;
     var isShowing = false;
+    var isPinned = false;
     var showThreshold = 120;
     var hideThreshold = 180;
     var hideTimer = null;
@@ -1575,7 +1587,7 @@
     },100);
 
     document.addEventListener('mousemove', function(e){
-      if(isExpanded) return;
+      if(isExpanded || isPinned) return;
       var distFromBottom = window.innerHeight - e.clientY;
       if(distFromBottom <= showThreshold){
         if(hideTimer){
@@ -1601,23 +1613,39 @@
       e.stopPropagation();
       var isMobile = window.innerWidth <= 480;
       if(isMobile){
-        dockWrapper.classList.toggle('mobile-hidden');
+        if(dockWrapper.classList.contains('dock-pinned')){
+          dockWrapper.classList.remove('dock-pinned');
+          dock.classList.remove('expanded');
+          isPinned = false;
+        }else{
+          dockWrapper.classList.add('dock-pinned');
+          dockWrapper.classList.add('show');
+          dock.classList.add('expanded');
+          isPinned = true;
+        }
       }else{
         isExpanded = !isExpanded;
         if(isExpanded){
           dock.classList.add('expanded');
           dockWrapper.classList.add('show');
+          dockWrapper.classList.add('dock-pinned');
           isShowing = true;
+          isPinned = true;
         }else{
           dock.classList.remove('expanded');
+          dockWrapper.classList.remove('dock-pinned');
+          isPinned = false;
         }
       }
     });
 
     document.addEventListener('click',function(e){
       if(!dock.contains(e.target) && !dockToggle.contains(e.target)){
-        dock.classList.remove('expanded');
-        isExpanded = false;
+        var isMobile = window.innerWidth <= 480;
+        if(!isMobile && !isPinned){
+          dock.classList.remove('expanded');
+          isExpanded = false;
+        }
       }
     });
 
