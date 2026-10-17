@@ -29,7 +29,7 @@
       align-items:center;
       gap:8px;
       z-index:100;
-      transition:bottom 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      transition:bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .dock-wrapper.show{
       bottom:12px;
@@ -87,9 +87,9 @@
       gap:6px;
       padding:0 10px;
       overflow:hidden;
-      width:0;
+      max-width:0;
       opacity:0;
-      transition:width 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease, padding 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      transition:max-width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       position:relative;
     }
     .dock::before{
@@ -102,9 +102,8 @@
       pointer-events:none;
     }
     .dock.expanded{
-      width:394px;
+      max-width:600px;
       opacity:1;
-      padding:0 10px;
     }
     .dock-item{
       width:32px;
@@ -114,18 +113,19 @@
       align-items:center;
       justify-content:center;
       cursor:pointer;
-      transition:transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+      transition:transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
       position:relative;
       flex-shrink:0;
     }
     .dock-item:hover{
-      transform:scale(1.08);
+      transform:scale(1.15) translateY(-2px);
+      background:rgba(255,255,255,0.08);
     }
     .dock-item:hover svg{
-      filter:brightness(1.2);
+      filter:brightness(1.3) drop-shadow(0 2px 4px rgba(255,255,255,0.3));
     }
     .dock-item:active{
-      transform:scale(0.92);
+      transform:scale(0.85) translateY(0);
     }
     .dock-item svg{
       width:18px;
@@ -155,12 +155,12 @@
       position:fixed;
       left:50%;
       top:50%;
-      transform:translate(-50%,-50%) scale(0.92);
+      transform:translate(-50%,-50%) scale(0.85);
       width:min(85vw,700px);
       height:min(75vh,520px);
       min-width:360px;
       min-height:320px;
-      border-radius:8px;
+      border-radius:12px;
       overflow:visible;
       background:rgba(10,10,14,0.92);
       backdrop-filter:blur(20px) saturate(150%);
@@ -173,25 +173,18 @@
       opacity:0;
       visibility:hidden;
       pointer-events:none;
-      transition:opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1), 
-                 visibility 0.28s cubic-bezier(0.22, 1, 0.36, 1), 
-                 transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+      isolation:isolate;
+      transition:opacity 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                 visibility 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                 transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+                 box-shadow 0.3s ease;
     }
     .app-window.active{
       opacity:1;
       visibility:visible;
       pointer-events:auto;
       transform:translate(-50%,-50%) scale(1);
-    }
-    .window-content{
-      flex:1;
-      overflow:hidden;
-      position:relative;
-    }
-    .app-window.active{
-      opacity:1;
-      visibility:visible;
-      pointer-events:auto;
+      box-shadow:0 24px 64px rgba(0,0,0,0.65);
     }
     .app-window.maximized{
       left:4px !important;
@@ -260,15 +253,15 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      transition:background 0.12s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition:background 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .window-btn:hover{
-      transform:scale(1.15);
+      transform:scale(1.2);
       background:rgba(255,255,255,0.12);
       color:#fff;
     }
     .window-btn:active{
-      transform:scale(0.9);
+      transform:scale(0.85);
     }
     .window-btn.close:hover{
       background:rgba(255,80,80,0.6);
@@ -301,13 +294,16 @@
       bottom:0;
       width:220px;
       background:rgba(10,10,14,0.1);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
       border-right:1px solid rgba(255,255,255,0.06);
       z-index:10;
       transform:translateX(-100%);
-      transition:transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+      transition:transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
       display:flex;
       flex-direction:column;
       padding:16px 0;
+      isolation:isolate;
     }
     .window-sidebar.open{
       transform:translateX(0);
@@ -447,6 +443,17 @@
     }
     .home-panel.active{
       display:block;
+      animation:panelFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes panelFadeIn{
+      from{
+        opacity:0;
+        transform:translateY(12px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
     }
     .home-panel-header{
       margin-bottom:24px;
@@ -500,6 +507,11 @@
       border-radius:16px;
       border:1px solid rgba(255,255,255,0.08);
       margin-bottom:20px;
+      transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    }
+    .stats-card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(0,0,0,0.3);
     }
     .stats-card h4{
       font-size:16px;
@@ -521,6 +533,11 @@
       border-radius:12px;
       border:1px solid rgba(255,255,255,0.06);
       text-align:center;
+      transition:transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+    }
+    .theme-stat-item:hover{
+      transform:scale(1.03);
+      background:rgba(255,255,255,0.06);
     }
     .theme-stat-value{
       font-size:28px;
@@ -574,6 +591,111 @@
       min-width:36px;
       text-align:right;
       flex-shrink:0;
+    }
+
+    /* 网站卡片 */
+    .site-cards{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:16px;
+      margin-top:20px;
+    }
+    .site-card{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:18px;
+      background:rgba(255,255,255,0.04);
+      backdrop-filter:blur(15px);
+      -webkit-backdrop-filter:blur(15px);
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.08);
+      transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+      min-height:100px;
+    }
+    .site-card:hover{
+      transform:translateY(-3px);
+      box-shadow:0 12px 32px rgba(0,0,0,0.35);
+    }
+    .site-card-icon{
+      width:44px;
+      height:44px;
+      border-radius:10px;
+      background:rgba(255,255,255,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+    .site-card-icon svg{
+      width:22px;
+      height:22px;
+      stroke:rgba(255,255,255,0.85);
+      stroke-width:1.5;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .site-card-info{
+      flex:1;
+      min-width:0;
+      overflow-y:auto;
+      overflow-x:hidden;
+      max-height:120px;
+    }
+    .site-card-info::-webkit-scrollbar{
+      display:none;
+    }
+    .site-card-info{
+      -ms-overflow-style:none;
+      scrollbar-width:none;
+    }
+    .site-card-title{
+      font-size:14px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:4px;
+      letter-spacing:0.3px;
+    }
+    .site-card-desc{
+      font-size:12px;
+      color:rgba(255,255,255,0.5);
+      line-height:1.5;
+    }
+    .site-card-actions{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      flex-shrink:0;
+    }
+    .site-card-btn{
+      width:36px;
+      height:36px;
+      border-radius:8px;
+      border:none;
+      background:#fff;
+      color:#000;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+    }
+    .site-card-btn:hover{
+      transform:scale(1.1);
+      box-shadow:0 4px 12px rgba(255,255,255,0.2);
+    }
+    .site-card-btn:active{
+      transform:scale(0.9);
+    }
+    .site-card-btn svg{
+      width:16px;
+      height:16px;
+      stroke:#000;
+      stroke-width:2;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
     }
 
     .bg-clock{
@@ -661,7 +783,7 @@
         transform:translate(-50%,-50%);
       }
       .window-sidebar{
-        width:180px;
+        width:min(280px, 80vw);
       }
       .window-sidebar-header h3{
         font-size:14px;
@@ -673,6 +795,22 @@
       .window-sidebar-item svg{
         width:16px;
         height:16px;
+      }
+      .site-cards{
+        grid-template-columns:1fr;
+        gap:12px;
+      }
+      .site-card{
+        padding:14px;
+        gap:12px;
+      }
+      .site-card-icon{
+        width:40px;
+        height:40px;
+      }
+      .site-card-icon svg{
+        width:20px;
+        height:20px;
       }
 
       /* 手机端折叠按钮：左上角 */
@@ -921,13 +1059,72 @@
                 </div>
                 <div class="tech-stat-row">
                   <span class="tech-stat-label">前端稳定性</span>
-                  <div class="tech-stat-bar"><div class="tech-stat-fill purple" data-width="82"></div></div>
+                  <div class="tech-stat-bar"><div class="tech-stat-fill purple" data-width="92"></div></div>
                   <span class="tech-stat-percent">92%</span>
                 </div>
                 <div class="tech-stat-row">
                   <span class="tech-stat-label">后端稳定性</span>
                   <div class="tech-stat-bar"><div class="tech-stat-fill orange" data-width="75"></div></div>
                   <span class="tech-stat-percent">45%</span>
+                </div>
+              </div>
+            </div>
+            <!-- 网站卡片 -->
+            <div class="site-cards">
+              <!-- 原汁原味的首页 -->
+              <div class="site-card">
+                <div class="site-card-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                  </svg>
+                </div>
+                <div class="site-card-info">
+                  <div class="site-card-title">原汁原味的首页</div>
+                  <div class="site-card-desc">一种非常好吃的鸡腿，但是看起来十分臃肿，至少我不认为跟专业有什么比捕鼠夹和煎牛排之间更大的关系</div>
+                </div>
+                <div class="site-card-actions">
+                  <button class="site-card-btn" title="本站内打开" onclick="return false;">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+                    </svg>
+                  </button>
+                  <button class="site-card-btn" title="新标签页打开" onclick="window.open('https://lightboxofficial.github.io/', '_blank')">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                      <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <!-- 复杂版本 -->
+              <div class="site-card">
+                <div class="site-card-icon">
+                  <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                </div>
+                <div class="site-card-info">
+                  <div class="site-card-title">复杂版本</div>
+                  <div class="site-card-desc">我也不知道啊，但是图标这么多，肯定得图省事，然后就省了。</div>
+                </div>
+                <div class="site-card-actions">
+                  <button class="site-card-btn" title="本站内打开" onclick="return false;">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+                    </svg>
+                  </button>
+                  <button class="site-card-btn" title="新标签页打开" onclick="window.open('https://lightboxofficial.github.io/home.html', '_blank')">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                      <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1907,6 +2104,13 @@
       moreWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null}
     };
 
+    var zIndexCounter = 50;
+
+    function focusWindow(winId){
+      zIndexCounter++;
+      windows[winId].el.style.zIndex = zIndexCounter;
+    }
+
     var dockItems = {
       homeWindow:document.getElementById('dockHome'),
       appsWindow:document.getElementById('dockApps'),
@@ -1958,7 +2162,12 @@
         if(e.target.closest('button')) return;
         if(e.target.closest('[data-sidebar-toggle]')) return;
         if(w.max) return;
+        focusWindow(winId);
         startDrag(e,w);
+      });
+
+      w.el.addEventListener('mousedown',function(){
+        focusWindow(winId);
       });
 
       function startDrag(e,w){
