@@ -2549,16 +2549,16 @@
     });
 
     var windows = {
-      homeWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
-      appsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
-      projectsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
-      profileWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
-      accountWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
-      settingsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
-      blogWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
-      chatWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
-      menuWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null},
-      moreWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null}
+      homeWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null,initialContent:null},
+      appsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null,initialContent:null},
+      projectsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null,initialContent:null},
+      profileWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null,initialContent:null},
+      accountWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null,initialContent:null},
+      settingsWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null,initialContent:null},
+      blogWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null,initialContent:null},
+      chatWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null,initialContent:null},
+      menuWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null,initialContent:null},
+      moreWindow:{el:null,header:null,minBtn:null,maxBtn:null,closeBtn:null,max:false,prevRect:null,initialContent:null}
     };
 
     var zIndexCounter = 50;
@@ -2592,6 +2592,14 @@
       w.closeBtn.addEventListener('click',function(){
         w.el.classList.remove('active');
         if(dockItems[winId]) dockItems[winId].classList.remove('active');
+        var content = w.el.querySelector('.window-content');
+        if(content && w.initialContent){
+          content.innerHTML = w.initialContent;
+          var skillFills = content.querySelectorAll('.skill-fill[data-width]');
+          skillFills.forEach(function(fill){
+            fill.style.width = '0%';
+          });
+        }
       });
 
       w.minBtn.addEventListener('click',function(){
@@ -2711,6 +2719,10 @@
           if(!wasActive){
             w.el.classList.add('active');
             item.classList.add('active');
+            var content = w.el.querySelector('.window-content');
+            if(content && !w.initialContent){
+              w.initialContent = content.innerHTML;
+            }
           }else{
             w.el.classList.remove('active');
             item.classList.remove('active');
