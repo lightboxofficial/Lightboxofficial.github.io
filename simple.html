@@ -925,6 +925,31 @@
       flex-shrink:0;
     }
 
+    /* 空空如也卡片 */
+    .empty-card{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:40px 20px;
+      background:rgba(255,255,255,0.03);
+      border-radius:14px;
+      border:1px dashed rgba(255,255,255,0.1);
+      margin-top:10px;
+    }
+    .empty-kaomoji{
+      font-size:20px;
+      color:rgba(255,255,255,0.6);
+      margin-bottom:12px;
+      letter-spacing:1px;
+    }
+    .empty-note{
+      font-size:13px;
+      color:rgba(255,255,255,0.35);
+      text-align:center;
+      line-height:1.6;
+    }
+
     .bg-clock{
       position:fixed;
       top:15%;
@@ -1573,7 +1598,10 @@
             <p>实时数据</p>
           </div>
           <div class="home-panel-body">
-            <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">实时面板内容区域</p>
+            <div class="empty-card">
+              <div class="empty-kaomoji">(´･ω･`)っ空空如也</div>
+              <div class="empty-note">我没钱买服务器，简直是太棒了</div>
+            </div>
           </div>
         </div>
         <!-- 关于网站面板 -->
@@ -1583,7 +1611,10 @@
             <p>了解更多</p>
           </div>
           <div class="home-panel-body">
-            <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">关于网站内容区域</p>
+            <div class="empty-card">
+              <div class="empty-kaomoji">(´･ω･`)っ空空如也</div>
+              <div class="empty-note">我没钱买服务器，简直是太棒了</div>
+            </div>
           </div>
         </div>
       </div>
