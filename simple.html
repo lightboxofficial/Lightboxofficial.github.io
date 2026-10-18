@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NoTificiansCloud Simple，一即全，全即一</title>
+  <title>NoTificiansCloud Simple ---路漫漫其修远兮，吾将上下而求索</title>
   <style>
     *{
       margin:0;
@@ -699,6 +699,229 @@
       stroke-linejoin:round;
     }
 
+    /* 个人首页样式 */
+    .profile-card{
+      display:flex;
+      gap:20px;
+      padding:20px;
+      background:rgba(255,255,255,0.04);
+      backdrop-filter:blur(15px);
+      -webkit-backdrop-filter:blur(15px);
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.08);
+      margin-bottom:16px;
+      transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    }
+    .profile-card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(0,0,0,0.3);
+    }
+    .profile-card.about-card{
+      flex-direction:column;
+    }
+    .profile-card.links-card{
+      flex-direction:column;
+    }
+    .avatar-box{
+      width:100px;
+      height:100px;
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.15);
+      flex-shrink:0;
+      transition:transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor:pointer;
+    }
+    .avatar-box:hover{
+      transform:scale(1.05);
+    }
+    .avatar-box img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .profile-info{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-width:0;
+    }
+    .profile-main{
+      display:flex;
+      align-items:center;
+      gap:16px;
+    }
+    .profile-buttons{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      flex-shrink:0;
+    }
+    .profile-btn{
+      padding:8px 16px;
+      border-radius:8px;
+      background:#fff;
+      color:#000;
+      font-size:13px;
+      font-weight:600;
+      text-decoration:none;
+      transition:transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+      white-space:nowrap;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width:120px;
+    }
+    .profile-btn:hover{
+      transform:scale(1.05);
+      box-shadow:0 4px 12px rgba(255,255,255,0.15);
+    }
+    .profile-btn:active{
+      transform:scale(0.95);
+    }
+    .profile-bio{
+      font-size:14px;
+      line-height:1.6;
+      color:rgba(255,255,255,0.8);
+    }
+    .profile-card-scroll{
+      flex:1;
+      overflow-y:auto;
+      overflow-x:hidden;
+      max-height:200px;
+    }
+    .profile-card-scroll::-webkit-scrollbar{
+      display:none;
+    }
+    .profile-card-scroll{
+      -ms-overflow-style:none;
+      scrollbar-width:none;
+    }
+    .about-title{
+      font-size:16px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:12px;
+    }
+    .about-content{
+      font-size:13px;
+      line-height:1.7;
+      color:rgba(255,255,255,0.75);
+    }
+    .links-content{
+      display:flex;
+      gap:20px;
+      align-items:flex-start;
+    }
+    .links-list{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      flex-shrink:0;
+    }
+    .link-item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 12px;
+      border-radius:8px;
+      color:rgba(255,255,255,0.7);
+      text-decoration:none;
+      font-size:13px;
+      transition:background 0.2s ease, color 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .link-item:hover{
+      background:rgba(255,255,255,0.08);
+      color:rgba(255,255,255,0.95);
+      transform:translateX(4px);
+    }
+    .link-item svg{
+      flex-shrink:0;
+      opacity:0.7;
+    }
+    .links-note{
+      flex:1;
+      font-size:13px;
+      line-height:1.7;
+      color:rgba(255,255,255,0.65);
+      padding:14px;
+      background:rgba(255,255,255,0.03);
+      border-radius:8px;
+      overflow-y:auto;
+      max-height:300px;
+    }
+    .links-note::-webkit-scrollbar{
+      display:none;
+    }
+    .links-note{
+      -ms-overflow-style:none;
+      scrollbar-width:none;
+    }
+    /* 技能统计 */
+    .skills-card{
+      padding:20px;
+      background:rgba(255,255,255,0.04);
+      backdrop-filter:blur(15px);
+      -webkit-backdrop-filter:blur(15px);
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.08);
+      margin-bottom:16px;
+      transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    }
+    .skills-card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(0,0,0,0.3);
+    }
+    .skills-title{
+      font-size:16px;
+      font-weight:600;
+      color:#fff;
+      margin-bottom:16px;
+    }
+    .skill-row{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .skill-row:last-child{
+      margin-bottom:0;
+    }
+    .skill-label{
+      font-size:13px;
+      color:rgba(255,255,255,0.7);
+      min-width:80px;
+      flex-shrink:0;
+    }
+    .skill-bar{
+      flex:1;
+      height:8px;
+      background:rgba(255,255,255,0.08);
+      border-radius:4px;
+      overflow:hidden;
+    }
+    .skill-fill{
+      height:100%;
+      border-radius:4px;
+      transition:width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .skill-fill.html{background:linear-gradient(90deg,#e34c26,#f06529);}
+    .skill-fill.css{background:linear-gradient(90deg,#264de4,#2965f1);}
+    .skill-fill.js{background:linear-gradient(90deg,#f0db4f,#e8d44d);}
+    .skill-fill.python{background:linear-gradient(90deg,#3776ab,#ffd43b);}
+    .skill-fill.cpp{background:linear-gradient(90deg,#00599c,#659ad2);}
+    .skill-fill.java{background:linear-gradient(90deg,#ed8b00,#5382a1);}
+    .skill-fill.node{background:linear-gradient(90deg,#3c873a,#68a063);}
+    .skill-fill.git{background:linear-gradient(90deg,#f05032,#de4c36);}
+    .skill-percent{
+      font-size:12px;
+      color:rgba(255,255,255,0.5);
+      min-width:36px;
+      text-align:right;
+      flex-shrink:0;
+    }
+
     .bg-clock{
       position:fixed;
       top:15%;
@@ -1138,7 +1361,132 @@
             <p>关于我</p>
           </div>
           <div class="home-panel-body">
-            <p style="text-align:center;color:rgba(255,255,255,0.5);margin-top:40px;">个人首页内容区域</p>
+            <!-- 头像卡片 -->
+            <div class="profile-card">
+              <div class="avatar-box">
+                <img src="avatar1.jpg" alt="头像">
+              </div>
+              <div class="profile-info">
+                <div class="profile-main">
+                  <div class="profile-buttons">
+                    <a href="https://space.bilibili.com/3546714772343354" target="_blank" class="profile-btn">关注 Subscribe</a>
+                    <a href="https://github.com/lightboxofficial" target="_blank" class="profile-btn">跟随 Following</a>
+                  </div>
+                  <div class="profile-bio">
+                    中学牲 / B站野生UP主 / 编程猫佛系选手
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 自我介绍卡片 -->
+            <div class="profile-card about-card">
+              <div class="about-title">自我介绍</div>
+              <div class="profile-card-scroll">
+                <div class="about-content">
+                  👋 Hi, I'm @lightboxofficial<br><br>
+                  📣 lightboxofficial的GitHub个人主页📣<br>
+                  ✨ 我是谁？✨<br>
+                  大家好，我是lightboxofficial——一个在"苟且偷生"的代码打工人（误）畜中牲（真），B站野生UP主，编程猫の佛系选手。<br><br>
+                  虽然"胸无大志"，但"胸（怀）有大志"——毕竟我的梦想是成为"躺着也能把钱赚了"的卷王之王（划掉）咸鱼之王！🌚<br><br>
+                  🌿 我的地盘<br>
+                  GitHub：本仓库主要存放我那些"看似有用实则摸鱼"的代码，欢迎围观，但别指望能直接拿来拯救世界（除非你想毁灭它）。<br>
+                  B站：https://space.bilibili.com/3546714772343354 —— 偶尔更新一些"技术向鬼畜"和"摸鱼教程"，粉丝没有全靠同行衬托，求关注。<br>
+                  编程猫：https://shequ.codemao.cn/user/7984238 —— 别问，问就是"少儿编程从入门到入土"。🐾<br><br>
+                  ⚠️ 重要声明⚠️<br>
+                  本仓库代码可能存在大量"魔法注释"和"祖传代码"，使用前请自备护目镜和防毒面具。<br>
+                  若发现任何BUG，请温柔地告诉我，我会用"下次一定改"的真诚眼神凝视你。<br>
+                  合作？没问题！只要你不介意我的"拖延症晚期"和"需求变更强迫症"。<br><br>
+                  🔥 我的技能树🔥<br>
+                  熟练掌握：Ctrl+C / V，摸鱼大法，以及"假装在工作的表情管理"。<br>
+                  略懂：Python（写脚本）、c++（花式杂耍）、前端（调样式到眼瞎）。<br>
+                  终极奥义：用30行代码实现别人100行功能——然后花200行修复它。😂<br><br>
+                  💡 人生信条💡<br>
+                  "代码写得好，不如PPT做得骚；技术强不强，关键看头发掉得多不多。"<br>
+                  （温馨提示：本人头发茂密，可能是个假程序员🌝）<br><br>
+                  🌙 联系我🌙<br>
+                  邮箱：lightboxofficial@163.com / lightboxofficial@outlook.com<br>
+                  微信：13815309423（加好友请备注"GitHub有缘人"）<br>
+                  QQ：3896653459（加好友必发"啊米诺斯"）<br>
+                  或者直接私信B站/编程猫——虽然我可能三天后才回……<br><br>
+                  📸 最后の彩蛋📸<br>
+                  如果你看到这里还没走，说明你也是个"细节怪"！送你一个专属成就："真爱粉の凝视"！✨<br>
+                  快来和我一起——在代码的世界里，做一个快乐的咸鱼吧！🐟
+                </div>
+              </div>
+            </div>
+            <!-- 技能统计 -->
+            <div class="skills-card">
+              <div class="skills-title"> 技能树</div>
+              <div class="skill-row">
+                <span class="skill-label">HTML/CSS</span>
+                <div class="skill-bar"><div class="skill-fill html" data-width="85"></div></div>
+                <span class="skill-percent">85%</span>
+              </div>
+              <div class="skill-row">
+                <span class="skill-label">JavaScript</span>
+                <div class="skill-bar"><div class="skill-fill js" data-width="70"></div></div>
+                <span class="skill-percent">70%</span>
+              </div>
+              <div class="skill-row">
+                <span class="skill-label">Python</span>
+                <div class="skill-bar"><div class="skill-fill python" data-width="65"></div></div>
+                <span class="skill-percent">65%</span>
+              </div>
+              <div class="skill-row">
+                <span class="skill-label">C++</span>
+                <div class="skill-bar"><div class="skill-fill cpp" data-width="50"></div></div>
+                <span class="skill-percent">50%</span>
+              </div>
+              <div class="skill-row">
+                <span class="skill-label">Node.js</span>
+                <div class="skill-bar"><div class="skill-fill node" data-width="45"></div></div>
+                <span class="skill-percent">45%</span>
+              </div>
+              <div class="skill-row">
+                <span class="skill-label">Git</span>
+                <div class="skill-bar"><div class="skill-fill git" data-width="60"></div></div>
+                <span class="skill-percent">60%</span>
+              </div>
+            </div>
+            <!-- 链接卡片 -->
+            <div class="profile-card links-card">
+              <div class="about-title">相关链接</div>
+              <div class="links-content">
+                <div class="links-list">
+                  <a href="https://github.com/lightboxofficial" target="_blank" class="link-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                    <span>GitHub</span>
+                  </a>
+                  <a href="https://space.bilibili.com/3546714772343354" target="_blank" class="link-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.813 4.653h.854c.656 0 1.188.532 1.188 1.188v11.111c0 .656-.532 1.188-1.188 1.188H5.333a1.188 1.188 0 0 1-1.188-1.188V5.841c0-.656.532-1.188 1.188-1.188h.855L4.932 2.9a.594.594 0 0 1 .84-.84l1.59 1.594h9.277l1.59-1.594a.594.594 0 1 1 .84.84l-1.256 1.753zM8.024 8.425a.89.89 0 0 0-.891.89v4.262c0 .491.4.89.89.89.492 0 .891-.399.891-.89V9.315a.89.89 0 0 0-.89-.89zm7.952 0a.89.89 0 0 0-.89.89v4.262c0 .491.399.89.89.89.492 0 .89-.399.89-.89V9.315a.89.89 0 0 0-.89-.89z"/></svg>
+                    <span>B站</span>
+                  </a>
+                  <a href="https://shequ.codemao.cn/user/7984238" target="_blank" class="link-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                    <span>编程猫</span>
+                  </a>
+                  <a href="mailto:lightboxofficial@163.com" class="link-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <span>邮箱</span>
+                  </a>
+                  <a href="https://chat.neboer.site" target="_blank" class="link-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span>Matrix</span>
+                  </a>
+                  <a href="https://center.mcmod.cn/1148080" target="_blank" class="link-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+                    <span>MCMod</span>
+                  </a>
+                </div>
+                <div class="links-note">
+                  这里是NoTificians无闻，这个词很有意思，原本是notifications的缩写，我去掉了ca，显然我的英语并不怎么好。<br>
+                  No是一个梗的用法，你可以读成no ti fi tion s 的读法，随你喜欢。<br><br>
+                  我本来就比较擅长胡思乱想，我擅长从完全不同的猎奇角度来想问题，因此对于一些矛盾的问题，我总会从一些不一样的角度思考。<br>
+                  如"研究生导师是不是和学生充当的也有互补作用，老师不会的学生也可以解决"或者"营销号是社会必然的白血病"如此之类。<br><br>
+                  总之，我是一个似乎不太合群的人，但是能看到这里，陌生人，谢谢你，祝你早安 午安 晚安——NoTificians无闻
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <!-- 实时面板 -->
@@ -2328,6 +2676,14 @@
               var target = windowContent.querySelector('.home-panel[data-panel="'+panelName+'"]');
               if(target){
                 target.classList.add('active');
+                if(panelName === 'profileHome'){
+                  setTimeout(function(){
+                    target.querySelectorAll('.skill-fill').forEach(function(bar){
+                      var w = bar.getAttribute('data-width');
+                      bar.style.width = w + '%';
+                    });
+                  }, 100);
+                }
               }
             }
           }
