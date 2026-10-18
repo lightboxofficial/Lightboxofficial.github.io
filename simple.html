@@ -602,7 +602,7 @@
     }
     .site-card{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       gap:14px;
       padding:18px;
       background:rgba(255,255,255,0.04);
@@ -611,7 +611,8 @@
       border-radius:14px;
       border:1px solid rgba(255,255,255,0.08);
       transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-      min-height:100px;
+      height:110px;
+      overflow:hidden;
     }
     .site-card:hover{
       transform:translateY(-3px);
@@ -641,7 +642,7 @@
       min-width:0;
       overflow-y:auto;
       overflow-x:hidden;
-      max-height:120px;
+      max-height:72px;
     }
     .site-card-info::-webkit-scrollbar{
       display:none;
