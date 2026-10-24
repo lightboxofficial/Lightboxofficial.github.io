@@ -374,7 +374,7 @@
               return match;
             }
           }
-          return val;
+          return Array.isArray(val) ? '[' + val.join(',') + ']' : val;
         }
         if(datLists[listName]){
           var val = datLists[listName];
@@ -385,7 +385,7 @@
               return match;
             }
           }
-          return val;
+          return Array.isArray(val) ? '{' + val.join(',') + '}' : val;
         }
         return match;
       });
@@ -393,6 +393,10 @@
       text = text.replace(/(\w+)\[(\d+)\]/g, function(match, listName, index){
         if(lists[listName] && lists[listName][parseInt(index)] !== undefined){
           return lists[listName][parseInt(index)];
+        }
+        if(datLists[listName] && datLists[listName][parseInt(index)] !== undefined){
+          var val = datLists[listName][parseInt(index)];
+          return Array.isArray(val) ? '{' + val.join(',') + '}' : val;
         }
         return match;
       });
@@ -480,7 +484,7 @@
         return;
       }
 
-      // dat list 列表名 = {{项},{项},...}
+      // dat list 列表名 = {项1,项2,...} 支持单项和嵌套
       if(input.startsWith('dat list ')){
         var datMatch = input.match(/^dat\s+list\s+(\w+)\s*=\s*\{(.+)\}$/);
         if(datMatch){
@@ -507,27 +511,49 @@
                 }
                 if(depth === 0){
                   if(current.trim()){
-                    datItems.push(current.trim().split(/,/).map(function(s){ return s.trim(); }));
+                    // 解析当前项：可能是嵌套列表或单个值
+                    var item = parseDatItem(current.trim());
+                    datItems.push(item);
                   }
                   current = '';
                 }else{
                   current += ch;
                 }
-              }else if(depth > 0){
+              }else if(ch === ',' && depth === 0){
+                if(current.trim()){
+                  var item = parseDatItem(current.trim());
+                  datItems.push(item);
+                }
+                current = '';
+              }else if(depth >= 0){
                 current += ch;
               }
             }
             if(error || depth !== 0){
-              addOutput('语法错误: dat list 列表名 = {{项1,项2},{项3,项4}}');
+              addOutput('语法错误: dat list 列表名 = {项1,项2,...}');
             }else{
+              if(current.trim()){
+                var item = parseDatItem(current.trim());
+                datItems.push(item);
+              }
               datLists[datName] = datItems;
-              addOutput('dat列表 ' + datName + ' 已创建，共 ' + datItems.length + ' 组');
+              addOutput('dat列表 ' + datName + ' 已创建，共 ' + datItems.length + ' 项');
             }
           }
         }else{
-          addOutput('语法错误: dat list 列表名 = {{项1,项2},{项3,项4}}');
+          addOutput('语法错误: dat list 列表名 = {项1,项2,...}');
         }
         return;
+      }
+
+      function parseDatItem(text){
+        text = text.trim();
+        if(text.startsWith('{') && text.endsWith('}')){
+          // 嵌套列表
+          var inner = text.substring(1, text.length - 1);
+          return inner.split(/,/).map(function(s){ return s.trim(); });
+        }
+        return text;
       }
 
       // dom list 列表名 = 多维数组格式
@@ -589,47 +615,47 @@
           }
           return;
         }
-        // write dat列表名[索引1,索引2] = 值
+        // write dat/dom列表名[索引1,索引2] = 值
         var writeDatMatch = writeContent.match(/^(\w+)\[([\d,]+)\]\s*=\s*(.+)$/);
         if(writeDatMatch){
           var wDatName = writeDatMatch[1];
           var wIndices = writeDatMatch[2].split(',').map(Number);
           var wValue = writeDatMatch[3].trim();
-          if(datLists[wDatName]){
-            var target = datLists[wDatName];
-            for(var i = 0; i < wIndices.length - 1; i++){
-              if(target[wIndices[i]]){
-                target = target[wIndices[i]];
+          var targetList = datLists[wDatName] || domLists[wDatName];
+          if(targetList){
+            if(wIndices.length === 1){
+              // 单层写入
+              var idx = wIndices[0];
+              if(idx >= targetList.length){
+                targetList.push(wValue);
+                addOutput('列表 ' + wDatName + ' 新增第 ' + idx + ' 项');
+              }else{
+                targetList[idx] = wValue;
+                addOutput('列表 ' + wDatName + '[' + idx + '] 已修改');
+              }
+            }else{
+              // 多层写入
+              var target = targetList;
+              for(var i = 0; i < wIndices.length - 1; i++){
+                if(target[wIndices[i]] !== undefined){
+                  target = target[wIndices[i]];
+                }else{
+                  addOutput('索引越界');
+                  return;
+                }
+              }
+              var lastIdx = wIndices[wIndices.length - 1];
+              if(Array.isArray(target)){
+                if(lastIdx >= target.length){
+                  target.push(wValue);
+                  addOutput('列表 ' + wDatName + ' 新增项');
+                }else{
+                  target[lastIdx] = wValue;
+                  addOutput('列表 ' + wDatName + ' 已修改');
+                }
               }else{
                 addOutput('索引越界');
-                return;
               }
-            }
-            var lastIdx = wIndices[wIndices.length - 1];
-            if(target[lastIdx] !== undefined){
-              target[lastIdx] = wValue;
-              addOutput('dat列表 ' + wDatName + ' 已修改');
-            }else{
-              target.push(wValue);
-              addOutput('dat列表 ' + wDatName + ' 新增项');
-            }
-          }else if(domLists[wDatName]){
-            var target = domLists[wDatName];
-            for(var i = 0; i < wIndices.length - 1; i++){
-              if(target[wIndices[i]] !== undefined){
-                target = target[wIndices[i]];
-              }else{
-                addOutput('索引越界');
-                return;
-              }
-            }
-            var lastIdx = wIndices[wIndices.length - 1];
-            if(target[lastIdx] !== undefined){
-              target[lastIdx] = wValue;
-              addOutput('dom列表 ' + wDatName + ' 已修改');
-            }else{
-              target.push(wValue);
-              addOutput('dom列表 ' + wDatName + ' 新增项');
             }
           }else{
             addOutput('未找到: ' + wDatName);
@@ -660,7 +686,7 @@
             'var': 'var 变量名 = 变量值\n设置一个变量，值可以是任何类型的连续内容\n示例: var name = 张三\n引用: 直接使用变量名，如 "你好 name"',
             'list': 'list 列表名 = {内容1, 内容2, ...}\n创建一个列表，项之间用英文逗号分隔\n示例: list colors = {红, 绿, 蓝}\n引用: 列表名[索引]，如 colors[0]\n注意: 仅英文符号识别为表达式',
             'dict': 'dict 字典名 = [键:值, 键:值, ...]\n创建键值对字典，用中括号包裹\n示例: dict info = [姓名:张三, 年龄:20]\n引用: 字典名(键名)，如 info(姓名)\n注意: 仅英文符号识别为表达式',
-            'dat': 'dat list 列表名 = {{项1,项2},{项3,项4}}\n创建嵌套列表，支持多层嵌套\n示例: dat list matrix = {{1,2},{3,4}}\n引用: 列表名[行,列]，如 matrix[0,1]\n注意: 英文符号优先识别为表达式，中文符号为普通字符，嵌套出错会报错',
+            'dat': 'dat list 列表名 = {项1,项2,...}\n创建嵌套列表，支持单项和嵌套混合\n示例: dat list name = {1,{1,3},{1,3,5},5,4,1,{1,2,3}}\n引用: 列表名[索引] 读取单项，列表名[索引1,索引2] 读取嵌套项\n如 name[2,2] 读取 {1,3,5} 中的 5\n注意: 英文符号优先识别为表达式，中文符号为普通字符，嵌套出错会报错',
             'dom': 'dom list 列表名 = 多维数组格式\n创建多维列表，语法类似C++多维数组\n示例: dom list arr = [[[1,2],[3,4]],[[5,6],[7,8]]]\n引用: 列表名[索引1,索引2,...]\n注意: 仅英文符号识别为表达式',
             'read': 'read 变量名              查看变量值\nread 列表名              查看整个列表\nread 列表名[索引]        查看列表某一项\nread 字典名              查看整个字典\nread 字典名(键名)        查看字典某键的值\nread 列表名[索引1,索引2] 查看嵌套列表某项',
             'write': 'write 列表名[索引] = 值      修改列表项（不存在则新建）\nwrite 字典名(键) = 值        修改字典键值\nwrite 列表名[索引1,索引2] = 值  修改嵌套列表项',
@@ -713,7 +739,7 @@
                 return;
               }
             }
-            addOutput(val);
+            addOutput(Array.isArray(val) ? '[' + val.join(',') + ']' : val);
             return;
           }
           if(datLists[mName]){
@@ -726,7 +752,7 @@
                 return;
               }
             }
-            addOutput(val);
+            addOutput(Array.isArray(val) ? '{' + val.join(',') + '}' : val);
             return;
           }
         }
@@ -737,6 +763,9 @@
           var lIndex = parseInt(listMatch[2]);
           if(lists[lName] && lists[lName][lIndex] !== undefined){
             addOutput(lists[lName][lIndex]);
+          }else if(datLists[lName] && datLists[lName][lIndex] !== undefined){
+            var val = datLists[lName][lIndex];
+            addOutput(Array.isArray(val) ? '{' + val.join(',') + '}' : val);
           }else{
             addOutput('未找到: ' + name);
           }
