@@ -402,6 +402,41 @@
         return;
       }
 
+      // help [指令名]
+      if(input === 'help' || input.startsWith('help ')){
+        var cmdName = input.substring(5).trim();
+        if(!cmdName){
+          addOutput('=== NoTificiansCloud 指令列表 ===');
+          addOutput('var <名> = <值>      设置变量');
+          addOutput('list <名> = {项...}  创建列表');
+          addOutput('read <名/索引>       查看变量或列表');
+          addOutput('help [指令名]        查看帮助');
+          addOutput('clear                清屏');
+          addOutput('输入任意内容         回显（支持变量/列表引用）');
+        }else{
+          var helpTexts = {
+            'var': 'var 变量名 = 变量值\n设置一个变量，值可以是任何类型的连续内容\n示例: var name = 张三\n引用: 直接使用变量名，如 "你好 name"',
+            'list': 'list 列表名 = {内容1, 内容2, ...}\n创建一个列表，项之间用逗号分隔（支持全半角中英文逗号）\n示例: list colors = {红, 绿, 蓝}\n引用: 列表名[索引]，如 colors[0]',
+            'read': 'read 变量名          查看变量值\nread 列表名          查看整个列表\nread 列表名[索引]    查看列表某一项\n示例: read name\n      read colors\n      read colors[0]',
+            'help': 'help               查看所有指令列表\nhelp 指令名        查看指定指令的详细用法\n示例: help var\n      help list',
+            'clear': 'clear              清空终端屏幕\n无参数'
+          };
+          if(helpTexts[cmdName]){
+            addOutput(helpTexts[cmdName]);
+          }else{
+            addOutput('未找到指令: ' + cmdName);
+          }
+        }
+        return;
+      }
+
+      // clear 清屏
+      if(input === 'clear'){
+        var lines = terminalBody.querySelectorAll('.terminal-line');
+        lines.forEach(function(line){ line.remove(); });
+        return;
+      }
+
       // read 列表名/变量名/列表名[索引]
       if(input.startsWith('read ')){
         var name = input.substring(5).trim();
