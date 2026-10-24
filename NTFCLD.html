@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NoTificiansCloud 4.0</title>
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+    body{
+      min-height:100vh;
+      background:#111;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      overflow:hidden;
+      transition:background-image 0.5s ease;
+    }
+    .app-window{
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%) scale(0.85);
+      width:min(85vw,700px);
+      height:min(75vh,520px);
+      min-width:360px;
+      min-height:320px;
+      border-radius:12px;
+      overflow:visible;
+      background:rgba(10,10,14,0.92);
+      backdrop-filter:blur(20px) saturate(150%);
+      -webkit-backdrop-filter:blur(20px) saturate(150%);
+      border:1px solid rgba(255,255,255,0.05);
+      box-shadow:0 16px 48px rgba(0,0,0,0.55);
+      z-index:50;
+      display:flex;
+      flex-direction:column;
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      isolation:isolate;
+      transition:opacity 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                 visibility 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                 transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+                 box-shadow 0.3s ease;
+    }
+    .app-window.active{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto;
+      transform:translate(-50%,-50%) scale(1);
+      box-shadow:0 24px 64px rgba(0,0,0,0.65);
+    }
+    .app-window.maximized{
+      left:4px !important;
+      top:4px !important;
+      transform:none !important;
+      width:calc(100vw - 8px) !important;
+      height:calc(100vh - 76px) !important;
+    }
+    .window-header{
+      display:flex;
+      align-items:center;
+      padding:8px 12px;
+      background:rgba(0,0,0,0.12);
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      cursor:move;
+      user-select:none;
+      flex-shrink:0;
+    }
+    .window-header-left{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .window-title{
+      font-size:13px;
+      font-weight:500;
+      color:rgba(255,255,255,0.85);
+      letter-spacing:0.5px;
+      font-family:'Georgia','Times New Roman',serif;
+    }
+    .window-controls{
+      margin-left:auto;
+      display:flex;
+      gap:6px;
+    }
+    .window-btn{
+      width:24px;
+      height:24px;
+      border-radius:6px;
+      border:none;
+      background:rgba(255,255,255,0.06);
+      color:rgba(255,255,255,0.7);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:background 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .window-btn:hover{
+      transform:scale(1.2);
+      background:rgba(255,255,255,0.12);
+      color:#fff;
+    }
+    .window-btn:active{
+      transform:scale(0.85);
+    }
+    .window-btn.close:hover{
+      background:rgba(255,80,80,0.6);
+    }
+    .window-btn svg{
+      width:12px;
+      height:12px;
+      stroke:currentColor;
+      stroke-width:2;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .window-content{
+      flex:1;
+      padding:16px;
+      overflow:hidden;
+      color:rgba(255,255,255,0.8);
+      display:flex;
+      flex-direction:column;
+    }
+    .terminal-body{
+      flex:1;
+      overflow-y:auto;
+      font-family:"SF Mono","Cascadia Code","Fira Code","Consolas",monospace;
+      font-size:13px;
+      color:rgba(255,255,255,0.85);
+      line-height:1.6;
+    }
+    .terminal-body::-webkit-scrollbar{
+      display:none;
+    }
+    .terminal-line{
+      display:flex;
+      align-items:flex-start;
+      margin-bottom:2px;
+    }
+    .terminal-prompt{
+      color:#28c840;
+      white-space:nowrap;
+      margin-right:8px;
+      font-weight:600;
+    }
+    .terminal-output{
+      color:rgba(255,255,255,0.7);
+      word-break:break-all;
+    }
+    .terminal-input-line{
+      display:flex;
+      align-items:center;
+      margin-top:4px;
+    }
+    .terminal-input{
+      flex:1;
+      background:transparent;
+      border:none;
+      outline:none;
+      color:rgba(255,255,255,0.9);
+      font-family:inherit;
+      font-size:inherit;
+      caret-color:#28c840;
+    }
+    .terminal-input::placeholder{
+      color:rgba(255,255,255,0.2);
+    }
+    .terminal-welcome{
+      color:rgba(255,255,255,0.5);
+      margin-bottom:12px;
+      line-height:1.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-window" id="cmdWindow">
+    <div class="window-header" id="cmdHeader">
+      <div class="window-header-left">
+        <div class="window-title">NoTificiansCloudSimple CMD</div>
+      </div>
+      <div class="window-controls">
+        <button class="window-btn minimize" onclick="minimizeWindow('cmdWindow')">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="window-btn maximize" onclick="maximizeWindow('cmdWindow')">
+          <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+        </button>
+        <button class="window-btn close" onclick="closeWindow('cmdWindow')">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-content">
+      <div class="terminal-body" id="terminalBody">
+        <div class="terminal-welcome">欢迎使用NoTificiansCloudSimple CMD</div>
+        <div class="terminal-input-line">
+          <span class="terminal-prompt">&lt;NoTificiansCloud&gt;:</span>
+          <input type="text" class="terminal-input" id="terminalInput" placeholder="" autofocus>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentPicInfo = { desc:'', author:'', link:'', picId:'', bgUrl:'' };
+    const terminalBody = document.getElementById('terminalBody');
+    const terminalInput = document.getElementById('terminalInput');
+    const cmdWindow = document.getElementById('cmdWindow');
+    const cmdHeader = document.getElementById('cmdHeader');
+
+    var zCounter = 50;
+    var initialContent = {};
+    var variables = {};
+    var lists = {};
+
+    function focusWindow(id){
+      var el = document.getElementById(id);
+      if(el){
+        zCounter++;
+        el.style.zIndex = zCounter;
+      }
+    }
+
+    function minimizeWindow(id){
+      var el = document.getElementById(id);
+      if(el){
+        el.classList.remove('active');
+      }
+    }
+
+    function maximizeWindow(id){
+      var el = document.getElementById(id);
+      if(el){
+        el.classList.toggle('maximized');
+      }
+    }
+
+    function closeWindow(id){
+      var el = document.getElementById(id);
+      if(!el) return;
+      if(initialContent[id]){
+        el.querySelector('.window-content').innerHTML = initialContent[id];
+        el.classList.remove('maximized');
+      }
+      el.classList.remove('active');
+    }
+
+    initialContent['cmdWindow'] = document.querySelector('#cmdWindow .window-content').innerHTML;
+    cmdWindow.addEventListener('mousedown', function(){
+      focusWindow('cmdWindow');
+    });
+
+    var isDragging = false;
+    var dragOffsetX = 0;
+    var dragOffsetY = 0;
+
+    cmdHeader.addEventListener('mousedown', function(e){
+      if(cmdWindow.classList.contains('maximized')) return;
+      isDragging = true;
+      var rect = cmdWindow.getBoundingClientRect();
+      dragOffsetX = e.clientX - rect.left;
+      dragOffsetY = e.clientY - rect.top;
+      cmdWindow.style.transition = 'none';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e){
+      if(!isDragging) return;
+      var x = e.clientX - dragOffsetX;
+      var y = e.clientY - dragOffsetY;
+      cmdWindow.style.left = x + 'px';
+      cmdWindow.style.top = y + 'px';
+      cmdWindow.style.transform = 'none';
+    });
+
+    document.addEventListener('mouseup', function(){
+      if(isDragging){
+        isDragging = false;
+        cmdWindow.style.transition = '';
+      }
+    });
+
+    async function setBingBg(){
+      const jsonUrl = "https://lightboxofficial.github.io/Bing-Wallpaper-Action/data/zh-CN_update.json";
+      try{
+        const resp = await fetch(jsonUrl);
+        const data = await resp.json();
+        if(data && data.images && data.images.length > 0){
+          const img = data.images[0];
+          const imgUrl = "https://cn.bing.com" + img.url;
+          const copyright = img.copyright || '';
+          const match = copyright.match(/^(.*?)\s*\(©\s*(.*?)\)$/);
+          let desc, author;
+          if(match){
+            desc = match[1];
+            author = match[2];
+          }else{
+            desc = copyright || '必应壁纸';
+            author = '';
+          }
+          const preload = new Image();
+          preload.onload = function(){
+            document.body.style.backgroundImage = `url(${imgUrl})`;
+            currentPicInfo.bgUrl = imgUrl;
+            currentPicInfo.desc = desc;
+            currentPicInfo.author = author;
+            currentPicInfo.link = img.copyrightlink || '';
+            currentPicInfo.picId = img.startdate || 'bing_' + Date.now();
+          };
+          preload.onerror = function(){
+            loadFallback();
+          };
+          preload.src = imgUrl;
+          return;
+        }
+      }catch(e){
+        console.log("必应壁纸加载失败，降级picsum", e);
+      }
+      loadFallback();
+    }
+
+    function loadFallback(){
+      const fallback = "https://picsum.photos/1920/1080?random=" + Date.now();
+      document.body.style.backgroundImage = `url(${fallback})`;
+      currentPicInfo.bgUrl = fallback;
+      currentPicInfo.desc = "风景壁纸";
+      currentPicInfo.author = "Picsum";
+      currentPicInfo.picId = 'picsum_' + Date.now();
+    }
+
+    function resolveValue(text){
+      // 解析列表引用 列表名[索引]
+      text = text.replace(/(\w+)\[(\d+)\]/g, function(match, listName, index){
+        if(lists[listName] && lists[listName][parseInt(index)] !== undefined){
+          return lists[listName][parseInt(index)];
+        }
+        return match;
+      });
+      // 解析变量引用
+      Object.keys(variables).forEach(function(name){
+        var regex = new RegExp('\\b' + name + '\\b', 'g');
+        text = text.replace(regex, variables[name]);
+      });
+      return text;
+    }
+
+    function addOutput(text){
+      const line = document.createElement('div');
+      line.className = 'terminal-line';
+      line.style.paddingLeft = '0';
+      line.innerHTML = '<span class="terminal-output" style="margin-left:0">' + text + '</span>';
+      const inputLine = terminalBody.querySelector('.terminal-input-line');
+      terminalBody.insertBefore(line, inputLine);
+      terminalBody.scrollTop = terminalBody.scrollHeight;
+    }
+
+    function processCommand(rawInput){
+      var input = rawInput.trim();
+      if(!input) return;
+
+      // var 变量名 = 变量值
+      if(input.startsWith('var ')){
+        var varMatch = input.match(/^var\s+(\w+)\s*=\s*(.+)$/);
+        if(varMatch){
+          var varName = varMatch[1];
+          if(variables[varName] !== undefined || lists[varName] !== undefined){
+            addOutput('该命名重复，请重新命名');
+          }else{
+            variables[varName] = varMatch[2].trim();
+            addOutput('变量 ' + varName + ' 已设置');
+          }
+        }else{
+          addOutput('语法错误: var 变量名 = 变量值');
+        }
+        return;
+      }
+
+      // list 列表名 = {内容1, 内容2, ...}
+      if(input.startsWith('list ')){
+        var listMatch = input.match(/^list\s+(\w+)\s*=\s*\{(.+)\}$/);
+        if(listMatch){
+          var listName = listMatch[1];
+          if(variables[listName] !== undefined || lists[listName] !== undefined){
+            addOutput('该命名重复，请重新命名');
+          }else{
+            var items = listMatch[2].split(/[,，]/).map(function(item){ return item.trim(); });
+            lists[listName] = items;
+            addOutput('列表 ' + listName + ' 已创建，共 ' + items.length + ' 项');
+          }
+        }else{
+          addOutput('语法错误: list 列表名 = {内容1, 内容2, ...}');
+        }
+        return;
+      }
+
+      // read 列表名/变量名/列表名[索引]
+      if(input.startsWith('read ')){
+        var name = input.substring(5).trim();
+        // 检查是否是列表项引用 列表名[索引]
+        var listMatch = name.match(/^(\w+)\[(\d+)\]$/);
+        if(listMatch){
+          var listName = listMatch[1];
+          var index = parseInt(listMatch[2]);
+          if(lists[listName] && lists[listName][index] !== undefined){
+            addOutput(lists[listName][index]);
+          }else{
+            addOutput('未找到: ' + name);
+          }
+          return;
+        }
+        if(variables[name] !== undefined){
+          addOutput(variables[name]);
+        }else if(lists[name]){
+          addOutput('[' + lists[name].join(', ') + ']');
+        }else{
+          addOutput('未找到: ' + name);
+        }
+        return;
+      }
+
+      // 默认回显（解析变量和列表引用）
+      var resolved = resolveValue(input);
+      addOutput(resolved);
+    }
+
+    terminalInput.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        const val = terminalInput.value.trim();
+        if(val){
+          // 先显示输入行（带提示符）
+          const inputLine = document.createElement('div');
+          inputLine.className = 'terminal-line';
+          inputLine.innerHTML = '<span class="terminal-prompt">&lt;NoTificiansCloud&gt;:</span><span class="terminal-output"> ' + val + '</span>';
+          const currentInputLine = terminalBody.querySelector('.terminal-input-line');
+          terminalBody.insertBefore(inputLine, currentInputLine);
+          // 处理命令
+          processCommand(val);
+          terminalInput.value = '';
+        }
+      }
+    });
+
+    terminalBody.addEventListener('click', function(){
+      terminalInput.focus();
+    });
+
+    window.addEventListener('load', function(){
+      setBingBg();
+      setTimeout(function(){
+        cmdWindow.classList.add('active');
+        terminalInput.focus();
+      }, 300);
+    });
+  </script>
+</body>
+</html>
