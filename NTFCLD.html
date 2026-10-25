@@ -238,6 +238,9 @@
     var windowTemplate = null;
     var windowIdCounter = 100;
     var openWindows = {};
+    var evtFiles = {};
+    var lawFiles = {};
+    var contTypes = {};
 
     function focusWindow(id){
       var el = document.getElementById(id);
@@ -898,6 +901,54 @@
         return;
       }
 
+      // cont 类型赋值: cont (html) = start terminal.evt
+      var contMatch = input.match(/^cont\s*\((\w+)\)\s*=\s*start\s+(\w+\.\w+)$/);
+      if(contMatch){
+        var contType = contMatch[1];
+        var evtName = contMatch[2];
+        if(evtFiles[evtName]){
+          contTypes[evtName] = { type: contType, content: evtFiles[evtName] };
+          addOutput('内容类型 ' + evtName + ' 已设置为 ' + contType + ' 类型');
+        }else{
+          addOutput('未找到事件文件: ' + evtName);
+        }
+        return;
+      }
+
+      // start 指令：加载并执行指令集文件
+      if(input.startsWith('start ')){
+        var startMatch = input.match(/^start\s+(\S+)$/);
+        if(startMatch){
+          var fileName = startMatch[1];
+          console.log('尝试加载: ' + fileName + ', lawFiles:', JSON.stringify(Object.keys(lawFiles)));
+          if(lawFiles[fileName]){
+            addOutput('=== 开始执行指令集: ' + fileName + ' ===');
+            var lines = lawFiles[fileName].split('\n');
+            var executed = 0;
+            var execNext = function(){
+              if(executed < lines.length){
+                var line = lines[executed].trim();
+                if(line && !line.startsWith('#')){
+                  addOutput('[执行] ' + line);
+                  processCommand(line);
+                }
+                executed++;
+                setTimeout(execNext, 100);
+              }else{
+                addOutput('=== 指令集 ' + fileName + ' 执行完成 ===');
+              }
+            };
+            execNext();
+          }else{
+            addOutput('未找到指令集文件: ' + fileName);
+            addOutput('已加载的文件: ' + Object.keys(lawFiles).join(', ') || '无');
+          }
+        }else{
+          addOutput('语法错误: start 文件名');
+        }
+        return;
+      }
+
       function createWindowFromStruct(s){
         var winId = 'dynWindow_' + windowIdCounter++;
         var w = parseInt(s.width) || 600;
@@ -1115,6 +1166,8 @@
           addOutput('<类型> <实例名>           创建结构体实例');
           addOutput('<实例>.<字段> = <值>      修改实例字段');
           addOutput('window <实例名>           从实例创建窗口');
+          addOutput('cont (<类型>) = start <文件名>  设置内容类型');
+          addOutput('start <文件名>            执行指令集文件');
           addOutput('read <名/索引/键>         查看数据');
           addOutput('write <名[索引]> = <值>   修改数据');
           addOutput('help [指令名]             查看帮助');
@@ -1130,6 +1183,8 @@
             'dat dict': 'dat dict 字典名 = [变量名:值, ...]\n创建繁杂字典，键必须是已定义的变量名，值可以是列表或字典\n示例: var a = 1\n      dat dict info = [a:{1,2,3}, b:[x:10]]\n引用: read info',
             'struct': 'struct 结构体名 = <var 字段名 = 值, ...>\n定义结构体类型（类似C++ struct定义）\n示例: struct mywin = <var name = 窗口, var icon = <svg>...</svg>, var width = 600, var height = 400, var pos = {100,100}>\n\n创建实例: mywin win1\n修改字段: win1.name = 新窗口\n读取字段: read win1.name',
             'window': 'window 结构体实例名\n从结构体实例创建窗口\n实例必须包含: name(名称), icon(SVG图标), width(宽度), height(高度), pos({x坐标,y坐标})\n可选: menu(侧边栏繁杂列表，每项{名称,SVG图标,HTML内容})\n示例: mywin win1\n      win1.name = 我的窗口\n      win1.width = 800\n      window win1',
+            'cont': 'cont (类型) = start 文件名\n将事件文件内容设置为指定类型\n示例: cont (html) = start terminal.evt\n类型可以是: html, text, code 等',
+            'start': 'start 文件名\n加载并执行指令集文件(.law)\n文件中的每一行都是一条独立指令\n示例: start testwindow.law\n执行过程会在终端中完整显示',
             'read': 'read 变量名              查看变量值\nread 列表名              查看整个列表\nread 列表名[索引]        查看列表某一项\nread 字典名              查看整个字典\nread 字典名(键名)        查看字典某键的值\nread 列表名[索引1,索引2] 查看嵌套列表某项\nread 结构体实例.字段名    查看结构体实例字段',
             'write': 'write 列表名[索引] = 值      修改列表项（不存在则新建）\nwrite 字典名(键) = 值        修改字典键值\nwrite 列表名[索引1,索引2] = 值  修改嵌套列表项',
             'help': 'help               查看所有指令列表\nhelp 指令名        查看指定指令的详细用法\n示例: help var\n      help list',
@@ -1294,8 +1349,66 @@
       terminalInput.focus();
     });
 
+    async function loadResourceFiles(){
+      try{
+        console.log('开始加载 files.md...');
+        var resp = await fetch('files.md');
+        console.log('fetch 响应状态:', resp.status);
+        if(resp.ok){
+          var text = await resp.text();
+          console.log('files.md 内容前100字符:', text.substring(0, 100));
+          parseFileSystem(text);
+          console.log('解析完成, evtFiles:', Object.keys(evtFiles));
+          console.log('解析完成, lawFiles:', Object.keys(lawFiles));
+        }else{
+          console.log('fetch 失败，状态码:', resp.status);
+        }
+      }catch(e){
+        console.log('加载 files.md 异常: ' + e);
+      }
+    }
+
+    function parseFileSystem(text){
+      var lines = text.split('\n');
+      var currentFile = null;
+      var currentContent = [];
+      for(var i = 0; i < lines.length; i++){
+        var line = lines[i];
+        var fileMatch = line.match(/^<([a-zA-Z0-9_]+\.[a-zA-Z]+)>$/);
+        if(fileMatch){
+          if(currentFile){
+            saveFile(currentFile, currentContent.join('\n'));
+          }
+          currentFile = fileMatch[1];
+          currentContent = [];
+        }else if(currentFile){
+          var closeMatch = line.match(/^<\/([a-zA-Z0-9_]+\.[a-zA-Z]+)>$/);
+          if(closeMatch && closeMatch[1] === currentFile){
+            saveFile(currentFile, currentContent.join('\n'));
+            currentFile = null;
+            currentContent = [];
+          }else{
+            currentContent.push(line);
+          }
+        }
+      }
+      if(currentFile){
+        saveFile(currentFile, currentContent.join('\n'));
+      }
+    }
+
+    function saveFile(fname, content){
+      content = content.trim();
+      if(fname.endsWith('.evt')){
+        evtFiles[fname] = content;
+      }else if(fname.endsWith('.law')){
+        lawFiles[fname] = content;
+      }
+    }
+
     window.addEventListener('load', function(){
       setBingBg();
+      loadResourceFiles();
       setTimeout(function(){
         cmdWindow.classList.add('active');
         terminalInput.focus();
