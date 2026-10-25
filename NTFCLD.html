@@ -76,6 +76,13 @@
       display:flex;
       align-items:center;
       gap:8px;
+      color:rgba(255,255,255,0.85);
+    }
+    .window-header-left svg{
+      fill:currentColor;
+      stroke:currentColor;
+      width:16px;
+      height:16px;
     }
     .window-title{
       font-size:13px;
@@ -224,6 +231,13 @@
     var dicts = {};
     var datLists = {};
     var domLists = {};
+    var datDicts = {};
+    var structs = {};
+    var structInstances = {};
+    var windowStructs = {};
+    var windowTemplate = null;
+    var windowIdCounter = 100;
+    var openWindows = {};
 
     function focusWindow(id){
       var el = document.getElementById(id);
@@ -347,14 +361,27 @@
       Object.keys(dicts).forEach(function(n){ names.push(n); });
       Object.keys(datLists).forEach(function(n){ names.push(n); });
       Object.keys(domLists).forEach(function(n){ names.push(n); });
+      Object.keys(datDicts).forEach(function(n){ names.push(n); });
+      Object.keys(structs).forEach(function(n){ names.push(n); });
+      Object.keys(structInstances).forEach(function(n){ names.push(n); });
       return names;
     }
 
     function isNameExists(name){
-      return variables[name] !== undefined || lists[name] !== undefined || dicts[name] !== undefined || datLists[name] !== undefined || domLists[name] !== undefined;
+      return variables[name] !== undefined || lists[name] !== undefined || dicts[name] !== undefined || datLists[name] !== undefined || domLists[name] !== undefined || datDicts[name] !== undefined || structs[name] !== undefined || structInstances[name] !== undefined;
     }
 
     function resolveValue(text){
+      // 解析结构体实例字段引用 instanceName.fieldName
+      text = text.replace(/(\w+)\.(\w+)/g, function(match, instName, fieldName){
+        if(structInstances[instName] && structInstances[instName].data[fieldName] !== undefined){
+          return structInstances[instName].data[fieldName];
+        }
+        if(structs[instName] && structs[instName][fieldName] !== undefined){
+          return structs[instName][fieldName];
+        }
+        return match;
+      });
       // 解析字典引用 dictName(keyName) - 仅英文括号
       text = text.replace(/(\w+)\(([^)]+)\)/g, function(match, dictName, keyName){
         if(dicts[dictName] && dicts[dictName][keyName] !== undefined){
@@ -408,11 +435,17 @@
       return text;
     }
 
+    function escapeHtml(text){
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(text));
+      return div.innerHTML;
+    }
+
     function addOutput(text){
       const line = document.createElement('div');
       line.className = 'terminal-line';
       line.style.paddingLeft = '0';
-      line.innerHTML = '<span class="terminal-output" style="margin-left:0">' + text + '</span>';
+      line.innerHTML = '<span class="terminal-output" style="margin-left:0">' + escapeHtml(text) + '</span>';
       const inputLine = terminalBody.querySelector('.terminal-input-line');
       terminalBody.insertBefore(line, inputLine);
       terminalBody.scrollTop = terminalBody.scrollHeight;
@@ -579,6 +612,184 @@
         return;
       }
 
+      // dat dict 字典名 = [变量名:值, 变量名:值, ...] 键必须是变量名，值可以是列表或字典
+      if(input.startsWith('dat dict ')){
+        var datDictMatch = input.match(/^dat\s+dict\s+(\w+)\s*=\s*\[(.+)\]$/);
+        if(datDictMatch){
+          var datDictName = datDictMatch[1];
+          if(isNameExists(datDictName)){
+            addOutput('该命名重复，请重新命名');
+          }else{
+            var content = datDictMatch[2];
+            var datDictData = {};
+            var pairs = content.split(/,(?![^\[]*\])/);
+            var error = false;
+            for(var i = 0; i < pairs.length; i++){
+              var pair = pairs[i].trim();
+              var kvMatch = pair.match(/^(\w+)\s*:\s*(.+)$/);
+              if(kvMatch){
+                var key = kvMatch[1].trim();
+                var val = kvMatch[2].trim();
+                // 键必须是已存在的变量名
+                if(variables[key] === undefined){
+                  addOutput('键必须是已定义的变量名: ' + key);
+                  error = true;
+                  break;
+                }
+                // 解析值：可能是列表或字典
+                if(val.startsWith('{') && val.endsWith('}')){
+                  // 列表值
+                  var inner = val.substring(1, val.length - 1);
+                  datDictData[key] = inner.split(/,/).map(function(s){ return s.trim(); });
+                }else if(val.startsWith('[') && val.endsWith(']')){
+                  // 字典值
+                  var inner = val.substring(1, val.length - 1);
+                  var subDict = {};
+                  var subPairs = inner.split(/,(?![^\[]*\])/);
+                  for(var j = 0; j < subPairs.length; j++){
+                    var sp = subPairs[j].trim();
+                    var skv = sp.match(/^([^:]+)\s*:\s*(.+)$/);
+                    if(skv){
+                      subDict[skv[1].trim()] = skv[2].trim();
+                    }
+                  }
+                  datDictData[key] = subDict;
+                }else{
+                  datDictData[key] = val;
+                }
+              }
+            }
+            if(!error){
+              datDicts[datDictName] = datDictData;
+              addOutput('dat字典 ' + datDictName + ' 已创建');
+            }
+          }
+        }else{
+          addOutput('语法错误: dat dict 字典名 = [变量名:值, ...]');
+        }
+        return;
+      }
+
+      // struct 结构体名 = <var 字段名 = 值, var 字段名 = 值, ...> 定义结构体类型
+      if(input.startsWith('struct ')){
+        var structPrefix = input.match(/^struct\s+(\w+)\s*=\s*</);
+        if(structPrefix){
+          var structName = structPrefix[1];
+          if(isNameExists(structName) || structInstances[structName]){
+            addOutput('该命名重复，请重新命名');
+          }else{
+            var startIdx = input.indexOf('<', input.indexOf('='));
+            var depth = 0;
+            var endIdx = -1;
+            for(var si = startIdx; si < input.length; si++){
+              if(input[si] === '<') depth++;
+              else if(input[si] === '>'){
+                depth--;
+                if(depth === 0){
+                  endIdx = si;
+                  break;
+                }
+              }
+            }
+            if(endIdx === -1){
+              addOutput('语法错误: struct 结构体名 = <var 字段名 = 值, ...>');
+            }else{
+              var content = input.substring(startIdx + 1, endIdx);
+              var structData = {};
+              var fields = splitStructFields(content);
+              var error = false;
+              for(var i = 0; i < fields.length; i++){
+                var field = fields[i].trim();
+                var varMatch = field.match(/^var\s+(\w+)\s*=\s*(.+)$/);
+                if(varMatch){
+                  var fieldName = varMatch[1].trim();
+                  var fieldValue = varMatch[2].trim();
+                  structData[fieldName] = fieldValue;
+                }else{
+                  addOutput('语法错误: struct 字段必须是 var 字段名 = 值 格式');
+                  error = true;
+                  break;
+                }
+              }
+              if(!error){
+                structs[structName] = structData;
+                addOutput('结构体类型 ' + structName + ' 已定义');
+              }
+            }
+          }
+        }else{
+          addOutput('语法错误: struct 结构体名 = <var 字段名 = 值, ...>');
+        }
+        return;
+      }
+
+      // 结构体类型 实例名  创建实例
+      var structInstanceMatch = input.match(/^(\w+)\s+(\w+)$/);
+      if(structInstanceMatch && !input.startsWith('var ') && !input.startsWith('list ') && !input.startsWith('dict ') && !input.startsWith('dat ') && !input.startsWith('dom ') && !input.startsWith('struct ') && !input.startsWith('window ') && !input.startsWith('read ') && !input.startsWith('write ') && !input.startsWith('help ') && !input.startsWith('clear')){
+        var typeName = structInstanceMatch[1];
+        var instanceName = structInstanceMatch[2];
+        if(structs[typeName]){
+          if(isNameExists(instanceName) || structInstances[instanceName]){
+            addOutput('该命名重复，请重新命名');
+          }else{
+            // 复制结构体模板作为实例初始值
+            var template = structs[typeName];
+            var instanceData = {};
+            Object.keys(template).forEach(function(k){
+              instanceData[k] = template[k];
+            });
+            structInstances[instanceName] = { type: typeName, data: instanceData };
+            addOutput('结构体实例 ' + instanceName + ' 已创建 (类型: ' + typeName + ')');
+          }
+        }
+        // 注意：这里不 return，因为可能是普通回显
+
+      // 实例名.字段名 = 值  修改实例字段
+      }
+      var instanceFieldMatch = input.match(/^(\w+)\.(\w+)\s*=\s*(.+)$/);
+      if(instanceFieldMatch && structInstances[instanceFieldMatch[1]]){
+        var instName = instanceFieldMatch[1];
+        var fieldName = instanceFieldMatch[2];
+        var newValue = instanceFieldMatch[3].trim();
+        if(structInstances[instName]){
+          structInstances[instName].data[fieldName] = newValue;
+          addOutput('结构体实例 ' + instName + '.' + fieldName + ' 已修改');
+        }else{
+          addOutput('未找到结构体实例: ' + instName);
+        }
+        return;
+      }
+
+      function splitStructFields(text){
+        var fields = [];
+        var current = '';
+        var depth = 0;
+        var i = 0;
+        while(i < text.length){
+          if(depth === 0 && text.substr(i, 4) === 'var ' && (i === 0 || text[i-1] === ',' || text[i-1] === ' ')){
+            var trimmed = current.replace(/,\s*$/, '').trim();
+            if(trimmed){
+              fields.push(trimmed);
+            }
+            current = '';
+            i += 4;
+            continue;
+          }
+          var ch = text[i];
+          if(ch === '{' || ch === '[' || ch === '(' || ch === '<') depth++;
+          else if(ch === '}' || ch === ']' || ch === ')' || ch === '>') depth--;
+          current += ch;
+          i++;
+        }
+        var trimmed = current.replace(/,\s*$/, '').trim();
+        if(trimmed){
+          fields.push(trimmed);
+        }
+        return fields.map(function(f){
+          return 'var ' + f;
+        });
+      }
+
       // write 修改数据
       if(input.startsWith('write ')){
         var writeContent = input.substring(6).trim();
@@ -666,6 +877,229 @@
         return;
       }
 
+      // window 指令：从结构体实例创建窗口
+      if(input.startsWith('window ')){
+        var windowMatch = input.match(/^window\s+(\w+)$/);
+        if(windowMatch){
+          var instName = windowMatch[1];
+          if(!structInstances[instName]){
+            addOutput('未找到结构体实例: ' + instName);
+          }else{
+            var s = structInstances[instName].data;
+            if(!s.name || !s.icon || !s.width || !s.height || !s.pos){
+              addOutput('窗口结构体必须包含: name, icon, width, height, pos');
+            }else{
+              createWindowFromStruct(s);
+            }
+          }
+        }else{
+          addOutput('语法错误: window 结构体实例名');
+        }
+        return;
+      }
+
+      function createWindowFromStruct(s){
+        var winId = 'dynWindow_' + windowIdCounter++;
+        var w = parseInt(s.width) || 600;
+        var h = parseInt(s.height) || 400;
+        var posStr = s.pos;
+        var x = 50, y = 50;
+        var posMatch = posStr.match(/[\{\[]?\s*(\d+)\s*,\s*(\d+)\s*[\}\]]?/);
+        if(posMatch){
+          x = parseInt(posMatch[1]);
+          y = parseInt(posMatch[2]);
+        }
+        var hasMenu = s.menu !== undefined;
+
+        var winEl = document.createElement('div');
+        winEl.className = 'app-window';
+        winEl.id = winId;
+        winEl.style.left = x + 'px';
+        winEl.style.top = y + 'px';
+        winEl.style.width = w + 'px';
+        winEl.style.height = h + 'px';
+        winEl.style.transform = 'scale(0.85)';
+
+        var headerHTML = '<div class="window-header" id="' + winId + '_header">' +
+          '<div class="window-header-left">' +
+            '<span style="display:inline-flex;align-items:center;">' + s.icon + '</span>' +
+            '<div class="window-title">' + s.name + '</div>' +
+          '</div>' +
+          '<div class="window-controls">' +
+            '<button class="window-btn minimize" onclick="minimizeWindow(\'' + winId + '\')"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>' +
+            '<button class="window-btn maximize" onclick="maximizeWindow(\'' + winId + '\')"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg></button>' +
+            '<button class="window-btn close" onclick="closeWindow(\'' + winId + '\')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>' +
+          '</div>' +
+        '</div>';
+
+        var contentHTML = '';
+        if(hasMenu){
+          contentHTML = '<div style="display:flex;height:100%;">' +
+            '<div style="width:160px;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.06);overflow-y:auto;padding:8px;" class="window-menu-list">' +
+              buildMenuItems(s.menu) +
+            '</div>' +
+            '<div style="flex:1;overflow:hidden;position:relative;" class="window-iframe-container">' +
+              '<iframe style="width:100%;height:100%;border:none;background:transparent;" srcdoc="<html><body style=\'margin:0;padding:16px;color:#fff;font-family:sans-serif;\'>选择一个菜单项</body></html>"></iframe>' +
+            '</div>' +
+          '</div>';
+        }else{
+          contentHTML = '<div style="height:100%;position:relative;" class="window-iframe-container">' +
+            '<iframe style="width:100%;height:100%;border:none;background:transparent;" srcdoc="<html><body style=\'margin:0;padding:16px;color:#fff;font-family:sans-serif;\'>窗口内容</body></html>"></iframe>' +
+          '</div>';
+        }
+
+        winEl.innerHTML = headerHTML + '<div class="window-content" style="padding:0;">' + contentHTML + '</div>';
+        document.body.appendChild(winEl);
+
+        initialContent[winId] = winEl.querySelector('.window-content').innerHTML;
+
+        winEl.addEventListener('mousedown', function(){
+          focusWindow(winId);
+        });
+
+        var hdr = document.getElementById(winId + '_header');
+        setupDrag(winEl, hdr);
+
+        if(hasMenu){
+          bindMenuClicks(winId, s.menu);
+        }
+
+        setTimeout(function(){
+          winEl.classList.add('active');
+          focusWindow(winId);
+        }, 50);
+
+        addOutput('窗口 "' + s.name + '" 已打开');
+      }
+
+      function buildMenuItems(menuStr){
+        var items = parseMenuItems(menuStr);
+        var html = '';
+        items.forEach(function(item, idx){
+          html += '<div class="menu-item" data-idx="' + idx + '" style="padding:8px;margin:4px 0;border-radius:6px;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.8);">' +
+            '<span class="menu-icon" style="flex-shrink:0;">' + item.icon + '</span>' +
+            '<span>' + item.name + '</span>' +
+          '</div>';
+        });
+        return html;
+      }
+
+      function parseMenuItems(menuStr){
+        var items = [];
+        var depth = 0;
+        var current = '';
+        for(var i = 0; i < menuStr.length; i++){
+          var ch = menuStr[i];
+          if(ch === '{'){
+            depth++;
+            if(depth === 1){ current = ''; continue; }
+          }else if(ch === '}'){
+            depth--;
+            if(depth === 0){
+              items.push(parseMenuItem(current.trim()));
+              current = '';
+              continue;
+            }
+          }else if(ch === ',' && depth === 0){
+            continue;
+          }
+          current += ch;
+        }
+        return items;
+      }
+
+      function parseMenuItem(text){
+        // 解析菜单项：名称,图标(SVG),HTML内容
+        // SVG 可能包含 <svg>...</svg> 和逗号，需要特殊处理
+        var parts = [];
+        var depth = 0;
+        var current = '';
+        for(var i = 0; i < text.length; i++){
+          var ch = text[i];
+          if(ch === '<') depth++;
+          else if(ch === '>') depth--;
+          if(ch === ',' && depth === 0){
+            parts.push(current.trim());
+            current = '';
+          }else{
+            current += ch;
+          }
+        }
+        if(current) parts.push(current.trim());
+        
+        // 至少需要名称
+        return {
+          name: parts[0] || '未命名',
+          icon: parts[1] || '',
+          html: parts.slice(2).join(',') || '<p>无内容</p>'
+        };
+      }
+
+      function bindMenuClicks(winId, menuStr){
+        var winEl = document.getElementById(winId);
+        if(!winEl) return;
+        var menuItems = winEl.querySelectorAll('.menu-item');
+        var items = parseMenuItems(menuStr);
+
+        menuItems.forEach(function(el, idx){
+          el.addEventListener('click', function(){
+            menuItems.forEach(function(m){ m.style.background = 'transparent'; });
+            el.style.background = 'rgba(255,255,255,0.08)';
+            var item = items[idx];
+            var htmlContent = item.html || '<p>无内容</p>';
+            var iframeContainer = winEl.querySelector('.window-iframe-container');
+            if(iframeContainer){
+              var iframe = iframeContainer.querySelector('iframe');
+              if(iframe){
+                iframe.srcdoc = '<html><head><style>body{margin:0;padding:16px;color:rgba(255,255,255,0.9);font-family:-apple-system,sans-serif;}</style></head><body>' + htmlContent + '</body></html>';
+              }
+            }
+          });
+          el.addEventListener('mouseenter', function(){
+            if(el.style.background !== 'rgba(255,255,255,0.08)'){
+              el.style.background = 'rgba(255,255,255,0.04)';
+            }
+          });
+          el.addEventListener('mouseleave', function(){
+            if(el.style.background !== 'rgba(255,255,255,0.08)'){
+              el.style.background = 'transparent';
+            }
+          });
+        });
+      }
+
+      function setupDrag(winEl, header){
+        var isDragging = false;
+        var dragOffsetX = 0;
+        var dragOffsetY = 0;
+
+        header.addEventListener('mousedown', function(e){
+          if(winEl.classList.contains('maximized')) return;
+          isDragging = true;
+          var rect = winEl.getBoundingClientRect();
+          dragOffsetX = e.clientX - rect.left;
+          dragOffsetY = e.clientY - rect.top;
+          winEl.style.transition = 'none';
+          e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e){
+          if(!isDragging) return;
+          var x = e.clientX - dragOffsetX;
+          var y = e.clientY - dragOffsetY;
+          winEl.style.left = x + 'px';
+          winEl.style.top = y + 'px';
+          winEl.style.transform = 'none';
+        });
+
+        document.addEventListener('mouseup', function(){
+          if(isDragging){
+            isDragging = false;
+            winEl.style.transition = '';
+          }
+        });
+      }
+
       // help [指令名]
       if(input === 'help' || input.startsWith('help ')){
         var cmdName = input.substring(5).trim();
@@ -674,8 +1108,13 @@
           addOutput('var <名> = <值>           设置变量');
           addOutput('list <名> = {项...}       创建列表');
           addOutput('dict <名> = [键:值...]    创建字典');
-          addOutput('dat list <名> = {{...}}   创建嵌套列表');
+          addOutput('dat list <名> = {项...}   创建嵌套列表');
           addOutput('dom list <名> = [...]     创建多维列表');
+          addOutput('dat dict <名> = [键:值...] 创建繁杂字典');
+          addOutput('struct <名> = <var...>    定义结构体类型');
+          addOutput('<类型> <实例名>           创建结构体实例');
+          addOutput('<实例>.<字段> = <值>      修改实例字段');
+          addOutput('window <实例名>           从实例创建窗口');
           addOutput('read <名/索引/键>         查看数据');
           addOutput('write <名[索引]> = <值>   修改数据');
           addOutput('help [指令名]             查看帮助');
@@ -688,7 +1127,10 @@
             'dict': 'dict 字典名 = [键:值, 键:值, ...]\n创建键值对字典，用中括号包裹\n示例: dict info = [姓名:张三, 年龄:20]\n引用: 字典名(键名)，如 info(姓名)\n注意: 仅英文符号识别为表达式',
             'dat': 'dat list 列表名 = {项1,项2,...}\n创建嵌套列表，支持单项和嵌套混合\n示例: dat list name = {1,{1,3},{1,3,5},5,4,1,{1,2,3}}\n引用: 列表名[索引] 读取单项，列表名[索引1,索引2] 读取嵌套项\n如 name[2,2] 读取 {1,3,5} 中的 5\n注意: 英文符号优先识别为表达式，中文符号为普通字符，嵌套出错会报错',
             'dom': 'dom list 列表名 = 多维数组格式\n创建多维列表，语法类似C++多维数组\n示例: dom list arr = [[[1,2],[3,4]],[[5,6],[7,8]]]\n引用: 列表名[索引1,索引2,...]\n注意: 仅英文符号识别为表达式',
-            'read': 'read 变量名              查看变量值\nread 列表名              查看整个列表\nread 列表名[索引]        查看列表某一项\nread 字典名              查看整个字典\nread 字典名(键名)        查看字典某键的值\nread 列表名[索引1,索引2] 查看嵌套列表某项',
+            'dat dict': 'dat dict 字典名 = [变量名:值, ...]\n创建繁杂字典，键必须是已定义的变量名，值可以是列表或字典\n示例: var a = 1\n      dat dict info = [a:{1,2,3}, b:[x:10]]\n引用: read info',
+            'struct': 'struct 结构体名 = <var 字段名 = 值, ...>\n定义结构体类型（类似C++ struct定义）\n示例: struct mywin = <var name = 窗口, var icon = <svg>...</svg>, var width = 600, var height = 400, var pos = {100,100}>\n\n创建实例: mywin win1\n修改字段: win1.name = 新窗口\n读取字段: read win1.name',
+            'window': 'window 结构体实例名\n从结构体实例创建窗口\n实例必须包含: name(名称), icon(SVG图标), width(宽度), height(高度), pos({x坐标,y坐标})\n可选: menu(侧边栏繁杂列表，每项{名称,SVG图标,HTML内容})\n示例: mywin win1\n      win1.name = 我的窗口\n      win1.width = 800\n      window win1',
+            'read': 'read 变量名              查看变量值\nread 列表名              查看整个列表\nread 列表名[索引]        查看列表某一项\nread 字典名              查看整个字典\nread 字典名(键名)        查看字典某键的值\nread 列表名[索引1,索引2] 查看嵌套列表某项\nread 结构体实例.字段名    查看结构体实例字段',
             'write': 'write 列表名[索引] = 值      修改列表项（不存在则新建）\nwrite 字典名(键) = 值        修改字典键值\nwrite 列表名[索引1,索引2] = 值  修改嵌套列表项',
             'help': 'help               查看所有指令列表\nhelp 指令名        查看指定指令的详细用法\n示例: help var\n      help list',
             'clear': 'clear              清空终端屏幕\n无参数'
@@ -712,6 +1154,20 @@
       // read 数据
       if(input.startsWith('read ')){
         var name = input.substring(5).trim();
+        // 结构体实例字段引用 name.field
+        var structReadMatch = name.match(/^(\w+)\.(\w+)$/);
+        if(structReadMatch){
+          var sName = structReadMatch[1];
+          var sField = structReadMatch[2];
+          if(structInstances[sName] && structInstances[sName].data[sField] !== undefined){
+            addOutput(structInstances[sName].data[sField]);
+          }else if(structs[sName] && structs[sName][sField] !== undefined){
+            addOutput(structs[sName][sField]);
+          }else{
+            addOutput('未找到: ' + name);
+          }
+          return;
+        }
         // 字典引用 name(key)
         var dictReadMatch = name.match(/^(\w+)\(([^)]+)\)$/);
         if(dictReadMatch){
@@ -786,6 +1242,25 @@
           addOutput(JSON.stringify(datLists[name]));
         }else if(domLists[name]){
           addOutput(JSON.stringify(domLists[name]));
+        }else if(datDicts[name]){
+          var ddStrs = [];
+          Object.keys(datDicts[name]).forEach(function(k){
+            var v = datDicts[name][k];
+            ddStrs.push(k + ':' + (Array.isArray(v) ? '{' + v.join(',') + '}' : (typeof v === 'object' ? JSON.stringify(v) : v)));
+          });
+          addOutput('[' + ddStrs.join(', ') + ']');
+        }else if(structs[name]){
+          var stStrs = [];
+          Object.keys(structs[name]).forEach(function(k){
+            stStrs.push(k + '=' + structs[name][k]);
+          });
+          addOutput('<' + stStrs.join(', ') + '>');
+        }else if(structInstances[name]){
+          var siStrs = [];
+          Object.keys(structInstances[name].data).forEach(function(k){
+            siStrs.push(k + '=' + structInstances[name].data[k]);
+          });
+          addOutput('[' + structInstances[name].type + '] <' + siStrs.join(', ') + '>');
         }else{
           addOutput('未找到: ' + name);
         }
