@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeepSilence --- 静水流深</title>
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+    body{
+      min-height:100vh;
+      background:#111;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      overflow:hidden;
+      transition:background-image 0.5s ease;
+    }
+    .app-window{
+      position:absolute;
+      background:rgba(12,12,16,0.95);
+      backdrop-filter:blur(20px) saturate(180%) contrast(1.3) brightness(0.85);
+      -webkit-backdrop-filter:blur(20px) saturate(180%) contrast(1.3) brightness(0.85);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:12px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.6);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      transform:scale(0.85);
+      opacity:0;
+      transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+      z-index:10;
+    }
+    .app-window.active{
+      transform:scale(1);
+      opacity:1;
+    }
+    .app-window.focused{
+      z-index:100;
+      box-shadow:0 12px 48px rgba(0,0,0,0.7);
+    }
+    .window-header{
+      height:40px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 12px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      cursor:move;
+      flex-shrink:0;
+    }
+    .window-header-left{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .window-header-logo{
+      width:20px;
+      height:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      opacity:0.7;
+      transition:opacity 0.2s;
+    }
+    .window-header-logo:hover{
+      opacity:1;
+    }
+    .window-header-logo svg{
+      width:16px;
+      height:16px;
+      stroke:rgba(255,255,255,0.85);
+      stroke-width:2;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .window-title{
+      font-size:13px;
+      font-weight:500;
+      color:rgba(255,255,255,0.9);
+    }
+    .window-controls{
+      display:flex;
+      gap:6px;
+    }
+    .window-btn{
+      width:24px;
+      height:24px;
+      border-radius:6px;
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:background 0.15s;
+    }
+    .window-btn:hover{
+      background:rgba(255,255,255,0.1);
+    }
+    .window-btn svg{
+      width:14px;
+      height:14px;
+      stroke:rgba(255,255,255,0.7);
+      stroke-width:2;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .window-btn.close:hover{
+      background:rgba(255,95,87,0.8);
+    }
+    .window-btn.close:hover svg{
+      stroke:white;
+    }
+    .window-body{
+      flex:1;
+      display:flex;
+      overflow:hidden;
+      position:relative;
+    }
+    .window-sidebar{
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:240px;
+      background:rgba(8,8,12,0.98);
+      border-right:1px solid rgba(255,255,255,0.06);
+      transform:translateX(-100%);
+      transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index:50;
+      display:flex;
+      flex-direction:column;
+    }
+    .window-sidebar.open{
+      transform:translateX(0);
+    }
+    .window-sidebar-header{
+      padding:16px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .window-sidebar-header h3{
+      font-size:14px;
+      font-weight:600;
+      color:rgba(255,255,255,0.9);
+    }
+    .window-sidebar-nav{
+      flex:1;
+      overflow-y:auto;
+      padding:8px;
+    }
+    .window-sidebar-item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      transition:background 0.15s;
+      color:rgba(255,255,255,0.7);
+      font-size:13px;
+      margin-bottom:4px;
+    }
+    .window-sidebar-item:hover{
+      background:rgba(255,255,255,0.06);
+    }
+    .window-sidebar-item.active{
+      background:rgba(255,255,255,0.1);
+      color:rgba(255,255,255,0.95);
+    }
+    .window-sidebar-overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,0.4);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 0.3s;
+      z-index:40;
+    }
+    .window-sidebar-overlay.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .window-content{
+      flex:1;
+      overflow:hidden;
+      color:rgba(255,255,255,0.8);
+    }
+    .terminal-body{
+      flex:1;
+      overflow-y:auto;
+      font-family:"SF Mono","Cascadia Code","Fira Code","Consolas",monospace;
+      font-size:13px;
+      line-height:1.6;
+      display:flex;
+      flex-direction:column;
+      padding:16px;
+    }
+    .terminal-body::-webkit-scrollbar{
+      width:6px;
+    }
+    .terminal-body::-webkit-scrollbar-track{
+      background:transparent;
+    }
+    .terminal-body::-webkit-scrollbar-thumb{
+      background:rgba(255,255,255,0.15);
+      border-radius:3px;
+    }
+    .terminal-body::-webkit-scrollbar-thumb:hover{
+      background:rgba(255,255,255,0.25);
+    }
+    .terminal-line{
+      margin-bottom:4px;
+      word-break:break-all;
+    }
+    .terminal-line.output{
+      color:#abb2bf;
+    }
+    .terminal-line.error{
+      color:#e06c75;
+    }
+    .terminal-line.success{
+      color:#98c379;
+    }
+    .terminal-line.info{
+      color:#61afef;
+    }
+    .terminal-line .keyword{
+      color:#c678dd;
+    }
+    .terminal-line .string{
+      color:#98c379;
+    }
+    .terminal-line .number{
+      color:#d19a66;
+    }
+    .terminal-line .identifier{
+      color:#61afef;
+    }
+    .terminal-line .operator{
+      color:#56b6c9;
+    }
+    .terminal-line .comment{
+      color:#5c6370;
+      font-style:italic;
+    }
+    .terminal-input-line{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-top:8px;
+    }
+    .terminal-prompt{
+      color:#c678dd;
+      flex-shrink:0;
+    }
+    .terminal-input{
+      flex:1;
+      background:transparent;
+      border:none;
+      outline:none;
+      color:#abb2bf;
+      font-family:inherit;
+      font-size:inherit;
+    }
+    .window-iframe-container{
+      height:100%;
+      position:relative;
+    }
+    .window-iframe-container iframe{
+      width:100%;
+      height:100%;
+      border:none;
+      background:transparent;
+    }
+    .minimized{
+      display:none !important;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    var variables = {};
+    var lists = {};
+    var dicts = {};
+    var dlists = {};
+    var structs = {};
+    var structInstances = {};
+    var evtFiles = {};
+    var funcFiles = {};
+    var contTypes = {};
+    var windowIdCounter = 0;
+    var initialContent = {};
+    var highestZ = 100;
+
+    function loadResourceFiles(){
+      fetch('files.txt').then(function(r){
+        return r.text();
+      }).then(function(text){
+        parseFileSystem(text);
+      }).catch(function(e){
+        console.log('无法加载files.txt，使用空文件系统');
+      });
+    }
+
+    function parseFileSystem(text){
+      var lines = text.split('\n');
+      var currentFile = null;
+      var content = [];
+      for(var i = 0; i < lines.length; i++){
+        var line = lines[i].trim();
+        if(line.startsWith('<') && line.endsWith('>')){
+          if(currentFile){
+            saveFile(currentFile, content.join('\n'));
+          }
+          currentFile = line.substring(1, line.length - 1);
+          content = [];
+        }else if(line.startsWith('</') && line.endsWith('>')){
+          var closeName = line.substring(2, line.length - 1);
+          if(closeName === currentFile){
+            saveFile(currentFile, content.join('\n'));
+            currentFile = null;
+            content = [];
+          }
+        }else if(currentFile){
+          content.push(lines[i]);
+        }
+      }
+      if(currentFile){
+        saveFile(currentFile, content.join('\n'));
+      }
+    }
+
+    function saveFile(fname, content){
+      var ext = fname.split('.').pop();
+      if(ext === 'evt'){
+        evtFiles[fname] = content;
+      }else if(ext === 'func'){
+        funcFiles[fname] = content;
+      }
+    }
+
+    function isNameExists(name){
+      return variables[name] !== undefined || 
+             lists[name] !== undefined || 
+             dicts[name] !== undefined || 
+             dlists[name] !== undefined || 
+             structs[name] !== undefined || 
+             structInstances[name] !== undefined;
+    }
+
+    var reservedKeywords = ['var','list','dict','dlist','struct','window','write','read','start','cont','clear','help'];
+
+    function resolveValue(name){
+      if(variables[name] !== undefined) return variables[name];
+      if(lists[name] !== undefined) return JSON.stringify(lists[name]);
+      if(dicts[name] !== undefined) return JSON.stringify(dicts[name]);
+      if(dlists[name] !== undefined) return JSON.stringify(dlists[name]);
+      if(structs[name] !== undefined) return '[struct ' + name + ']';
+      if(structInstances[name] !== undefined) return '[instance ' + name + ']';
+      return null;
+    }
+
+    function createWindowFromStruct(s){
+      var winId = 'dynWindow_' + windowIdCounter++;
+      var w = parseInt(s.width) || 600;
+      var h = parseInt(s.height) || 400;
+      var posStr = s.pos;
+      var x = 50, y = 50;
+      var posMatch = posStr.match(/[\{\[]?\s*(\d+)\s*,\s*(\d+)\s*[\}\]]?/);
+      if(posMatch){
+        x = parseInt(posMatch[1]);
+        y = parseInt(posMatch[2]);
+      }
+      var hasMenu = s.menu !== undefined;
+
+      var winEl = document.createElement('div');
+      winEl.className = 'app-window';
+      winEl.id = winId;
+      winEl.style.left = x + 'px';
+      winEl.style.top = y + 'px';
+      winEl.style.width = w + 'px';
+      winEl.style.height = h + 'px';
+      winEl.style.transform = 'scale(0.85)';
+
+      var headerHTML = '<div class="window-header" id="' + winId + '_header">' +
+        '<div class="window-header-left">' +
+          '<div class="window-header-logo" data-sidebar-toggle="' + winId + '">' +
+            '<svg viewBox="0 0 24 24">' +
+              '<polyline points="4 17 10 11 4 5"></polyline>' +
+              '<line x1="12" y1="19" x2="20" y2="19"></line>' +
+            '</svg>' +
+          '</div>' +
+          '<div class="window-title">' + s.name + '</div>' +
+        '</div>' +
+        '<div class="window-controls">' +
+          '<button class="window-btn minimize" onclick="minimizeWindow(\'' + winId + '\')"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>' +
+          '<button class="window-btn maximize" onclick="maximizeWindow(\'' + winId + '\')"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg></button>' +
+          '<button class="window-btn close" onclick="closeWindow(\'' + winId + '\')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>' +
+        '</div>' +
+      '</div>';
+
+      var contentHTML = '';
+      if(hasMenu){
+        var menuItems = parseMenuItems(s.menu);
+        var sidebarItemsHTML = '';
+        menuItems.forEach(function(item, idx){
+          sidebarItemsHTML += '<div class="window-sidebar-item' + (idx === 0 ? ' active' : '') + '" data-idx="' + idx + '">' +
+            '<span style="flex-shrink:0;">' + item.icon + '</span>' +
+            '<span>' + item.name + '</span>' +
+          '</div>';
+        });
+        
+        contentHTML = '<div class="window-body">' +
+          '<div class="window-sidebar" id="' + winId + '_sidebar">' +
+            '<div class="window-sidebar-header"><h3>' + s.name + '</h3></div>' +
+            '<div class="window-sidebar-nav">' + sidebarItemsHTML + '</div>' +
+          '</div>' +
+          '<div class="window-sidebar-overlay" id="' + winId + '_overlay"></div>' +
+          '<div class="window-content" style="padding:0;">' +
+            '<div style="height:100%;position:relative;" class="window-iframe-container">' +
+              '<iframe style="width:100%;height:100%;border:none;background:transparent;" srcdoc="<html><body style=\'margin:0;padding:16px;color:#fff;font-family:sans-serif;\'>选择一个菜单项</body></html>"></iframe>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }else{
+        contentHTML = '<div class="window-content" style="padding:16px;">' +
+          '<div style="height:100%;position:relative;" class="window-iframe-container">' +
+            '<iframe style="width:100%;height:100%;border:none;background:transparent;" srcdoc="<html><body style=\'margin:0;padding:16px;color:#fff;font-family:sans-serif;\'>窗口内容</body></html>"></iframe>' +
+          '</div>' +
+        '</div>';
+      }
+
+      winEl.innerHTML = headerHTML + contentHTML;
+      document.body.appendChild(winEl);
+
+      initialContent[winId] = winEl.querySelector('.window-content').innerHTML;
+
+      winEl.addEventListener('mousedown', function(){
+        focusWindow(winId);
+      });
+
+      var hdr = document.getElementById(winId + '_header');
+      setupDrag(winEl, hdr);
+
+      var logoToggle = winEl.querySelector('[data-sidebar-toggle]');
+      if(logoToggle){
+        logoToggle.addEventListener('click', function(e){
+          e.stopPropagation();
+          var sidebar = winEl.querySelector('.window-sidebar');
+          var overlay = winEl.querySelector('.window-sidebar-overlay');
+          if(sidebar && overlay){
+            var isOpen = sidebar.classList.contains('open');
+            if(isOpen){
+              sidebar.classList.remove('open');
+              overlay.classList.remove('show');
+            } else {
+              sidebar.classList.add('open');
+              overlay.classList.add('show');
+            }
+          }
+        });
+      }
+
+      var overlay = winEl.querySelector('.window-sidebar-overlay');
+      if(overlay){
+        overlay.addEventListener('click', function(){
+          var sidebar = winEl.querySelector('.window-sidebar');
+          if(sidebar){
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+          }
+        });
+      }
+
+      var sidebarItems = winEl.querySelectorAll('.window-sidebar-item');
+      sidebarItems.forEach(function(item){
+        item.addEventListener('click', function(){
+          var sidebar = item.closest('.window-sidebar');
+          if(sidebar){
+            sidebar.querySelectorAll('.window-sidebar-item').forEach(function(i){
+              i.classList.remove('active');
+            });
+            item.classList.add('active');
+            sidebar.classList.remove('open');
+            var overlay = sidebar.parentElement.querySelector('.window-sidebar-overlay');
+            if(overlay) overlay.classList.remove('show');
+          }
+        });
+      });
+
+      if(hasMenu){
+        bindMenuClicks(winId, s.menu);
+      }
+
+      setTimeout(function(){
+        winEl.classList.add('active');
+        focusWindow(winId);
+      }, 50);
+
+      addOutput('窗口 "' + s.name + '" 已打开', 'success');
+    }
+
+    function parseMenuItems(menuStr){
+      var items = [];
+      var depth = 0;
+      var current = '';
+      for(var i = 0; i < menuStr.length; i++){
+        var ch = menuStr[i];
+        if(ch === '{') depth++;
+        else if(ch === '}') depth--;
+        if(depth === 0 && ch === ','){
+          if(current.trim()) items.push(parseSingleMenuItem(current.trim()));
+          current = '';
+        }else{
+          current += ch;
+        }
+      }
+      if(current.trim()) items.push(parseSingleMenuItem(current.trim()));
+      return items;
+    }
+
+    function parseSingleMenuItem(str){
+      var parts = [];
+      var depth = 0;
+      var current = '';
+      for(var i = 0; i < str.length; i++){
+        var ch = str[i];
+        if(ch === '<' || ch === '{' || ch === '[' || ch === '(') depth++;
+        else if(ch === '>' || ch === '}' || ch === ']' || ch === ')') depth--;
+        if(depth === 0 && ch === ','){
+          parts.push(current.trim());
+          current = '';
+        }else{
+          current += ch;
+        }
+      }
+      if(current.trim()) parts.push(current.trim());
+      return {
+        name: parts[0] || '',
+        icon: parts[1] || '',
+        content: parts.slice(2).join(',') || ''
+      };
+    }
+
+    function buildMenuItems(menuStr){
+      var items = parseMenuItems(menuStr);
+      var html = '';
+      items.forEach(function(item, idx){
+        html += '<div class="menu-item' + (idx === 0 ? ' active' : '') + '" data-idx="' + idx + '">' +
+          '<span style="flex-shrink:0;">' + item.icon + '</span>' +
+          '<span>' + item.name + '</span>' +
+        '</div>';
+      });
+      return html;
+    }
+
+    function bindMenuClicks(winId, menuStr){
+      var items = parseMenuItems(menuStr);
+      var winEl = document.getElementById(winId);
+      if(!winEl) return;
+      var menuItems = winEl.querySelectorAll('.menu-item');
+      menuItems.forEach(function(item){
+        item.addEventListener('click', function(){
+          var idx = parseInt(item.getAttribute('data-idx'));
+          menuItems.forEach(function(i){ i.classList.remove('active'); });
+          item.classList.add('active');
+          var iframe = winEl.querySelector('.window-iframe-container iframe');
+          if(iframe && items[idx]){
+            iframe.srcdoc = '<html><body style="margin:0;padding:16px;color:#fff;font-family:sans-serif;">' + items[idx].content + '</body></html>';
+          }
+        });
+      });
+    }
+
+    function setupDrag(winEl, handle){
+      var isDragging = false;
+      var startX, startY, startLeft, startTop;
+      handle.addEventListener('mousedown', function(e){
+        if(e.target.closest('.window-btn')) return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = parseInt(winEl.style.left) || 0;
+        startTop = parseInt(winEl.style.top) || 0;
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', function(e){
+        if(!isDragging) return;
+        var dx = e.clientX - startX;
+        var dy = e.clientY - startY;
+        winEl.style.left = (startLeft + dx) + 'px';
+        winEl.style.top = (startTop + dy) + 'px';
+      });
+      document.addEventListener('mouseup', function(){
+        isDragging = false;
+      });
+    }
+
+    function focusWindow(winId){
+      highestZ++;
+      var winEl = document.getElementById(winId);
+      if(winEl){
+        document.querySelectorAll('.app-window').forEach(function(w){
+          w.classList.remove('focused');
+        });
+        winEl.style.zIndex = highestZ;
+        winEl.classList.add('focused');
+      }
+    }
+
+    function minimizeWindow(winId){
+      var winEl = document.getElementById(winId);
+      if(winEl){
+        winEl.classList.add('minimized');
+      }
+    }
+
+    function maximizeWindow(winId){
+      var winEl = document.getElementById(winId);
+      if(winEl){
+        if(winEl.dataset.maximized === 'true'){
+          winEl.style.left = winEl.dataset.origLeft;
+          winEl.style.top = winEl.dataset.origTop;
+          winEl.style.width = winEl.dataset.origWidth;
+          winEl.style.height = winEl.dataset.origHeight;
+          winEl.dataset.maximized = 'false';
+        }else{
+          winEl.dataset.origLeft = winEl.style.left;
+          winEl.dataset.origTop = winEl.style.top;
+          winEl.dataset.origWidth = winEl.style.width;
+          winEl.dataset.origHeight = winEl.style.height;
+          winEl.style.left = '0';
+          winEl.style.top = '0';
+          winEl.style.width = '100vw';
+          winEl.style.height = '100vh';
+          winEl.dataset.maximized = 'true';
+        }
+      }
+    }
+
+    function closeWindow(winId){
+      var winEl = document.getElementById(winId);
+      if(winEl){
+        winEl.classList.remove('active');
+        setTimeout(function(){
+          winEl.remove();
+          delete initialContent[winId];
+        }, 300);
+      }
+    }
+
+    function addOutput(text, type){
+      var terminalBody = document.querySelector('.terminal-body');
+      if(!terminalBody) return;
+      var line = document.createElement('div');
+      line.className = 'terminal-line ' + (type || 'output');
+      line.textContent = text;
+      terminalBody.appendChild(line);
+      terminalBody.scrollTop = terminalBody.scrollHeight;
+    }
+
+    function processCommand(rawInput){
+      var input = rawInput.trim();
+      if(!input) return;
+
+      if(input === 'clear'){
+        var terminalBody = document.querySelector('.terminal-body');
+        if(terminalBody){
+          terminalBody.innerHTML = '';
+        }
+        return;
+      }
+
+      if(input === 'help'){
+        showHelp();
+        return;
+      }
+
+      function parseText(text){
+        text = text.trim();
+        if(text.startsWith('<') && text.endsWith('>')){
+          return text.substring(1, text.length - 1);
+        }
+        if(!isNaN(text) && text !== ''){
+          return text;
+        }
+        if(isNameExists(text)){
+          return resolveValue(text);
+        }
+        return null;
+      }
+
+      if(input.startsWith('var ')){
+        var varMatch = input.match(/^var\s+(\w+)\s*=\s*(.+)$/);
+        if(varMatch){
+          var varName = varMatch[1];
+          if(reservedKeywords.indexOf(varName) !== -1){
+            addOutput('错误: "' + varName + '" 是保留关键字，不能用作变量名', 'error');
+          }else if(isNameExists(varName)){
+            addOutput('错误: 命名 "' + varName + '" 已存在，请重新命名', 'error');
+          }else{
+            var varValue = parseText(varMatch[2].trim());
+            if(varValue === null){
+              addOutput('错误: 未定义的标识符 "' + varMatch[2].trim() + '"，文本内容请使用 <> 包裹', 'error');
+            }else{
+              variables[varName] = varValue;
+              addOutput('变量 ' + varName + ' 已创建', 'success');
+            }
+          }
+        }else{
+          addOutput('语法错误: var 变量名 = <变量值>', 'error');
+        }
+        return;
+      }
+
+      if(input.startsWith('list ')){
+        var listMatch = input.match(/^list\s+(\w+)\s*=\s*\[(.+)\]$/);
+        if(listMatch){
+          var listName = listMatch[1];
+          if(reservedKeywords.indexOf(listName) !== -1){
+            addOutput('错误: "' + listName + '" 是保留关键字，不能用作命名', 'error');
+          }else if(isNameExists(listName)){
+            addOutput('错误: 命名 "' + listName + '" 已存在，请重新命名', 'error');
+          }else{
+            var rawItems = listMatch[2].split(/,/);
+            var items = [];
+            var hasError = false;
+            for(var i = 0; i < rawItems.length; i++){
+              var item = parseText(rawItems[i].trim());
+              if(item === null){
+                addOutput('错误: 未定义的标识符 "' + rawItems[i].trim() + '"，文本内容请使用 <> 包裹', 'error');
+                hasError = true;
+                break;
+              }
+              items.push(item);
+            }
+            if(!hasError){
+              lists[listName] = items;
+              addOutput('列表 ' + listName + ' 已创建，共 ' + items.length + ' 项', 'success');
+            }
+          }
+        }else{
+          addOutput('语法错误: list 列表名 = [<内容1>, <内容2>, ...]', 'error');
+        }
+        return;
+      }
+
+      if(input.startsWith('dict ')){
+        var dictMatch = input.match(/^dict\s+(\w+)\s*=\s*\{(.+)\}$/);
+        if(dictMatch){
+          var dictName = dictMatch[1];
+          if(reservedKeywords.indexOf(dictName) !== -1){
+            addOutput('错误: "' + dictName + '" 是保留关键字，不能用作命名', 'error');
+          }else if(isNameExists(dictName)){
+            addOutput('错误: 命名 "' + dictName + '" 已存在，请重新命名', 'error');
+          }else{
+            var pairs = dictMatch[2].split(/,/);
+            var dictObj = {};
+            var hasError = false;
+            pairs.forEach(function(pair){
+              var kv = pair.split(/:/);
+              if(kv.length >= 2){
+                var k = parseText(kv[0].trim());
+                var v = parseText(kv.slice(1).join(':').trim());
+                if(k === null || v === null){
+                  addOutput('错误: 未定义的标识符，文本内容请使用 <> 包裹', 'error');
+                  hasError = true;
+                }else{
+                  dictObj[k] = v;
+                }
+              }
+            });
+            if(!hasError){
+              dicts[dictName] = dictObj;
+              addOutput('字典 ' + dictName + ' 已创建，共 ' + Object.keys(dictObj).length + ' 项', 'success');
+            }
+          }
+        }else{
+          addOutput('语法错误: dict 字典名 = {<键>:<值>, <键>:<值>, ...}', 'error');
+        }
+        return;
+      }
+
+      if(input.startsWith('dlist ')){
+        var dlistMatch = input.match(/^dlist\s+(\w+)\s*=\s*(.+)$/);
+        if(dlistMatch){
+          var dlistName = dlistMatch[1];
+          if(reservedKeywords.indexOf(dlistName) !== -1){
+            addOutput('错误: "' + dlistName + '" 是保留关键字，不能用作命名', 'error');
+          }else if(isNameExists(dlistName)){
+            addOutput('错误: 命名 "' + dlistName + '" 已存在，请重新命名', 'error');
+          }else{
+            try{
+              var dlistContent = dlistMatch[2].trim();
+              var dlistData = JSON.parse(dlistContent);
+              dlists[dlistName] = dlistData;
+              addOutput('多维列表 ' + dlistName + ' 已创建', 'success');
+            }catch(e){
+              addOutput('语法错误: dlist 列表名 = 多维数组格式（JSON格式）', 'error');
+            }
+          }
+        }else{
+          addOutput('语法错误: dlist 列表名 = [[...], [...], ...]', 'error');
+        }
+        return;
+      }
+
+      if(input.startsWith('struct ')){
+        var structPrefix = input.match(/^struct\s+(\w+)\s*=\s*\{/);
+        if(structPrefix){
+          var structName = structPrefix[1];
+          if(reservedKeywords.indexOf(structName) !== -1){
+            addOutput('错误: "' + structName + '" 是保留关键字，不能用作命名', 'error');
+          }else if(isNameExists(structName) || structInstances[structName]){
+            addOutput('错误: 命名 "' + structName + '" 已存在，请重新命名', 'error');
+          }else{
+            var startIdx = input.indexOf('{', input.indexOf('='));
+            var depth = 0;
+            var endIdx = -1;
+            for(var si = startIdx; si < input.length; si++){
+              if(input[si] === '{') depth++;
+              else if(input[si] === '}'){
+                depth--;
+                if(depth === 0){
+                  endIdx = si;
+                  break;
+                }
+              }
+            }
+            if(endIdx === -1){
+              addOutput('语法错误: struct 结构体名 = {var 字段名 = <值>, ...}', 'error');
+            }else{
+              var content = input.substring(startIdx + 1, endIdx);
+              var structData = {};
+              var fields = splitStructFields(content);
+              var error = false;
+              for(var i = 0; i < fields.length; i++){
+                var field = fields[i].trim();
+                var varMatch = field.match(/^var\s+(\w+)\s*=\s*(.+)$/);
+                if(varMatch){
+                  var fieldName = varMatch[1].trim();
+                  var fieldValue = parseText(varMatch[2].trim());
+                  if(fieldValue === null){
+                    addOutput('错误: 未定义的标识符，文本内容请使用 <> 包裹', 'error');
+                    error = true;
+                    break;
+                  }
+                  structData[fieldName] = fieldValue;
+                }else{
+                  addOutput('语法错误: struct 字段必须是 var 字段名 = <值> 格式', 'error');
+                  error = true;
+                  break;
+                }
+              }
+              if(!error){
+                structs[structName] = structData;
+                addOutput('结构体类型 ' + structName + ' 已定义', 'success');
+              }
+            }
+          }
+        }else{
+          addOutput('语法错误: struct 结构体名 = {var 字段名 = <值>, ...}', 'error');
+        }
+        return;
+      }
+
+      function splitStructFields(text){
+        var fields = [];
+        var current = '';
+        var depth = 0;
+        var i = 0;
+        while(i < text.length){
+          if(depth === 0 && text.substr(i, 4) === 'var ' && (i === 0 || text[i-1] === ',' || text[i-1] === ' ')){
+            var trimmed = current.replace(/,\s*$/, '').trim();
+            if(trimmed){
+              fields.push(trimmed);
+            }
+            current = '';
+            i += 4;
+            continue;
+          }
+          var ch = text[i];
+          if(ch === '{' || ch === '[' || ch === '(' || ch === '<') depth++;
+          else if(ch === '}' || ch === ']' || ch === ')' || ch === '>') depth--;
+          current += ch;
+          i++;
+        }
+        var trimmed = current.replace(/,\s*$/, '').trim();
+        if(trimmed){
+          fields.push(trimmed);
+        }
+        return fields.map(function(f){
+          return 'var ' + f;
+        });
+      }
+
+      var structInstanceMatch = input.match(/^(\w+)\s+(\w+)$/);
+      if(structInstanceMatch && !input.startsWith('var ') && !input.startsWith('list ') && !input.startsWith('dict ') && !input.startsWith('dlist ') && !input.startsWith('struct ') && !input.startsWith('window ') && !input.startsWith('read ') && !input.startsWith('write ') && !input.startsWith('help ') && !input.startsWith('clear') && !input.startsWith('start ') && !input.startsWith('cont ')){
+        var typeName = structInstanceMatch[1];
+        var instanceName = structInstanceMatch[2];
+        if(reservedKeywords.indexOf(instanceName) !== -1){
+          addOutput('错误: "' + instanceName + '" 是保留关键字，不能用作命名', 'error');
+        }else if(structs[typeName]){
+          if(isNameExists(instanceName) || structInstances[instanceName]){
+            addOutput('错误: 命名 "' + instanceName + '" 已存在，请重新命名', 'error');
+          }else{
+            var template = structs[typeName];
+            var instanceData = {};
+            Object.keys(template).forEach(function(k){
+              instanceData[k] = template[k];
+            });
+            structInstances[instanceName] = { type: typeName, data: instanceData };
+            addOutput('结构体实例 ' + instanceName + ' 已创建 (类型: ' + typeName + ')', 'success');
+          }
+        }
+        return;
+      }
+
+      var instanceFieldMatch = input.match(/^(\w+)\.(\w+)\s*=\s*(.+)$/);
+      if(instanceFieldMatch && structInstances[instanceFieldMatch[1]]){
+        var instName = instanceFieldMatch[1];
+        var fieldName = instanceFieldMatch[2];
+        var newValue = parseText(instanceFieldMatch[3].trim());
+        if(newValue === null){
+          addOutput('错误: 未定义的标识符，文本内容请使用 <> 包裹', 'error');
+        }else if(structInstances[instName]){
+          structInstances[instName].data[fieldName] = newValue;
+          addOutput('结构体实例 ' + instName + '.' + fieldName + ' 已修改', 'success');
+        }else{
+          addOutput('错误: 未找到结构体实例 ' + instName, 'error');
+        }
+        return;
+      }
+
+      if(input.startsWith('write ')){
+        var writeContent = input.substring(6).trim();
+        
+        var writeVarMatch = writeContent.match(/^(\w+)\s*=\s*(.+)$/);
+        if(writeVarMatch && variables[writeVarMatch[1]] !== undefined){
+          var wVarName = writeVarMatch[1];
+          var wVarValue = parseText(writeVarMatch[2].trim());
+          if(wVarValue === null){
+            addOutput('错误: 未定义的标识符，文本内容请使用 <> 包裹', 'error');
+          }else{
+            variables[wVarName] = wVarValue;
+            addOutput('变量 ' + wVarName + ' 已修改', 'success');
+          }
+          return;
+        }
+        
+        var writeListMatch = writeContent.match(/^(\w+)\[(\d+)\]\s*=\s*(.+)$/);
+        if(writeListMatch){
+          var wListName = writeListMatch[1];
+          var wIndex = parseInt(writeListMatch[2]);
+          var wValue = parseText(writeListMatch[3].trim());
+          if(wValue === null){
+            addOutput('错误: 未定义的标识符，文本内容请使用 <> 包裹', 'error');
+          }else if(lists[wListName]){
+            if(wIndex >= lists[wListName].length){
+              lists[wListName].push(wValue);
+              addOutput('列表 ' + wListName + ' 新增第 ' + wIndex + ' 项', 'success');
+            }else{
+              lists[wListName][wIndex] = wValue;
+              addOutput('列表 ' + wListName + '[' + wIndex + '] 已修改', 'success');
+            }
+          }else if(dlists[wListName]){
+            addOutput('多维列表请使用 write 名[索引1,索引2] = <值> 格式', 'error');
+          }else{
+            addOutput('错误: 未找到列表 ' + wListName, 'error');
+          }
+          return;
+        }
+        
+        var writeDictMatch = writeContent.match(/^(\w+)\(([^)]+)\)\s*=\s*(.+)$/);
+        if(writeDictMatch){
+          var wDictName = writeDictMatch[1];
+          var wKey = writeDictMatch[2].trim();
+          var wValue = parseText(writeDictMatch[3].trim());
+          if(wValue === null){
+            addOutput('错误: 未定义的标识符，文本内容请使用 <> 包裹', 'error');
+          }else if(dicts[wDictName]){
+            dicts[wDictName][wKey] = wValue;
+            addOutput('字典 ' + wDictName + '(' + wKey + ') 已修改', 'success');
+          }else{
+            addOutput('错误: 未找到字典 ' + wDictName, 'error');
+          }
+          return;
+        }
+        
+        var writeDlistMatch = writeContent.match(/^(\w+)\[([\d,]+)\]\s*=\s*(.+)$/);
+        if(writeDlistMatch){
+          var wDlistName = writeDlistMatch[1];
+          var wIndices = writeDlistMatch[2].split(',').map(Number);
+          var wValue = parseText(writeDlistMatch[3].trim());
+          if(wValue === null){
+            addOutput('错误: 未定义的标识符，文本内容请使用 <> 包裹', 'error');
+          }else if(dlists[wDlistName]){
+            var target = dlists[wDlistName];
+            for(var i = 0; i < wIndices.length - 1; i++){
+              if(target[wIndices[i]] !== undefined){
+                target = target[wIndices[i]];
+              }else{
+                addOutput('错误: 索引越界', 'error');
+                return;
+              }
+            }
+            var lastIdx = wIndices[wIndices.length - 1];
+            if(Array.isArray(target)){
+              if(lastIdx >= target.length){
+                target.push(wValue);
+                addOutput('多维列表 ' + wDlistName + ' 新增项', 'success');
+              }else{
+                target[lastIdx] = wValue;
+                addOutput('多维列表 ' + wDlistName + ' 已修改', 'success');
+              }
+            }else{
+              addOutput('错误: 索引越界', 'error');
+            }
+          }else{
+            addOutput('错误: 未找到多维列表 ' + wDlistName, 'error');
+          }
+          return;
+        }
+        
+        addOutput('语法错误: write 数据 = <值> 或 write 名[索引] = <值> 或 write 名(键) = <值>', 'error');
+        return;
+      }
+
+      if(input.startsWith('read ')){
+        var readContent = input.substring(5).trim();
+        var readInstanceMatch = readContent.match(/^(\w+)\.(\w+)$/);
+        if(readInstanceMatch && structInstances[readInstanceMatch[1]]){
+          var instName = readInstanceMatch[1];
+          var fieldName = readInstanceMatch[2];
+          if(structInstances[instName].data[fieldName] !== undefined){
+            addOutput(instName + '.' + fieldName + ' = ' + structInstances[instName].data[fieldName], 'info');
+          }else{
+            addOutput('错误: 字段 ' + fieldName + ' 不存在', 'error');
+          }
+          return;
+        }
+        if(variables[readContent] !== undefined){
+          addOutput(readContent + ' = ' + variables[readContent], 'info');
+        }else if(lists[readContent] !== undefined){
+          addOutput(readContent + ' = ' + JSON.stringify(lists[readContent]), 'info');
+        }else if(dicts[readContent] !== undefined){
+          addOutput(readContent + ' = ' + JSON.stringify(dicts[readContent]), 'info');
+        }else if(dlists[readContent] !== undefined){
+          addOutput(readContent + ' = ' + JSON.stringify(dlists[readContent]), 'info');
+        }else if(structs[readContent] !== undefined){
+          addOutput('结构体类型: ' + readContent, 'info');
+        }else if(structInstances[readContent] !== undefined){
+          addOutput('结构体实例: ' + readContent + ' (类型: ' + structInstances[readContent].type + ')', 'info');
+        }else{
+          addOutput('错误: 未找到 ' + readContent, 'error');
+        }
+        return;
+      }
+
+      if(input.startsWith('window ')){
+        var windowMatch = input.match(/^window\s+(\w+)$/);
+        if(windowMatch){
+          var instName = windowMatch[1];
+          if(!structInstances[instName]){
+            addOutput('错误: 未找到结构体实例 ' + instName, 'error');
+          }else{
+            var s = structInstances[instName].data;
+            if(!s.name || !s.width || !s.height || !s.pos){
+              addOutput('错误: 窗口结构体必须包含 name, width, height, pos 字段', 'error');
+            }else{
+              createWindowFromStruct(s);
+            }
+          }
+        }else{
+          addOutput('语法错误: window 结构体实例名', 'error');
+        }
+        return;
+      }
+
+      var contMatch = input.match(/^cont\s*\((\w+)\)\s*=\s*start\s+(\w+\.\w+)$/);
+      if(contMatch){
+        var contType = contMatch[1];
+        var evtName = contMatch[2];
+        if(evtFiles[evtName]){
+          contTypes[evtName] = { type: contType, content: evtFiles[evtName] };
+          addOutput('内容类型 ' + evtName + ' 已设置为 ' + contType + ' 类型', 'success');
+        }else{
+          addOutput('错误: 未找到事件文件 ' + evtName, 'error');
+        }
+        return;
+      }
+
+      if(input.startsWith('start ')){
+        var startMatch = input.match(/^start\s+(\w+\.\w+)$/);
+        if(startMatch){
+          var fileName = startMatch[1];
+          if(funcFiles[fileName]){
+            addOutput('开始执行指令集: ' + fileName, 'info');
+            executeFuncFile(fileName);
+          }else{
+            addOutput('错误: 未找到指令集文件 ' + fileName, 'error');
+          }
+        }else{
+          addOutput('语法错误: start 文件名.func', 'error');
+        }
+        return;
+      }
+
+      addOutput('未知指令: ' + input, 'error');
+    }
+
+    function executeFuncFile(fileName){
+      var content = funcFiles[fileName];
+      if(!content) return;
+      var lines = content.split('\n');
+      var lineIndex = 0;
+      function executeNext(){
+        if(lineIndex >= lines.length){
+          addOutput('指令集执行完成: ' + fileName, 'success');
+          return;
+        }
+        var line = lines[lineIndex].trim();
+        lineIndex++;
+        if(!line || line.startsWith('#')){
+          executeNext();
+          return;
+        }
+        addOutput('> ' + line, 'output');
+        processCommand(line);
+        setTimeout(executeNext, 100);
+      }
+      executeNext();
+    }
+
+    function showHelp(){
+      addOutput('=== DeepSilence 指令帮助 ===', 'info');
+      addOutput('var 名 = <值>          创建变量', 'output');
+      addOutput('list 名 = [<值>, ...]  创建列表', 'output');
+      addOutput('dict 名 = {键:值, ...} 创建字典', 'output');
+      addOutput('dlist 名 = [[...]]     创建多维列表', 'output');
+      addOutput('struct 名 = {...}      定义结构体类型', 'output');
+      addOutput('类型 实例名            创建结构体实例', 'output');
+      addOutput('write 数据 = <值>      修改数据', 'output');
+      addOutput('read 数据              读取数据', 'output');
+      addOutput('window 实例名          打开窗口', 'output');
+      addOutput('start 文件名.func      执行指令集', 'output');
+      addOutput('cont (类型) = start 文件  关联内容类型', 'output');
+      addOutput('clear                  清屏', 'output');
+      addOutput('help                   显示帮助', 'output');
+    }
+
+    function initTerminal(){
+      var winId = 'terminalWindow';
+      var winEl = document.createElement('div');
+      winEl.className = 'app-window';
+      winEl.id = winId;
+      winEl.style.left = '50px';
+      winEl.style.top = '50px';
+      winEl.style.width = '700px';
+      winEl.style.height = '500px';
+      winEl.style.transform = 'scale(0.85)';
+
+      winEl.innerHTML = '<div class="window-header" id="' + winId + '_header">' +
+        '<div class="window-header-left">' +
+          '<div class="window-title">DeepSilence Terminal</div>' +
+        '</div>' +
+        '<div class="window-controls">' +
+          '<button class="window-btn minimize" onclick="minimizeWindow(\'' + winId + '\')"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>' +
+          '<button class="window-btn maximize" onclick="maximizeWindow(\'' + winId + '\')"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg></button>' +
+          '<button class="window-btn close" onclick="closeWindow(\'' + winId + '\')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="window-content" style="padding:0;">' +
+        '<div class="terminal-body" id="terminalBody">' +
+          '<div class="terminal-line info">DeepSilence v1.0 - 静水流深</div>' +
+          '<div class="terminal-line output">输入 help 查看可用指令</div>' +
+          '<div class="terminal-input-line">' +
+            '<span class="terminal-prompt">$</span>' +
+            '<input type="text" class="terminal-input" id="terminalInput" placeholder="输入指令..." autocomplete="off">' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+      document.body.appendChild(winEl);
+
+      var hdr = document.getElementById(winId + '_header');
+      setupDrag(winEl, hdr);
+
+      winEl.addEventListener('mousedown', function(){
+        focusWindow(winId);
+      });
+
+      setTimeout(function(){
+        winEl.classList.add('active');
+        focusWindow(winId);
+      }, 50);
+
+      var input = document.getElementById('terminalInput');
+      input.addEventListener('keydown', function(e){
+        if(e.key === 'Enter'){
+          var value = input.value;
+          input.value = '';
+          addOutput('$ ' + value, 'output');
+          processCommand(value);
+        }
+      });
+      input.focus();
+    }
+
+    window.addEventListener('load', function(){
+      loadResourceFiles();
+      setTimeout(initTerminal, 100);
+    });
+  </script>
+</body>
+</html>
