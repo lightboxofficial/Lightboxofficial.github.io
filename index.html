@@ -1679,7 +1679,7 @@ textarea::-webkit-scrollbar-thumb{
     <!-- 个人资料卡片 -->
     <div class="profile-card">
       <div class="avatar-box" id="avatarBox">
-        <img src="avatar1.jpg" alt="头像" id="avatarImg">
+        <img src="assets/images/avatar1.jpg" alt="头像" id="avatarImg">
       </div>
       <div class="profile-info">
         <div class="profile-main">
@@ -3029,7 +3029,7 @@ const avatarImg = document.getElementById('avatarImg');
 let avatarToggle = false;
 avatarBox.addEventListener('click', function(){
   avatarToggle = !avatarToggle;
-  avatarImg.src = avatarToggle ? 'avatar2.jpg' : 'avatar1.jpg';
+  avatarImg.src = avatarToggle ? 'assets/images/avatar2.jpg' : 'assets/images/avatar1.jpg';
 });
 
 // 首次访问自动弹出个人页面
