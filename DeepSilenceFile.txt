@@ -1,0 +1,13 @@
+# DeepSilenceFile.txt
+# 内核清单：声明可被终端直接调用的脚本与页面
+#
+# script <脚本名> <路径> <说明>
+# page   <页面名> <路径>
+#
+# 脚本文件按行执行，一行一条指令，'#' 开头为注释
+
+script home   scripts/home.txt   打开主页窗口
+script demo   scripts/demo.txt   侧边栏增删改测试
+
+page home    pages/home.html
+page about   pages/about.html
