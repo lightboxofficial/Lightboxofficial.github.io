@@ -1,0 +1,1397 @@
+"use strict";
+
+window.addEventListener("error", e => {
+  console.error("DeepSilence 启动错误：", e.message);
+});
+
+window.addEventListener("unhandledrejection", e => {
+  console.error("DeepSilence 未处理异常：", (e.reason && e.reason.message) || e.reason);
+});
+
+/* ============================================================
+   DeepSilence Engine · core.js
+   全部逻辑集中于此，页面与脚本只负责内容
+   ============================================================ */
+
+/* ---------- 基础工具 ---------- */
+
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+function num(v, d) {
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? n : d;
+}
+
+function bool(v, d) {
+  if (v === undefined || v === null || v === "") return d;
+  if (typeof v === "boolean") return v;
+  const s = String(v).toLowerCase();
+  if (["1", "true", "yes", "on"].includes(s)) return true;
+  if (["0", "false", "no", "off"].includes(s)) return false;
+  return d;
+}
+
+function splitTop(str, sep) {
+  const out = [];
+  let depth = 0, buf = "", q = null;
+  for (let i = 0; i < str.length; i++) {
+    const c = str[i];
+    if (q) {
+      buf += c;
+      if (c === "\\" && i + 1 < str.length) { buf += str[++i]; continue; }
+      if (c === q) q = null;
+      continue;
+    }
+    if (c === '"' || c === "'") { q = c; buf += c; continue; }
+    if (c === "(" || c === "[" || c === "{") { depth++; buf += c; continue; }
+    if (c === ")" || c === "]" || c === "}") { depth--; buf += c; continue; }
+    if (c === sep && depth === 0) { out.push(buf); buf = ""; continue; }
+    buf += c;
+  }
+  out.push(buf);
+  return out;
+}
+
+function unquote(s) {
+  s = String(s).trim();
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    return s.slice(1, -1).replace(/\\(.)/g, "$1");
+  }
+  return s;
+}
+
+const vars = Object.create(null);
+
+function parseValue(raw) {
+  const t = String(raw).trim();
+  if (!t) return "";
+  if ((t.startsWith('"') && t.endsWith('"') && t.length > 1) ||
+      (t.startsWith("'") && t.endsWith("'") && t.length > 1)) return unquote(t);
+  if (/^-?\d+(\.\d+)?$/.test(t)) return Number(t);
+  if (t === "true") return true;
+  if (t === "false") return false;
+  if (t === "null") return null;
+  if (t.startsWith("$")) {
+    const k = t.slice(1);
+    return vars[k] !== undefined ? vars[k] : "";
+  }
+  return t;
+}
+
+function topEq(str) {
+  let depth = 0, q = null;
+  for (let i = 0; i < str.length; i++) {
+    const c = str[i];
+    if (q) {
+      if (c === "\\") { i++; continue; }
+      if (c === q) q = null;
+      continue;
+    }
+    if (c === '"' || c === "'") { q = c; continue; }
+    if ("([{".includes(c)) depth++;
+    else if (")]}".includes(c)) depth--;
+    else if (c === "=" && depth === 0) return i;
+  }
+  return -1;
+}
+
+const ICON_DEF = '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>';
+
+const BASE_CSS = `
+html,body{background:transparent!important;margin:0;padding:0}
+::-webkit-scrollbar{width:0;height:0}
+*{scrollbar-width:none;-ms-overflow-style:none}
+`;
+
+/* ---------- 终端 ---------- */
+
+const Term = (() => {
+  const out = $("#termOut");
+  const win = $("#term");
+  const hist = [];
+  let hp = -1;
+
+  function scroll() {
+    out.scrollTop = out.scrollHeight;
+  }
+
+  function print(text, cls) {
+    const d = document.createElement("div");
+    d.className = "ln " + (cls || "");
+    d.innerHTML = text;
+    out.appendChild(d);
+    keepInputLast();
+    scroll();
+    return d;
+  }
+
+  function keepInputLast() {
+    const line = $(".in-line", out);
+    if (line && line !== out.lastElementChild) out.appendChild(line);
+  }
+
+  function raw(text, cls) {
+    const d = document.createElement("div");
+    d.className = "ln " + (cls || "");
+    d.textContent = text;
+    out.appendChild(d);
+    keepInputLast();
+    scroll();
+    return d;
+  }
+
+  function gap() {
+    print("", "gap");
+  }
+
+  function highlight(src) {
+    if (!src) return "";
+    const parts = [];
+    let i = 0;
+    const push = (t, c) => { if (t) parts.push('<span class="' + c + '">' + esc(t) + "</span>"); };
+    while (i < src.length) {
+      const c = src[i];
+      if (c === '"' || c === "'") {
+        let j = i + 1;
+        while (j < src.length && src[j] !== c) { if (src[j] === "\\") j++; j++; }
+        push(src.slice(i, j + 1), "t-str");
+        i = j + 1;
+        continue;
+      }
+      if (c === " " || c === "\t") { push(c, "t-arg"); i++; continue; }
+      const rest = src.slice(i);
+      let m;
+      if ((m = rest.match(/^<svg[\s\S]*?<\/svg>/))) { push(m[0], "t-str"); i += m[0].length; continue; }
+      if ((m = rest.match(/^[A-Za-z_][\w.-]*/))) {
+        push(m[0], i === 0 ? "t-cmd" : "t-arg");
+        i += m[0].length;
+        continue;
+      }
+      if ((m = rest.match(/^\$[A-Za-z_]\w*/))) { push(m[0], "t-var"); i += m[0].length; continue; }
+      if ((m = rest.match(/^-\w+/))) { push(m[0], "t-flag"); i += m[0].length; continue; }
+      if ((m = rest.match(/^-?\d+(\.\d+)?/))) { push(m[0], "t-num"); i += m[0].length; continue; }
+      if ((m = rest.match(/^[=<>!+\-*/&|]+/))) { push(m[0], "t-op"); i += m[0].length; continue; }
+      if ((m = rest.match(/^[\w./]+\/[\w./]*/))) { push(m[0], "t-path"); i += m[0].length; continue; }
+      push(c, "t-arg");
+      i++;
+    }
+    return parts.join("");
+  }
+
+  function makeInput() {
+    const exists = $(".cmd-input", out);
+    if (exists) return exists;
+    const line = document.createElement("div");
+    line.className = "in-line";
+    line.innerHTML =
+      '<span class="prompt">&gt;</span>' +
+      '<div class="in-wrap"><div class="hl empty"></div><input class="cmd-input" autocomplete="off" spellcheck="false"></div>';
+    out.appendChild(line);
+    const inp = $("input", line);
+    const hl = $(".hl", line);
+
+    inp.addEventListener("input", () => {
+      hl.innerHTML = highlight(inp.value);
+      hl.classList.toggle("empty", !inp.value);
+    });
+
+    inp.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const v = inp.value.trim();
+        inp.value = "";
+        hl.innerHTML = "";
+        hl.classList.add("empty");
+        if (!v) return;
+        hist.push(v);
+        hp = hist.length;
+        line.remove();
+        print('<span class="t-cmd">&gt;</span> ' + highlight(v), "cmd");
+        run(v).then(() => {
+          if (win.classList.contains("active") && !$(".cmd-input", out)) makeInput();
+        });
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (hp > 0) { hp--; inp.value = hist[hp] || ""; inp.dispatchEvent(new Event("input")); }
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (hp < hist.length - 1) { hp++; inp.value = hist[hp] || ""; }
+        else { hp = hist.length; inp.value = ""; }
+        inp.dispatchEvent(new Event("input"));
+      } else if (e.key === "l" && e.ctrlKey) {
+        e.preventDefault();
+        clearScreen();
+      } else if (e.key === "Escape") {
+        inp.value = "";
+        inp.dispatchEvent(new Event("input"));
+      }
+    });
+
+    inp.addEventListener("focus", () => scroll());
+    scroll();
+    return inp;
+  }
+
+  function focusInput() {
+    const inp = $(".cmd-input", out);
+    if (inp) inp.focus();
+  }
+
+  function clearScreen() {
+    out.innerHTML = "";
+    makeInput();
+  }
+
+  return { print, raw, gap, makeInput, focusInput, clearScreen, highlight, scroll };
+})();
+
+/* ---------- 背景 ---------- */
+
+const Bg = {
+  image: "",
+  info: "",
+
+  setImage(url) {
+    this.image = String(url || "").trim();
+    if (!this.image) {
+      document.body.style.backgroundImage = "none";
+      return "背景已清除";
+    }
+    const pre = new Image();
+    pre.onload = () => {
+      document.body.style.backgroundImage = 'url("' + this.image + '")';
+    };
+    pre.onerror = () => {
+      document.body.style.backgroundImage = 'url("' + this.image + '")';
+    };
+    pre.src = this.image;
+    return "背景已设置";
+  },
+
+  setInfo(url) {
+    this.info = String(url || "").trim();
+    if (!this.info) return "背景信息已清除";
+    return "背景信息已设置";
+  },
+
+  async loadInfo() {
+    if (!this.info) return;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 6000);
+    try {
+      const res = await fetch(this.info, { cache: "no-cache", signal: ctrl.signal });
+      const data = await res.json();
+      const img = data && data.images && data.images[0];
+      if (!img) return;
+      let u = img.url || "";
+      if (u.startsWith("/")) u = "https://cn.bing.com" + u;
+      this.setImage(u);
+      return u;
+    } catch (e) {
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+};
+
+/* ---------- 窗口对象 ---------- */
+
+const objects = Object.create(null);
+let zTop = 50;
+
+class DSWindow {
+  constructor(name, o) {
+    o = o || {};
+    this.type = "window";
+    this.name = name;
+    this.title = o.title !== undefined ? String(o.title) : name;
+    this.icon = o.icon !== undefined ? String(o.icon) : ICON_DEF;
+    this.x = num(o.x, Math.round((window.innerWidth - num(o.w, 700)) / 2));
+    this.y = num(o.y, Math.round((window.innerHeight - num(o.h, 520)) / 2));
+    this.w = num(o.w, 700);
+    this.h = num(o.h, 520);
+    this.visible = bool(o.visible, false);
+    this.maximized = false;
+    this.closed = false;
+
+    this.bg = o.bg !== undefined ? String(o.bg) : "";
+    this.blur = num(o.blur, 20);
+    this.radius = num(o.radius, 12);
+    this.opacity = num(o.opacity, 1);
+    this.shadow = bool(o.shadow, true);
+
+    this.movable = bool(o.movable, true);
+    this.resizable = bool(o.resizable, true);
+    this.closable = bool(o.closable, true);
+
+    this.sidebar = bool(o.sidebar, false);
+    this.sidebarWidth = num(o.sidebarWidth, 220);
+    this.sideOpen = false;
+
+    this.src = o.src !== undefined ? String(o.src) : "";
+    this.html = o.html !== undefined ? String(o.html) : "";
+    this.menu = [];
+    this.activeItem = null;
+
+    this.el = null;
+    this.build();
+  }
+
+  build() {
+    const el = document.createElement("div");
+    el.className = "win";
+    el.dataset.name = this.name;
+    el.innerHTML =
+      '<div class="win-head">' +
+        '<div class="win-head-left">' +
+          '<div class="win-logo"></div>' +
+          '<div class="win-title"></div>' +
+        '</div>' +
+        '<div class="win-ctrls">' +
+          '<button class="wbtn min" title="最小化"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>' +
+          '<button class="wbtn max" title="最大化"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1"/></svg></button>' +
+          '<button class="wbtn close" title="关闭"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6l-12 12"/></svg></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="win-body">' +
+        '<div class="win-side">' +
+          '<div class="win-side-head"><h3></h3></div>' +
+          '<div class="win-side-nav"></div>' +
+        '</div>' +
+        '<div class="win-content">' +
+          '<iframe class="win-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>' +
+          '<div class="win-empty">空</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rs top"></div><div class="rs bottom"></div>' +
+      '<div class="rs left"></div><div class="rs right"></div>' +
+      '<div class="rs top-left"></div><div class="rs top-right"></div>' +
+      '<div class="rs bottom-left"></div><div class="rs bottom-right"></div>';
+
+    this.el = el;
+    this.headEl = $(".win-head", el);
+    this.logoEl = $(".win-logo", el);
+    this.titleEl = $(".win-title", el);
+    this.sideEl = $(".win-side", el);
+    this.sideHeadEl = $(".win-side-head h3", el);
+    this.sideNavEl = $(".win-side-nav", el);
+    this.contentEl = $(".win-content", el);
+    this.frameEl = $(".win-frame", el);
+    this.emptyEl = $(".win-empty", el);
+
+    $("#winLayer").appendChild(el);
+
+    $(".wbtn.close", el).onclick = e => { e.stopPropagation(); this.close(); };
+    $(".wbtn.min", el).onclick = e => { e.stopPropagation(); this.minimize(); };
+    $(".wbtn.max", el).onclick = e => { e.stopPropagation(); this.maximized ? this.restore() : this.maximize(); };
+    this.logoEl.onclick = e => { e.stopPropagation(); this.toggleSidebar(); };
+    if (!this.closable) $(".wbtn.close", el).classList.add("hidden");
+
+    el.addEventListener("mousedown", () => this.focus(), true);
+
+    this.bindDrag();
+    this.bindResize();
+    this.apply();
+    this.renderMenu();
+    if (this.src) this.load(this.src);
+    else if (this.html) this.setHtml(this.html);
+  }
+
+  apply() {
+    const s = this.el.style;
+    s.left = this.x + "px";
+    s.top = this.y + "px";
+    s.width = this.w + "px";
+    s.height = this.h + "px";
+    if (this.bg) s.background = this.bg;
+    s.backdropFilter = "blur(" + this.blur + "px) saturate(150%)";
+    s.webkitBackdropFilter = "blur(" + this.blur + "px) saturate(150%)";
+    s.borderRadius = this.radius + "px";
+    s.setProperty("--win-opacity", this.opacity);
+    s.boxShadow = this.shadow ? "0 16px 48px rgba(0,0,0,0.55)" : "none";
+    s.setProperty("--side-w", this.sidebarWidth + "px");
+    this.el.classList.toggle("active", this.visible && !this.closed);
+    this.el.classList.toggle("maximized", this.maximized);
+    this.headEl.classList.toggle("no-drag", !this.movable);
+    this.headEl.style.cursor = this.movable ? "move" : "default";
+    this.contentEl.style.borderRadius = "0 0 " + this.radius + "px " + this.radius + "px";
+    this.headEl.style.borderRadius = this.radius + "px " + this.radius + "px 0 0";
+    $$(".rs", this.el).forEach(r => r.classList.toggle("off", !this.resizable || this.maximized));
+    this.logoEl.innerHTML = this.icon;
+    this.titleEl.textContent = this.title;
+    this.sideHeadEl.textContent = this.title;
+    this.sideEl.classList.toggle("open", this.sideOpen);
+  }
+
+  setZ(z) {
+    this.el.style.zIndex = z;
+  }
+
+  focus() {
+    if (this.closed) return;
+    zTop++;
+    this.setZ(zTop);
+  }
+
+  bindDrag() {
+    let sx = 0, sy = 0, ox = 0, oy = 0, dragging = false;
+    const head = this.headEl;
+    head.addEventListener("mousedown", e => {
+      if (!this.movable || this.maximized) return;
+      if (e.target.closest(".wbtn") || e.target.closest(".win-logo")) return;
+      dragging = true;
+      sx = e.clientX; sy = e.clientY;
+      ox = this.x; oy = this.y;
+      document.body.style.userSelect = "none";
+      e.preventDefault();
+    });
+    window.addEventListener("mousemove", e => {
+      if (!dragging) return;
+      this.x = Math.round(ox + e.clientX - sx);
+      this.y = Math.round(oy + e.clientY - sy);
+      this.el.style.left = this.x + "px";
+      this.el.style.top = this.y + "px";
+    });
+    window.addEventListener("mouseup", () => {
+      if (!dragging) return;
+      dragging = false;
+      document.body.style.userSelect = "";
+    });
+  }
+
+  bindResize() {
+    $$(".rs", this.el).forEach(rs => {
+      let sx = 0, sy = 0, st = null, dragging = false;
+      rs.addEventListener("mousedown", e => {
+        if (!this.resizable || this.maximized) return;
+        dragging = true;
+        sx = e.clientX; sy = e.clientY;
+        st = { x: this.x, y: this.y, w: this.w, h: this.h };
+        document.body.style.userSelect = "none";
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      window.addEventListener("mousemove", e => {
+        if (!dragging) return;
+        const dx = e.clientX - sx, dy = e.clientY - sy;
+        const cls = rs.className;
+        let { x, y, w, h } = st;
+        if (cls.includes("right")) w = Math.max(360, st.w + dx);
+        if (cls.includes("left")) { w = Math.max(360, st.w - dx); x = st.x + (st.w - w); }
+        if (cls.includes("bottom")) h = Math.max(320, st.h + dy);
+        if (cls.includes("top")) { h = Math.max(320, st.h - dy); y = st.y + (st.h - h); }
+        this.x = x; this.y = y; this.w = w; this.h = h;
+        this.el.style.left = x + "px";
+        this.el.style.top = y + "px";
+        this.el.style.width = w + "px";
+        this.el.style.height = h + "px";
+      });
+      window.addEventListener("mouseup", () => {
+        if (!dragging) return;
+        dragging = false;
+        document.body.style.userSelect = "";
+      });
+    });
+  }
+
+  open() {
+    this.closed = false;
+    this.visible = true;
+    this.apply();
+    this.focus();
+    return this;
+  }
+
+  close() {
+    this.closed = true;
+    this.visible = false;
+    this.apply();
+    return this;
+  }
+
+  show() { return this.open(); }
+
+  hide() {
+    this.visible = false;
+    this.apply();
+    return this;
+  }
+
+  minimize() {
+    this.visible = false;
+    this.apply();
+    return this;
+  }
+
+  maximize() {
+    this.maximized = true;
+    this.apply();
+    this.focus();
+    return this;
+  }
+
+  restore() {
+    this.maximized = false;
+    this.apply();
+    return this;
+  }
+
+  load(path) {
+    this.src = String(path);
+    this.html = "";
+    this.frameEl.removeAttribute("srcdoc");
+    this.frameEl.src = this.resolve(path);
+    this.emptyEl.style.display = "none";
+    return this;
+  }
+
+  setHtml(html) {
+    this.html = String(html);
+    this.src = "";
+    this.frameEl.removeAttribute("src");
+    this.frameEl.srcdoc = this.inject(html);
+    this.emptyEl.style.display = "none";
+    return this;
+  }
+
+  reload() {
+    if (this.src) return this.load(this.src);
+    if (this.html) return this.setHtml(this.html);
+    return this;
+  }
+
+  resolve(p) {
+    let s = String(p).trim();
+    if (/^(http|data|blob|about):/.test(s)) return s;
+    if (s.startsWith("./")) s = s.slice(2);
+    if (s.startsWith("../")) return s;
+    if (!s.includes("/")) s = "pages/" + s;
+    if (!s.endsWith(".html")) s += ".html";
+    return s;
+  }
+
+  inject(html) {
+    const s = String(html);
+    const style = "<style>" + BASE_CSS + "</style>";
+    if (/<\/head>/i.test(s)) return s.replace(/<\/head>/i, style + "</head>");
+    if (/<html/i.test(s)) return s.replace(/<html[^>]*>/i, m => m + "<head>" + style + "</head>");
+    return '<!DOCTYPE html><html><head><meta charset="utf-8">' + style + '</head><body>' + s + "</body></html>";
+  }
+
+  setSidebar(v) {
+    this.sidebar = bool(v, this.sidebar);
+    this.sideOpen = this.sidebar;
+    this.apply();
+    return this;
+  }
+
+  toggleSidebar(force) {
+    this.sideOpen = force === undefined ? !this.sideOpen : bool(force, this.sideOpen);
+    this.sideEl.classList.toggle("open", this.sideOpen);
+    return this;
+  }
+
+  renderMenu() {
+    this.sideHeadEl.textContent = this.title;
+    const nav = this.sideNavEl;
+    nav.innerHTML = "";
+    this.menu.forEach(it => {
+      if (it.type === "sep") {
+        const d = document.createElement("div");
+        d.className = "win-side-sep";
+        d.textContent = it.name;
+        nav.appendChild(d);
+        return;
+      }
+      const d = document.createElement("div");
+      d.className = "win-side-item";
+      if (this.activeItem === it.name) d.classList.add("active");
+      d.innerHTML = '<span class="ico">' + (it.icon || ICON_DEF) + '</span><span class="nm">' + esc(it.name) + "</span>";
+      d.onclick = () => {
+        try { this.select(it.name); } catch (e) {}
+        this.toggleSidebar(false);
+      };
+      nav.appendChild(d);
+    });
+    if (!this.menu.length) {
+      const d = document.createElement("div");
+      d.className = "win-side-sep";
+      d.textContent = "暂无条目";
+      nav.appendChild(d);
+    }
+  }
+
+  menuIndexOf(name) {
+    return this.menu.findIndex(it => it.type === "item" && it.name === name);
+  }
+
+  menuHas(name) { return this.menuIndexOf(name) >= 0; }
+
+  menuCount() { return this.menu.filter(it => it.type === "item").length; }
+
+  menuAdd(name, icon, page) {
+    name = String(name).trim();
+    if (!name) throw new Error("条目名不能为空");
+    if (this.menuHas(name)) throw new Error("条目已存在：" + name);
+    this.menu.push({ type: "item", name, icon: icon || ICON_DEF, page: page || "" });
+    this.renderMenu();
+    return this;
+  }
+
+  menuInsert(i, name, icon, page) {
+    name = String(name).trim();
+    if (!name) throw new Error("条目名不能为空");
+    if (this.menuHas(name)) throw new Error("条目已存在：" + name);
+    i = Math.max(0, Math.min(this.menu.length, parseInt(i, 10) || 0));
+    this.menu.splice(i, 0, { type: "item", name, icon: icon || ICON_DEF, page: page || "" });
+    this.renderMenu();
+    return this;
+  }
+
+  menuBefore(ref, name, icon, page) {
+    const i = this.menuIndexOf(ref);
+    if (i < 0) throw new Error("找不到条目：" + ref);
+    return this.menuInsert(i, name, icon, page);
+  }
+
+  menuAfter(ref, name, icon, page) {
+    const i = this.menuIndexOf(ref);
+    if (i < 0) throw new Error("找不到条目：" + ref);
+    return this.menuInsert(i + 1, name, icon, page);
+  }
+
+  menuRemove(name) {
+    const i = this.menuIndexOf(name);
+    if (i < 0) throw new Error("找不到条目：" + name);
+    this.menu.splice(i, 1);
+    if (this.activeItem === name) {
+      const next = this.menu.slice(i).find(it => it.type === "item") ||
+                   this.menu.slice(0, i).reverse().find(it => it.type === "item");
+      this.activeItem = next ? next.name : null;
+      if (next && next.page) this.load(next.page);
+      else this.clearContent();
+    }
+    this.renderMenu();
+    return this;
+  }
+
+  menuRemoveAt(i) {
+    i = parseInt(i, 10);
+    if (!Number.isFinite(i) || i < 0 || i >= this.menu.length) throw new Error("下标越界：" + i);
+    const it = this.menu[i];
+    if (it.type !== "item") throw new Error("该位置是分隔线");
+    return this.menuRemove(it.name);
+  }
+
+  menuClear() {
+    this.menu = [];
+    this.activeItem = null;
+    this.clearContent();
+    this.renderMenu();
+    return this;
+  }
+
+  menuUpdate(name, icon, page) {
+    const i = this.menuIndexOf(name);
+    if (i < 0) throw new Error("找不到条目：" + name);
+    if (icon) this.menu[i].icon = icon;
+    if (page) this.menu[i].page = page;
+    this.renderMenu();
+    return this;
+  }
+
+  menuRename(oldName, newName) {
+    const i = this.menuIndexOf(oldName);
+    if (i < 0) throw new Error("找不到条目：" + oldName);
+    newName = String(newName).trim();
+    if (!newName) throw new Error("新名称不能为空");
+    if (this.menuHas(newName)) throw new Error("条目已存在：" + newName);
+    this.menu[i].name = newName;
+    if (this.activeItem === oldName) this.activeItem = newName;
+    this.renderMenu();
+    return this;
+  }
+
+  menuMove(name, i) {
+    const from = this.menuIndexOf(name);
+    if (from < 0) throw new Error("找不到条目：" + name);
+    const it = this.menu.splice(from, 1)[0];
+    i = Math.max(0, Math.min(this.menu.length, parseInt(i, 10) || 0));
+    this.menu.splice(i, 0, it);
+    this.renderMenu();
+    return this;
+  }
+
+  menuSwap(a, b) {
+    const ia = this.menuIndexOf(a), ib = this.menuIndexOf(b);
+    if (ia < 0) throw new Error("找不到条目：" + a);
+    if (ib < 0) throw new Error("找不到条目：" + b);
+    const t = this.menu[ia];
+    this.menu[ia] = this.menu[ib];
+    this.menu[ib] = t;
+    this.renderMenu();
+    return this;
+  }
+
+  menuSep(label) {
+    this.menu.push({ type: "sep", name: String(label || "").trim() });
+    this.renderMenu();
+    return this;
+  }
+
+  menuBatch(spec) {
+    String(spec).split(",").forEach(pair => {
+      const p = pair.trim();
+      if (!p) return;
+      const k = p.indexOf(":");
+      if (k < 0) this.menuAdd(p, ICON_DEF, "");
+      else this.menuAdd(p.slice(0, k).trim(), ICON_DEF, p.slice(k + 1).trim());
+    });
+    return this;
+  }
+
+  menuList() {
+    return this.menu
+      .map((it, i) => it.type === "sep" ? i + "  --- " + it.name : i + "  " + it.name + "  ->  " + (it.page || "-"))
+      .join("\n");
+  }
+
+  select(name) {
+    const i = this.menuIndexOf(name);
+    if (i < 0) throw new Error("找不到条目：" + name);
+    this.activeItem = name;
+    const page = this.menu[i].page;
+    if (page) {
+      if (/[<>]/.test(page)) this.setHtml(page);
+      else this.load(page);
+    }
+    this.renderMenu();
+    return this;
+  }
+
+  selectAt(i) {
+    i = parseInt(i, 10);
+    const list = this.menu.filter(it => it.type === "item");
+    if (!Number.isFinite(i) || i < 0 || i >= list.length) throw new Error("下标越界：" + i);
+    return this.select(list[i].name);
+  }
+
+  menuNext() {
+    const list = this.menu.filter(it => it.type === "item");
+    if (!list.length) return this;
+    const i = list.findIndex(it => it.name === this.activeItem);
+    return this.select(list[(i + 1) % list.length].name);
+  }
+
+  menuPrev() {
+    const list = this.menu.filter(it => it.type === "item");
+    if (!list.length) return this;
+    const i = list.findIndex(it => it.name === this.activeItem);
+    return this.select(list[(i - 1 + list.length) % list.length].name);
+  }
+
+  clearContent() {
+    this.frameEl.removeAttribute("src");
+    this.frameEl.removeAttribute("srcdoc");
+    this.emptyEl.style.display = "flex";
+    return this;
+  }
+
+  destroy() {
+    this.el.remove();
+    delete objects[this.name];
+  }
+}
+
+/* ---------- 属性与方法表 ---------- */
+
+const PROPS = {
+  title: "string", icon: "string", x: "number", y: "number", w: "number", h: "number",
+  z: "number", visible: "bool", bg: "string", blur: "number", radius: "number",
+  opacity: "number", shadow: "bool", movable: "bool", resizable: "bool", closable: "bool",
+  sidebar: "bool", sidebarWidth: "number", src: "string", html: "string"
+};
+
+function setProp(obj, key, val) {
+  if (!PROPS[key]) throw new Error("未知属性：" + key);
+  const t = PROPS[key];
+  if (t === "number") val = num(val, 0);
+  else if (t === "bool") val = bool(val, false);
+  else val = String(val);
+
+  obj[key] = val;
+
+  if (key === "src") { obj.load(val); return; }
+  if (key === "html") { obj.setHtml(val); return; }
+  if (key === "sidebar") { obj.setSidebar(val); return; }
+  if (key === "z") { obj.setZ(val); return; }
+
+  obj.apply();
+}
+
+const METHODS = {
+  open: o => o.open(),
+  close: o => o.close(),
+  show: o => o.show(),
+  hide: o => o.hide(),
+  minimize: o => o.minimize(),
+  maximize: o => o.maximize(),
+  restore: o => o.restore(),
+  focus: o => o.focus(),
+  load: (o, a) => o.load(a[0] || ""),
+  html: (o, a) => o.setHtml(a[0] || ""),
+  reload: o => o.reload(),
+  select: (o, a) => o.select(a[0]),
+  selectAt: (o, a) => o.selectAt(a[0]),
+  next: o => o.menuNext(),
+  prev: o => o.menuPrev(),
+  sidebar: (o, a) => o.toggleSidebar(a[0])
+};
+
+const MENU_METHODS = {
+  add: (o, a) => o.menuAdd(a[0], a[1], a[2]),
+  insert: (o, a) => o.menuInsert(a[0], a[1], a[2], a[3]),
+  before: (o, a) => o.menuBefore(a[0], a[1], a[2], a[3]),
+  after: (o, a) => o.menuAfter(a[0], a[1], a[2], a[3]),
+  remove: (o, a) => o.menuRemove(a[0]),
+  removeAt: (o, a) => o.menuRemoveAt(a[0]),
+  clear: o => o.menuClear(),
+  update: (o, a) => o.menuUpdate(a[0], a[1], a[2]),
+  rename: (o, a) => o.menuRename(a[0], a[1]),
+  move: (o, a) => o.menuMove(a[0], a[1]),
+  swap: (o, a) => o.menuSwap(a[0], a[1]),
+  sep: (o, a) => o.menuSep(a[0]),
+  batch: (o, a) => o.menuBatch(a[0]),
+  list: o => o.menuList(),
+  count: o => o.menuCount(),
+  has: (o, a) => o.menuHas(a[0]),
+  select: (o, a) => o.select(a[0]),
+  selectAt: (o, a) => o.selectAt(a[0]),
+  next: o => o.menuNext(),
+  prev: o => o.menuPrev(),
+  open: o => o.toggleSidebar(true),
+  close: o => o.toggleSidebar(false),
+  toggle: o => o.toggleSidebar()
+};
+
+/* ---------- 解析 ---------- */
+
+function parseArgs(str) {
+  const out = [];
+  let buf = "", q = null, depth = 0;
+  for (let i = 0; i < str.length; i++) {
+    const c = str[i];
+    if (q) {
+      if (c === "\\" && i + 1 < str.length) { buf += str[++i]; continue; }
+      if (c === q) { q = null; continue; }
+      buf += c;
+      continue;
+    }
+    if (c === '"' || c === "'") { q = c; continue; }
+    if ("([{".includes(c)) { depth++; buf += c; continue; }
+    if (")]}".includes(c)) { depth--; buf += c; continue; }
+    if (c === "," && depth === 0) { out.push(buf.trim()); buf = ""; continue; }
+    buf += c;
+  }
+  if (buf.trim() || str.trim()) out.push(buf.trim());
+  return out.map(s => parseValue(s));
+}
+
+function getObject(name) {
+  const o = objects[name];
+  if (!o) throw new Error("找不到对象：" + name);
+  return o;
+}
+
+function createObject(type, name, fields) {
+  type = String(type).toLowerCase();
+  if (!/^[A-Za-z_]\w*$/.test(name)) throw new Error("对象名不合法：" + name);
+  if (objects[name]) throw new Error("对象已存在：" + name);
+
+  let obj;
+  if (type === "window") obj = new DSWindow(name, fields);
+  else throw new Error("未知对象类型：" + type);
+
+  objects[name] = obj;
+  return obj;
+}
+
+function delObject(name) {
+  const o = getObject(name);
+  if (typeof o.destroy === "function") o.destroy();
+  else delete objects[name];
+}
+
+/* ---------- 执行器 ---------- */
+
+const systemCmds = {};
+
+function reg(name, desc, fn) {
+  systemCmds[name] = { desc, fn };
+}
+
+async function execLine(line, opt) {
+  opt = opt || {};
+  const s = String(line).trim();
+  if (!s || s.startsWith("#") || s.startsWith("//")) return { skip: true };
+
+  try {
+    if (/^go\./.test(s)) {
+      const n = s.slice(3).trim();
+      const o = getObject(n);
+      if (typeof o.open === "function") o.open();
+      if (typeof o.focus === "function") o.focus();
+      return { ok: true, out: "已切换至 " + n };
+    }
+
+    if (/^new\s+/i.test(s)) {
+      const rest = s.slice(4).trim();
+      const parts = splitTop(rest, " ");
+      const type = parts.shift();
+      const name = parts.shift();
+      if (!type) throw new Error("缺少对象类型");
+      if (!name) throw new Error("缺少对象名");
+      const fields = {};
+      parts.forEach(p => {
+        const t = p.trim();
+        if (!t) return;
+        const k = t.indexOf("=");
+        if (k < 0) return;
+        fields[t.slice(0, k).trim()] = parseValue(t.slice(k + 1));
+      });
+      const o = createObject(type, name, fields);
+      return { ok: true, out: "已创建 " + type + "：" + name + (o.visible ? "" : "（隐藏）") };
+    }
+
+    if (/^del\s+/i.test(s)) {
+      const n = s.slice(4).trim();
+      delObject(n);
+      return { ok: true, out: "已删除：" + n };
+    }
+
+    const eq = topEq(s);
+    if (eq > 0) {
+      const left = s.slice(0, eq).trim();
+      const right = s.slice(eq + 1).trim();
+      const dot = left.indexOf(".");
+      if (dot > 0 && !left.includes("(")) {
+        const name = left.slice(0, dot).trim();
+        const prop = left.slice(dot + 1).trim();
+        if (objects[name]) {
+          setProp(objects[name], prop, parseValue(right));
+          return { ok: true, out: name + "." + prop + " = " + right };
+        }
+      }
+    }
+
+    const cm = s.match(/^([A-Za-z_]\w*)\.([A-Za-z_]\w*)(?:\.([A-Za-z_]\w*))?\s*\(([\s\S]*)\)$/);
+    if (cm) {
+      const name = cm[1], m2 = cm[2], m3 = cm[3];
+      const args = parseArgs(cm[4] || "");
+      const o = getObject(name);
+
+      if (m2 === "menu") {
+        if (!m3) throw new Error("缺少侧边栏方法");
+        const fn = MENU_METHODS[m3];
+        if (!fn) throw new Error("未知侧边栏方法：" + m3);
+        const r = fn(o, args);
+        return { ok: true, out: typeof r === "string" ? r : name + ".menu." + m3 + "()" };
+      }
+
+      const fn = METHODS[m2];
+      if (!fn) throw new Error("未知方法：" + m2);
+      const r = fn(o, args);
+      return { ok: true, out: typeof r === "string" ? r : name + "." + m2 + "()" };
+    }
+
+    const first = s.split(/\s+/)[0];
+    if (scripts[first]) return await runScript(first, opt);
+
+    const parts = splitTop(s, " ");
+    const cmd = parts.shift();
+    const sc = systemCmds[cmd.toLowerCase()];
+    if (sc) {
+      const r = await sc.fn(parts, opt);
+      return { ok: true, out: r === undefined ? "" : r };
+    }
+
+    throw new Error("未知指令：" + cmd);
+  } catch (e) {
+    return { ok: false, err: e.message || String(e) };
+  }
+}
+
+/* ---------- 脚本 ---------- */
+
+const scripts = Object.create(null);
+let strictMode = false;
+
+async function runScript(name, opt) {
+  const sc = scripts[name];
+  if (!sc) throw new Error("找不到脚本：" + name);
+
+  const silent = !!(opt && opt.silent);
+
+  if (!silent) {
+    Term.gap();
+    Term.print('<span class="t-cmd">run</span> ' + esc(name) + ' <span class="t-arg">(' + sc.lines.length + " 行)</span>", "head");
+  }
+
+  let okCount = 0, errCount = 0;
+
+  for (let i = 0; i < sc.lines.length; i++) {
+    const line = sc.lines[i].trim();
+    if (!line || line.startsWith("#") || line.startsWith("//")) continue;
+
+    if (!silent) Term.print('<span class="t-arg">[' + (i + 1) + ']</span> ' + Term.highlight(line), "echo");
+
+    const r = await execLine(line, { fromScript: name });
+    if (r.skip) continue;
+
+    if (r.ok) {
+      okCount++;
+      if (!silent && r.out) Term.print('<span class="t-arg">  → </span>' + esc(String(r.out)).split("\n").join("<br>  "), "dim");
+    } else {
+      errCount++;
+      Term.print('<span class="t-arg">  ✗ </span>' + esc(r.err), "err");
+      if (strictMode) {
+        Term.print("严格模式下中断执行", "err");
+        break;
+      }
+    }
+  }
+
+  if (!silent) {
+    Term.gap();
+    Term.print(
+      '<span class="ok">✓ ' + okCount + "</span> 成功  " +
+      (errCount ? '<span class="t-str">✗ ' + errCount + "</span> 失败" : '<span class="t-arg">0 失败</span>'),
+      "dim"
+    );
+  }
+
+  return { ok: errCount === 0, out: name + " 执行完毕" };
+}
+
+/* ---------- 系统指令 ---------- */
+
+reg("help", "显示指令总览", async () => {
+  const lines = [
+    "创建与销毁",
+    '  new window <名字> title="…" w=700 h=520 x=100 y=80 icon="<svg>…</svg>"',
+    "  del <名字>",
+    "",
+    "属性赋值   <对象>.<属性> = <值>",
+    "  title icon x y w h z visible bg blur radius opacity shadow",
+    "  movable resizable closable sidebar sidebarWidth src html",
+    "",
+    "方法调用   <对象>.<方法>(参数)",
+    "  open close show hide minimize maximize restore focus",
+    "  load(路径) html(字符串) reload() select(名字) selectAt(下标) next() prev()",
+    "  sidebar(on|off|toggle)",
+    "",
+    "侧边栏     <对象>.menu.<方法>(参数)",
+    "  add(名,图标,页面)  insert(下标,名,图标,页面)  before(参照,名,图标,页面)  after(参照,名,图标,页面)",
+    "  remove(名)  removeAt(下标)  clear()  update(名,图标,页面)  rename(旧,新)",
+    "  move(名,下标)  swap(名A,名B)  sep(标题)  batch(名:页,名:页)",
+    "  list()  count()  has(名)  open()  close()  toggle()",
+    "",
+    "切换窗口   go.<名字>",
+    "",
+    "背景",
+    "  bg <图片URL>          设置页面背景图",
+    "  bginfo <JSON URL>     设置壁纸信息源，自动取当日图",
+    "",
+    "系统指令",
+    "  help  list  ls  run <脚本>  source  clear  echo <文本>  set <键>=<值>  strict <on|off>"
+  ];
+  lines.forEach(l => Term.raw(l, l.startsWith("  ") ? "dim" : "head"));
+  return "";
+});
+
+reg("list", "列出所有对象", async () => {
+  const names = Object.keys(objects);
+  if (!names.length) return "当前没有任何对象";
+  names.forEach(n => {
+    const o = objects[n];
+    const st = o.visible && !o.closed ? "显示" : "隐藏";
+    Term.raw("  " + n + "  [" + o.type + "]  " + st + "  " + o.w + "x" + o.h + " @(" + o.x + "," + o.y + ")  " + (o.menuCount ? o.menuCount() + " 项" : ""), "dim");
+  });
+  return "共 " + names.length + " 个对象";
+});
+
+reg("ls", "列出脚本与页面", async () => {
+  const sn = Object.keys(scripts);
+  Term.print("脚本", "head");
+  if (!sn.length) Term.print("  （空）", "dim");
+  sn.forEach(n => Term.print("  " + n + "  (" + scripts[n].lines.length + " 行)  " + (scripts[n].desc || ""), "dim"));
+
+  Term.print("页面", "head");
+  const pn = Object.keys(pages);
+  if (!pn.length) Term.print("  （空）", "dim");
+  pn.forEach(n => Term.print("  " + n + "  " + pages[n], "dim"));
+  return "";
+});
+
+reg("run", "运行脚本", async args => {
+  const n = String(args[0] || "").trim();
+  if (!n) throw new Error("用法：run <脚本名>");
+  if (!scripts[n]) throw new Error("找不到脚本：" + n);
+  const r = await runScript(n);
+  return r.out;
+});
+
+reg("source", "查看脚本清单内容", async () => {
+  if (!MANIFEST_TEXT) return "清单为空";
+  MANIFEST_TEXT.split("\n").forEach(l => {
+    const t = l.trim();
+    Term.raw(l, !t || t.startsWith("#") ? "dim" : "cmd");
+  });
+  return "";
+});
+
+reg("clear", "清屏", async () => { Term.clearScreen(); return ""; });
+reg("cls", "清屏", async () => { Term.clearScreen(); return ""; });
+reg("echo", "回显文本", async args => args.map(String).join(" "));
+
+reg("set", "定义变量", async args => {
+  const s = args.join(" ");
+  const k = s.indexOf("=");
+  if (k < 0) throw new Error("用法：set 键=值");
+  const key = s.slice(0, k).trim();
+  const val = s.slice(k + 1).trim();
+  vars[key] = parseValue(val);
+  return key + " = " + val;
+});
+
+reg("strict", "遇错中断开关", async args => {
+  strictMode = bool(args[0], !strictMode);
+  return "strict = " + (strictMode ? "on" : "off");
+});
+
+reg("bg", "设置背景图", async args => {
+  const u = args.map(String).join(" ").trim();
+  if (!u) return "当前背景：" + (Bg.image || "（空）");
+  return Bg.setImage(u);
+});
+
+reg("bginfo", "设置背景信息源", async args => {
+  const u = args.map(String).join(" ").trim();
+  if (!u) return "当前信息源：" + (Bg.info || "（空）");
+  Bg.setInfo(u);
+  const got = await Bg.loadInfo();
+  return got ? "已从信息源载入背景" : "信息源已设置，但未能载入图片";
+});
+
+/* ---------- 清单与页面 ---------- */
+
+const pages = Object.create(null);
+let MANIFEST_TEXT = "";
+const STARTUP_NAME = "startup";
+
+async function fetchText(url) {
+  const res = await fetch(url, { cache: "no-cache" });
+  if (!res.ok) throw new Error("HTTP " + res.status + " · " + url);
+  return res.text();
+}
+
+function parseManifest(text) {
+  const out = [];
+  String(text).split(/\r?\n/).forEach(l => {
+    const t = l.trim();
+    if (!t || t.startsWith("#") || t.startsWith("//")) return;
+    const parts = t.split(/\s+/);
+    if (parts[0] === "script" && parts[1]) {
+      out.push({ name: parts[1], path: parts[2] || ("scripts/" + parts[1] + ".txt"), desc: parts.slice(3).join(" ") });
+    } else if (parts[0] === "page" && parts[1]) {
+      pages[parts[1]] = parts[2] || ("pages/" + parts[1] + ".html");
+    } else if (parts[0] === "run" && parts[1]) {
+      out.push({ name: parts[1], path: "scripts/" + parts[1] + ".txt", desc: "" });
+    }
+  });
+  return out;
+}
+
+async function loadScripts() {
+  try {
+    MANIFEST_TEXT = await fetchText("../DeepSilenceFile.txt");
+  } catch (e) {
+    MANIFEST_TEXT = "";
+    Term.print("清单读取失败：" + esc(e.message), "err");
+    return 0;
+  }
+
+  const entries = parseManifest(MANIFEST_TEXT);
+  let loaded = 0;
+
+  if (!entries.some(en => en.name === STARTUP_NAME)) {
+    entries.unshift({ name: STARTUP_NAME, path: "scripts/" + STARTUP_NAME + ".txt", desc: "启动时自动执行" });
+  }
+
+  for (const en of entries) {
+    try {
+      const txt = await fetchText(en.path);
+      scripts[en.name] = { lines: txt.split(/\r?\n/), desc: en.desc, path: en.path };
+      loaded++;
+    } catch (e) {
+      Term.print("脚本加载失败：" + esc(en.name) + " · " + esc(e.message), "err");
+    }
+  }
+
+  return loaded;
+}
+
+/* ---------- 主入口 ---------- */
+
+async function run(line) {
+  try {
+    const r = await execLine(line);
+    if (r.skip) return;
+    if (r.ok) {
+      if (r.out) Term.print(esc(String(r.out)).split("\n").join("<br>"), "dim");
+    } else {
+      Term.print("✗ " + esc(r.err), "err");
+    }
+  } finally {
+    Term.scroll();
+  }
+}
+
+/* ---------- 终端窗口交互 ---------- */
+
+(() => {
+  const win = $("#term");
+  const head = $("#termHead");
+  const chip = $("#chip");
+  let maxed = false;
+
+  $("#termMax").onclick = e => {
+    e.stopPropagation();
+    maxed = !maxed;
+    win.classList.toggle("maximized", maxed);
+  };
+
+  $("#termMin").onclick = e => {
+    e.stopPropagation();
+    win.classList.remove("active");
+    chip.classList.add("show");
+  };
+
+  $("#termClose").onclick = e => {
+    e.stopPropagation();
+    win.classList.remove("active");
+    chip.classList.add("show");
+  };
+
+  chip.onclick = () => {
+    win.classList.add("active");
+    chip.classList.remove("show");
+    Term.focusInput();
+  };
+
+  let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+
+  head.addEventListener("mousedown", e => {
+    if (maxed) return;
+    if (e.target.closest(".wbtn") || e.target.closest(".win-logo")) return;
+    const r = win.getBoundingClientRect();
+    dragging = true;
+    win.style.transform = "none";
+    win.style.left = r.left + "px";
+    win.style.top = r.top + "px";
+    sx = e.clientX; sy = e.clientY;
+    ox = r.left; oy = r.top;
+    document.body.style.userSelect = "none";
+    e.preventDefault();
+  });
+
+  window.addEventListener("mousemove", e => {
+    if (!dragging) return;
+    win.style.left = Math.round(ox + e.clientX - sx) + "px";
+    win.style.top = Math.round(oy + e.clientY - sy) + "px";
+  });
+
+  window.addEventListener("mouseup", () => {
+    if (!dragging) return;
+    dragging = false;
+    document.body.style.userSelect = "";
+  });
+
+  $$(".rs", win).forEach(rs => {
+    let on = false, sx = 0, sy = 0, st = null;
+    rs.addEventListener("mousedown", e => {
+      if (maxed) return;
+      const r = win.getBoundingClientRect();
+      win.style.transform = "none";
+      win.style.left = r.left + "px";
+      win.style.top = r.top + "px";
+      win.style.width = r.width + "px";
+      win.style.height = r.height + "px";
+      on = true;
+      sx = e.clientX; sy = e.clientY;
+      st = { x: r.left, y: r.top, w: r.width, h: r.height };
+      document.body.style.userSelect = "none";
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    window.addEventListener("mousemove", e => {
+      if (!on) return;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      const cls = rs.className;
+      let { x, y, w, h } = st;
+      if (cls.includes("right")) w = Math.max(360, st.w + dx);
+      if (cls.includes("left")) { w = Math.max(360, st.w - dx); x = st.x + (st.w - w); }
+      if (cls.includes("bottom")) h = Math.max(320, st.h + dy);
+      if (cls.includes("top")) { h = Math.max(320, st.h - dy); y = st.y + (st.h - h); }
+      win.style.left = x + "px";
+      win.style.top = y + "px";
+      win.style.width = w + "px";
+      win.style.height = h + "px";
+    });
+    window.addEventListener("mouseup", () => {
+      if (!on) return;
+      on = false;
+      document.body.style.userSelect = "";
+    });
+  });
+})();
+
+/* ---------- 启动 ---------- */
+
+(async () => {
+  Term.makeInput();
+  $("#term").classList.add("active");
+  setTimeout(() => Term.focusInput(), 200);
+
+  let bootErr = "";
+  try {
+    await Promise.race([
+      loadScripts(),
+      sleep(8000).then(() => { throw new Error("清单加载超时"); })
+    ]);
+  } catch (e) {
+    bootErr = e && e.message ? e.message : String(e);
+  }
+
+  if (bootErr) Term.print("启动警告：" + esc(bootErr), "err");
+  Term.scroll();
+
+  if (scripts[STARTUP_NAME]) {
+    try {
+      await runScript(STARTUP_NAME, { silent: true });
+    } catch (e) {
+      Term.print("启动文件执行失败：" + esc(e && e.message ? e.message : String(e)), "err");
+    }
+  }
+
+  Term.focusInput();
+})();
+
+window.DeepSilence = { objects, Term, Bg, exec: run, scripts, pages };
