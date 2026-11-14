@@ -1,6 +1,0 @@
-# boot.txt
-# 设置壁纸信息源（Bing 每日图），再打开主页窗口
-
-bginfo https://lightboxofficial.github.io/Bing-Wallpaper-Action/data/zh-CN_update.json
-
-home
