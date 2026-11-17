@@ -1,0 +1,68 @@
+{
+  "id": "core.lbxevents",
+  "name": "OriginalDeepsilenceHeart (ODH) 基础指令集",
+  "version": 1,
+  "about": "OriginalDeepsilenceHeart（ODH）的指令定义。本文件定义“有哪些指令可用”，全局指令文件(.lbxscript)与排版文件中的 action 只能调用这里登记过的指令。builtin 指向引擎内置实现，run 则允许直接用一小段代码定义指令。",
+  "instructions": {
+    "window": {
+      "desc": "打开一个窗口，并遵循指定的排版文件",
+      "args": ["layout", "x", "y", "w", "h", "opacity"],
+      "builtin": "window"
+    },
+    "close": {
+      "desc": "关闭窗口；省略 id 时关闭当前聚焦窗口",
+      "args": ["id"],
+      "builtin": "close"
+    },
+    "minimize": {
+      "desc": "最小化窗口到底部 dock",
+      "args": ["id"],
+      "builtin": "minimize"
+    },
+    "maximize": {
+      "desc": "最大化 / 还原窗口",
+      "args": ["id"],
+      "builtin": "maximize"
+    },
+    "focus": {
+      "desc": "召回并聚焦窗口",
+      "args": ["id"],
+      "builtin": "focus"
+    },
+    "page": {
+      "desc": "切换窗口内的侧边栏页面",
+      "args": ["id", "page"],
+      "builtin": "page"
+    },
+    "set": {
+      "desc": "修改窗口属性：x / y / w / h / opacity / radius / blur / padding / title",
+      "args": ["id", "key", "value"],
+      "builtin": "set"
+    },
+    "setwall": {
+      "desc": "从图片链接设置桌面壁纸；留空则恢复默认背景",
+      "args": ["url"],
+      "builtin": "setwall"
+    },
+    "notify": {
+      "desc": "顶部轻提示",
+      "args": ["text"],
+      "builtin": "notify"
+    },
+    "log": {
+      "desc": "写入 ODH 日志",
+      "args": ["text"],
+      "builtin": "log"
+    },
+    "exec": {
+      "desc": "把一段指令文本当作新的指令序列执行",
+      "args": ["text"],
+      "builtin": "exec"
+    },
+    "hello": {
+      "desc": "示例：用 run 代码在事件文件里自定义指令",
+      "args": ["name"],
+      "run": "kernel.notify('你好，' + (args.name || args.__pos[0] || '世界') + ' · 本指令由 core.lbxevents 的 run 代码实现');"
+    }
+  }
+}
