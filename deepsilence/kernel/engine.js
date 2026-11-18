@@ -2,10 +2,10 @@
    OriginalDeepsilenceHeart (ODH) · 窗口引擎
    ------------------------------------------------------------
    引擎由三部分组成：
-     1. 排版文件      layouts/*.lbxlayout   基础属性 + 侧边栏各项(含透明 html) + 排版语言
-     2. 指令事件文件  events/*.lbxevents    定义“有哪些指令可用”
-     3. 全局指令文件  command/*.lbxscript   逐句执行已定义的指令
-   后缀统一以 lbx 为前缀，避开 Windows 的 .cmd / .evt 等系统文件类型。
+     1. 排版文件  layouts/*.json     窗口基础属性 + 侧边栏各项(内嵌 html/css/js)
+     2. 指令集    events/commands.json   定义“有哪些指令可用”
+     3. 事件定义  events/events.json     每个事件是一段指令序列；root 为启动流程，
+                                          其余事件可在 HTML 中用 runEvent('名') 调用
    引擎自身不含任何具体内容，内容全部来自上述文件。
    ============================================================ */
 (function (global) {
@@ -208,9 +208,9 @@
       height: num(base.height, 480),
       x: base.x !== undefined ? base.x : 'center',
       y: base.y !== undefined ? base.y : 'center',
-      opacity: clamp(num(base.opacity, 0.94), 0.2, 1),
+      opacity: clamp(num(base.opacity, 0.8), 0.2, 1),
       radius: clamp(num(base.radius, 16), 0, 40),
-      blur: clamp(num(base.blur, 22), 0, 60),
+      blur: clamp(num(base.blur, 28), 0, 60),
       padding: clamp(num(base.padding, 0), 0, 80),
       minWidth: num(base.minWidth, 320),
       minHeight: num(base.minHeight, 220),
@@ -221,15 +221,14 @@
     var sb = raw.sidebar || {};
     var items = (sb.items || []).map(function (it, i) {
       if (typeof it === 'string') {
-        return { id: 'page-' + (i + 1), label: it, icon: '', html: '', htmlSrc: null, markup: '' };
+        return { id: 'page-' + (i + 1), label: it, icon: '', html: '', htmlSrc: null };
       }
       return {
         id: String(it.id || 'page-' + (i + 1)),
         label: it.label || it.title || it.id || '页面 ' + (i + 1),
         icon: it.icon || '',
         html: it.html || '',
-        htmlSrc: it.htmlSrc || null,
-        markup: it.markup || ''
+        htmlSrc: it.htmlSrc || null
       };
     });
 
@@ -240,15 +239,13 @@
       sidebar: { title: sb.title || '目录', items: items },
       page: {
         html: page.html || raw.html || '',
-        htmlSrc: page.htmlSrc || null,
-        markup: page.markup || raw.markup || ''
+        htmlSrc: page.htmlSrc || null
       }
     };
   }
 
   /* ------------------------------------------------------------
-     3. 排版语言（DSL）
-        class 对象名称 = button(x=24, y=80, w=120, text="确定", action="notify('ok')")
+     3. 指令参数解析（供 runStatement 调用）
      ------------------------------------------------------------ */
   function splitTop(str, sep) {
     var out = [];
@@ -346,35 +343,6 @@
     return args;
   }
 
-  function parseMarkup(src) {
-    var objects = [];
-    var errors = [];
-    if (!src) return { objects: objects, errors: errors };
-    var lines = String(src).split(/\r?\n/);
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i].trim();
-      if (!line || line.charAt(0) === '#' || line.indexOf('//') === 0) continue;
-      var m = /^class\s+([^\s=]+)\s*=\s*([A-Za-z][\w-]*)\s*\(([\s\S]*)\)\s*;?$/.exec(line);
-      if (!m) {
-        errors.push('第 ' + (i + 1) + ' 行无法解析：' + line);
-        continue;
-      }
-      objects.push({ name: m[1], type: m[2].toLowerCase(), args: toArgMap(parseCallArgs(m[3])) });
-    }
-    return { objects: objects, errors: errors };
-  }
-
-  function toArgMap(list) {
-    var map = {};
-    var positionals = [];
-    list.forEach(function (item) {
-      if (item.key) map[item.key] = item.value;
-      else positionals.push(item.value);
-    });
-    map.__pos = positionals;
-    return map;
-  }
-
   /* ------------------------------------------------------------
      4. 透明 html 加载层文档
      ------------------------------------------------------------ */
@@ -401,257 +369,7 @@
   }
 
   /* ------------------------------------------------------------
-     5. 多媒体：内置合成音源（保证离线可播放）
-     ------------------------------------------------------------ */
-  var TONE_CACHE = Object.create(null);
-
-  function makeTone(freq, seconds) {
-    var key = freq + ':' + seconds;
-    if (TONE_CACHE[key]) return TONE_CACHE[key];
-    var sr = 22050;
-    var n = Math.max(1, Math.floor(sr * seconds));
-    var buffer = new ArrayBuffer(44 + n * 2);
-    var view = new DataView(buffer);
-
-    function writeStr(offset, str) {
-      for (var i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
-    }
-
-    writeStr(0, 'RIFF');
-    view.setUint32(4, 36 + n * 2, true);
-    writeStr(8, 'WAVE');
-    writeStr(12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, 1, true);
-    view.setUint32(24, sr, true);
-    view.setUint32(28, sr * 2, true);
-    view.setUint16(32, 2, true);
-    view.setUint16(34, 16, true);
-    writeStr(36, 'data');
-    view.setUint32(40, n * 2, true);
-
-    for (var i = 0; i < n; i++) {
-      var t = i / sr;
-      var env = Math.min(1, t * 24) * Math.min(1, (seconds - t) * 5);
-      var vib = Math.sin(2 * Math.PI * freq * t) * 0.7 + Math.sin(2 * Math.PI * freq * 2 * t) * 0.14;
-      view.setInt16(44 + i * 2, vib * env * 0.34 * 32767, true);
-    }
-
-    var bytes = new Uint8Array(buffer);
-    var bin = '';
-    for (var j = 0; j < bytes.length; j++) bin += String.fromCharCode(bytes[j]);
-    var url = 'data:audio/wav;base64,' + btoa(bin);
-    TONE_CACHE[key] = url;
-    return url;
-  }
-
-  function resolveMediaSrc(src) {
-    if (!src) return '';
-    var s = String(src);
-    if (s.indexOf('tone:') === 0) {
-      var parts = s.split(':');
-      return makeTone(num(parts[1], 520), clamp(num(parts[2], 1), 0.2, 6));
-    }
-    return s;
-  }
-
-  /* ------------------------------------------------------------
-     6. DSL 对象构建
-     ------------------------------------------------------------ */
-  function place(el, a) {
-    el.style.position = 'absolute';
-    if (a.right !== undefined && a.x === undefined && a.left === undefined) el.style.right = px(a.right);
-    else el.style.left = px(a.left !== undefined ? a.left : (a.x !== undefined ? a.x : 0));
-
-    if (a.bottom !== undefined && a.y === undefined && a.top === undefined) el.style.bottom = px(a.bottom);
-    else el.style.top = px(a.top !== undefined ? a.top : (a.y !== undefined ? a.y : 0));
-
-    if (a.w !== undefined) el.style.width = px(a.w);
-    if (a.h !== undefined) el.style.height = px(a.h);
-    if (a.z !== undefined) el.style.zIndex = a.z;
-    if (a.opacity !== undefined) el.style.opacity = a.opacity;
-    if (a.rotate !== undefined) el.style.transform = 'rotate(' + a.rotate + 'deg)';
-  }
-
-  function buildObject(node, win) {
-    var a = node.args;
-    var el = null;
-
-    switch (node.type) {
-      case 'text': {
-        el = document.createElement('div');
-        el.className = 'lb-obj lb-obj-text';
-        el.textContent = a.text !== undefined ? a.text : (a.__pos[0] !== undefined ? a.__pos[0] : '');
-        if (a.size !== undefined) el.style.fontSize = px(a.size);
-        if (a.color !== undefined) el.style.color = a.color;
-        if (a.weight !== undefined) el.style.fontWeight = a.weight;
-        if (a.align !== undefined) el.style.textAlign = a.align;
-        if (a.line !== undefined) el.style.lineHeight = a.line;
-        if (a.track !== undefined) el.style.letterSpacing = px(a.track);
-        if (a.w !== undefined) el.style.width = px(a.w);
-        place(el, a);
-        break;
-      }
-
-      case 'button': {
-        el = document.createElement('button');
-        el.type = 'button';
-        el.className = 'lb-obj lb-btn' + (a.variant ? ' lb-btn-' + a.variant : '');
-        var btnText = a.text !== undefined ? a.text : (a.__pos[0] !== undefined ? a.__pos[0] : '按钮');
-        el.innerHTML = (a.icon ? '<span class="lb-btn-ico">' + a.icon + '</span>' : '') +
-          '<span>' + escapeHtml(btnText) + '</span>';
-        el.addEventListener('click', function () {
-          Kernel.execAction(a.action, { win: win.id });
-        });
-        place(el, a);
-        break;
-      }
-
-      case 'input': {
-        el = document.createElement('div');
-        el.className = 'lb-obj';
-        var inputHtml = (a.label ? '<span class="lb-obj-label">' + escapeHtml(a.label) + '</span>' : '') +
-          '<div class="lb-inputwrap"><input class="lb-obj-input" type="' +
-          escapeHtml(a.type || 'text') + '"><button class="lb-obj-go" type="button"></button></div>';
-        el.innerHTML = inputHtml;
-        place(el, a);
-
-        var input = el.querySelector('.lb-obj-input');
-        input.placeholder = a.placeholder !== undefined ? a.placeholder : '';
-        input.value = a.value !== undefined ? a.value : '';
-        if (a.autofocus) setTimeout(function () { input.focus(); }, 120);
-
-        var go = el.querySelector('.lb-obj-go');
-        if (a.submit) {
-          go.textContent = a.submit;
-        } else {
-          go.parentNode.removeChild(go);
-        }
-
-        var fire = function () {
-          Kernel.execAction(a.action, { win: win.id, value: input.value });
-        };
-        input.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            fire();
-          }
-        });
-        if (go.parentNode) go.addEventListener('click', fire);
-        break;
-      }
-
-      case 'slider': {
-        el = document.createElement('div');
-        el.className = 'lb-obj lb-slider';
-        el.innerHTML =
-          '<div class="lb-slider-top"><span class="lb-obj-label" style="margin:0">' +
-          escapeHtml(a.label || '滑杆') + '</span><span class="lb-slider-val"></span></div>' +
-          '<input class="lb-obj-range" type="range">';
-        place(el, a);
-        var range = el.querySelector('input');
-        range.min = a.min !== undefined ? a.min : 0;
-        range.max = a.max !== undefined ? a.max : 100;
-        range.step = a.step !== undefined ? a.step : 1;
-        range.value = a.value !== undefined ? a.value : range.min;
-        var valEl = el.querySelector('.lb-slider-val');
-        var show = function () {
-          valEl.textContent = range.value + (a.unit || '');
-        };
-        show();
-        range.addEventListener('input', function () {
-          show();
-          Kernel.execAction(a.action, { win: win.id, value: range.value });
-        });
-        break;
-      }
-
-      case 'media': {
-        el = document.createElement('div');
-        el.className = 'lb-obj lb-media';
-        place(el, a);
-        var src = resolveMediaSrc(a.src);
-        var attrs = (a.loop ? ' loop' : '') + (a.autoplay ? ' autoplay' : '') + (a.muted ? ' muted' : '');
-        if ((a.type || 'audio') === 'video') {
-          el.innerHTML = '<video class="lb-media-el" controls playsinline' + attrs + '></video>';
-          el.querySelector('video').src = src;
-        } else {
-          el.innerHTML =
-            '<div class="lb-media-meta"><span class="lb-media-title">' + escapeHtml(a.title || '音频') +
-            '</span><span class="lb-media-sub">' + escapeHtml(a.sub || '引擎合成音源') + '</span></div>' +
-            '<audio class="lb-media-el" controls' + attrs + '></audio>';
-          el.querySelector('audio').src = src;
-        }
-        break;
-      }
-
-      case 'image': {
-        el = document.createElement('img');
-        el.className = 'lb-obj lb-obj-img';
-        el.src = a.src || '';
-        el.alt = a.alt || '';
-        if (a.radius !== undefined) el.style.borderRadius = px(a.radius);
-        el.style.objectFit = a.fit || 'cover';
-        place(el, a);
-        break;
-      }
-
-      case 'panel': {
-        el = document.createElement('div');
-        el.className = 'lb-obj lb-panel';
-        if (a.fill !== undefined) el.style.background = a.fill;
-        if (a.border !== undefined) el.style.borderColor = a.border;
-        if (a.radius !== undefined) el.style.borderRadius = px(a.radius);
-        if (a.title) {
-          var t = document.createElement('div');
-          t.className = 'lb-panel-title';
-          t.textContent = a.title;
-          el.appendChild(t);
-        }
-        place(el, a);
-        break;
-      }
-
-      case 'divider': {
-        el = document.createElement('div');
-        el.className = 'lb-obj lb-divider';
-        if (a.h === undefined) el.style.height = '1px';
-        if (a.color !== undefined) el.style.background = a.color;
-        place(el, a);
-        break;
-      }
-
-      case 'badge': {
-        el = document.createElement('span');
-        el.className = 'lb-obj lb-badge';
-        el.textContent = a.text !== undefined ? a.text : (a.__pos[0] !== undefined ? a.__pos[0] : '');
-        if (a.color !== undefined) el.style.color = a.color;
-        if (a.fill !== undefined) el.style.background = a.fill;
-        if (a.border !== undefined) el.style.borderColor = a.border;
-        if (a.size !== undefined) el.style.fontSize = px(a.size);
-        place(el, a);
-        break;
-      }
-
-      case 'html': {
-        el = document.createElement('div');
-        el.className = 'lb-obj lb-obj-html';
-        el.innerHTML = a.content !== undefined ? a.content : (a.__pos[0] || '');
-        place(el, a);
-        break;
-      }
-
-      default:
-        return null;
-    }
-
-    if (el) el.setAttribute('data-obj', node.name);
-    return el;
-  }
-
-  /* ------------------------------------------------------------
-     7. 单窗口
+     5. 单窗口
      ------------------------------------------------------------ */
   var SETTINGS_FIELDS = [
     { key: 'x', label: 'X', step: 1 },
@@ -689,7 +407,6 @@
     document.body.appendChild(this.el);
     this.bar = this.el.querySelector('.lb-titlebar');
     this.frame = this.el.querySelector('.lb-frame');
-    this.objectLayer = this.el.querySelector('.lb-layer-objects');
 
     this.clampPos();
     this.applyState();
@@ -801,7 +518,6 @@
       '<div class="lb-body">' +
         '<div class="lb-layer lb-layer-frame"><iframe class="lb-frame" title="内容加载层" ' +
           'sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe></div>' +
-        '<div class="lb-layer lb-layer-objects"></div>' +
       '</div>' +
 
       ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'].map(function (dir) {
@@ -1197,25 +913,6 @@
     this.frame.srcdoc = buildFrameDoc(html);
   };
 
-  LBWindow.prototype.renderObjects = function (markup) {
-    var self = this;
-    this.objectLayer.innerHTML = '';
-    if (!markup) return;
-    var parsed = parseMarkup(markup);
-    parsed.errors.forEach(function (msg) {
-      Kernel.log('[' + self.id + '] ' + msg, 'warn');
-    });
-    parsed.objects.forEach(function (node) {
-      var nodeEl = null;
-      try {
-        nodeEl = buildObject(node, self);
-      } catch (err) {
-        Kernel.log('[' + self.id + '] 对象 ' + node.name + ' 构建失败：' + err.message, 'err');
-      }
-      if (nodeEl) self.objectLayer.appendChild(nodeEl);
-    });
-  };
-
   LBWindow.prototype.setPage = function (itemId) {
     var self = this;
     var item = null;
@@ -1229,16 +926,13 @@
     this.pageId = item ? item.id : null;
     this.highlightNav();
 
-    var html = item ? item.html : this.layout.page.html;
+    // 窗口级 html（如右下角悬浮按钮）始终保留，页面内容追加其后
+    var html = this.layout.page.html || '';
+    if (item && item.html) html = html + (html ? '\n' : '') + item.html;
     var src = item ? item.htmlSrc : this.layout.page.htmlSrc;
-
-    // 窗口级排版对象始终保留（例如右下角悬浮动作），页面可以再追加自己的对象
-    var markup = this.layout.page.markup || '';
-    if (item && item.markup) markup = (markup ? markup + '\n' : '') + item.markup;
 
     function finish(content) {
       self.renderFrame(content || '');
-      self.renderObjects(markup || '');
     }
 
     if (!html && src) {
@@ -1267,6 +961,7 @@
     layouts: new Map(),
     windows: windows,
     instructions: new Map(),
+    events: Object.create(null),
     focused: null,
 
     /* ---------- 排版文件 ---------- */
@@ -1276,7 +971,7 @@
       if (!key) return Promise.reject(new Error('排版文件名为空'));
       if (this.layouts.has(key)) return Promise.resolve(this.layouts.get(key));
 
-      var path = /\.lbxlayout$/i.test(key) ? key : 'layouts/' + key + '.lbxlayout';
+      var path = /\.(json|lbxlayout)$/i.test(key) ? key : 'layouts/' + key + '.json';
       return Sources.json(path).then(function (raw) {
         var layout = normalizeLayout(raw, path);
         self.layouts.set(key, layout);
@@ -1287,12 +982,11 @@
       });
     },
 
-    /* ---------- 指令事件文件 ---------- */
-    loadEvents: function (ref) {
+    /* ---------- 指令集定义（commands.json） ---------- */
+    loadCommands: function (ref) {
       var self = this;
-      var path = /\.lbxevents$/i.test(ref) || ref.indexOf('/') >= 0 ? ref : 'events/' + ref + '.lbxevents';
-      return Sources.text(path).then(function (txt) {
-        var def = JSON.parse(txt);
+      var path = /\.(json|lbxevents)$/i.test(ref) || ref.indexOf('/') >= 0 ? ref : 'events/' + ref + '.json';
+      return Sources.json(path).then(function (def) {
         var set = def.instructions || {};
         var names = Object.keys(set);
         names.forEach(function (name) {
@@ -1306,31 +1000,45 @@
             run: spec.run || null
           });
         });
-        self.log('指令事件文件 ' + (def.id || path) + ' 注册 ' + names.length + ' 条指令', 'ok');
+        self.log('指令集 ' + (def.id || path) + ' 注册 ' + names.length + ' 条指令', 'ok');
         return names.length;
       });
     },
 
-    /* ---------- 全局指令文件 ---------- */
-    runCommandFile: function (ref) {
+    /* ---------- 事件定义（events.json） ---------- */
+    loadEvents: function (ref) {
       var self = this;
-      var path = ref.indexOf('/') >= 0 || /\.lbxscript$/i.test(ref) ? ref : 'command/' + ref;
-      return Sources.text(path).then(function (txt) {
-        var list = parseCommandText(txt);
-        self.log('全局指令文件 ' + path + ' · ' + list.length + ' 条指令', 'ok');
-        var chain = Promise.resolve();
-        list.forEach(function (stmt) {
-          chain = chain.then(function () {
-            self.log('▶ ' + stmt, 'cmd');
-            return self.runStatement(stmt, path).catch(function (err) {
-              self.log(path + ' 第 ' + stmt + ' 执行失败：' + err.message, 'err');
-            });
+      var path = /\.json$/i.test(ref) || ref.indexOf('/') >= 0 ? ref : 'events/' + ref + '.json';
+      return Sources.json(path).then(function (def) {
+        var evs = def.events || {};
+        var names = Object.keys(evs);
+        names.forEach(function (name) {
+          self.events[name] = evs[name];
+        });
+        self.log('事件定义 ' + (def.id || path) + ' 注册 ' + names.length + ' 个事件', 'ok');
+        return names.length;
+      });
+    },
+
+    /* ---------- 执行一个事件 ---------- */
+    runEvent: function (name) {
+      var self = this;
+      var ev = this.events[name];
+      if (ev === undefined) {
+        this.log('未定义的事件：' + name, 'err');
+        return Promise.reject(new Error('未定义的事件：' + name));
+      }
+      var list = Array.isArray(ev) ? ev : parseCommandText(String(ev));
+      this.log('▶ 事件 ' + name + ' · ' + list.length + ' 条指令', 'cmd');
+      var chain = Promise.resolve();
+      list.forEach(function (stmt) {
+        chain = chain.then(function () {
+          return self.runStatement(stmt, 'event:' + name).catch(function (err) {
+            self.log('事件 ' + name + ' 执行失败：' + err.message, 'err');
           });
         });
-        return chain.then(function () {
-          return list.length;
-        });
       });
+      return chain.then(function () { return list.length; });
     },
 
     /* ---------- 单句执行 ---------- */
@@ -1405,6 +1113,19 @@
       setwall: function (a) {
         var url = a.url !== undefined ? a.url : a.__pos[0];
         return Kernel.setWallpaper(url === undefined ? '' : url);
+      },
+      dialog: function (a) {
+        var message = a.message !== undefined ? a.message : (a.text !== undefined ? a.text : a.__pos[0]);
+        var type = a.type !== undefined ? a.type : (a.__pos[1] || 'info');
+        var title = a.title !== undefined ? a.title : (a.__pos[2] || undefined);
+        Kernel.dialog({ message: message, type: type, title: title });
+      },
+      notif: function (a) {
+        var message = a.message !== undefined ? a.message : (a.text !== undefined ? a.text : a.__pos[0]);
+        var type = a.type !== undefined ? a.type : (a.__pos[1] || 'info');
+        var title = a.title !== undefined ? a.title : (a.__pos[2] || undefined);
+        var duration = a.duration !== undefined ? a.duration : (a.__pos[3] !== undefined ? a.__pos[3] : undefined);
+        Kernel.notif({ message: message, type: type, title: title, duration: duration });
       },
       page: function (a) {
         var id = a.id !== undefined ? a.id : a.__pos[0];
@@ -1491,7 +1212,7 @@
       win.applyField(key, value);
     },
 
-    /* ---------- 指令字符串（供 DSL 的 action 使用） ---------- */
+    /* ---------- 指令字符串（外部可直接调用） ---------- */
     exec: function (text) {
       var self = this;
       var list = parseCommandText(String(text === undefined || text === null ? '' : text));
@@ -1505,15 +1226,6 @@
         });
       });
       return chain;
-    },
-
-    execAction: function (action, ctx) {
-      if (!action) return Promise.resolve();
-      ctx = ctx || {};
-      var text = String(action);
-      if (ctx.win !== undefined) text = text.replace(/\$win/g, JSON.stringify(String(ctx.win)));
-      if (ctx.value !== undefined) text = text.replace(/\$value/g, JSON.stringify(String(ctx.value)));
-      return this.exec(text);
     },
 
     /* ---------- 反馈 ---------- */
@@ -1553,6 +1265,21 @@
       });
     },
 
+    /* ---------- 模态对话框 / 顶部通知 ---------- */
+    dialog: function (opts) {
+      if (typeof opts === 'string') opts = { message: opts };
+      opts = opts || {};
+      UI.dialog(opts);
+      this.log('弹窗[' + (opts.type || 'info') + '] ' + (opts.title || '提示') + '：' + (opts.message || opts.text || ''), 'cmd');
+    },
+
+    notif: function (opts) {
+      if (typeof opts === 'string') opts = { message: opts };
+      opts = opts || {};
+      UI.notif(opts);
+      this.log('顶部通知[' + (opts.type || 'info') + '] ' + (opts.title || '通知') + '：' + (opts.message || opts.text || ''), 'cmd');
+    },
+
     applyDefaultWallpaper: function (quiet) {
       var self = this;
       return loadDefaultWallpaper().then(function (url) {
@@ -1585,9 +1312,12 @@
       if (savedWall) UI.applyWallpaper(savedWall);
       else this.applyDefaultWallpaper(true);
 
-      return this.loadEvents('events/core.lbxevents')
+      return this.loadCommands('events/commands.json')
         .then(function () {
-          return self.runCommandFile('command/boot.lbxscript');
+          return self.loadEvents('events/events.json');
+        })
+        .then(function () {
+          return self.runEvent('root');
         })
         .then(function (count) {
           var ms = Math.round((global.performance ? performance.now() : Date.now()) - t0);
@@ -1679,7 +1409,11 @@
     bind: function () {
       var self = this;
       this.el.dock = document.getElementById('lbDock') || createNode('div', 'lb-dock', '', 'lbDock');
+      this.el.dockApps = document.getElementById('lbDockApps');
+      this.el.dockWins = document.getElementById('lbDockWins');
       this.el.toasts = document.getElementById('lbToasts') || createNode('div', 'lb-toasts', '', 'lbToasts');
+      this.el.notifs = document.getElementById('lbNotifs') || createNode('div', 'lb-notifs', '', 'lbNotifs');
+      this.el.dialogWrap = document.getElementById('lbDialogWrap') || createNode('div', 'lb-dialog-wrap', '', 'lbDialogWrap');
       this.el.status = document.getElementById('lbStatus');
       this.el.logList = document.getElementById('lbLogList');
       this.el.logPanel = document.getElementById('lbLogPanel');
@@ -1691,6 +1425,40 @@
       this.el.wallReset = document.getElementById('lbWallReset');
       this.el.launcher = document.getElementById('lbLauncher');
       this.el.launcherBtn = document.getElementById('lbLauncherBtn');
+
+      /* ---------- 底部应用启动器 ---------- */
+      var apps = [
+        { id: 'desktop', label: '应用桌面', event: 'openDesktop',
+          svg: '<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M3 9h18"/><rect x="6" y="12" width="5" height="6" rx="1"/><rect x="13" y="12" width="5" height="6" rx="1"/>' },
+        { id: 'settings', label: '系统设置', event: 'openSettings',
+          svg: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>' },
+        { id: 'control', label: '控制中心', event: 'openControl',
+          svg: '<line x1="6" y1="4" x2="6" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/><circle cx="6" cy="8" r="2.2"/><circle cx="12" cy="15" r="2.2"/><circle cx="18" cy="11" r="2.2"/>' },
+        { id: 'blog', label: '博客社区', event: 'openBlog',
+          svg: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>' },
+        { id: 'custom', label: '自定义', event: 'openCustom',
+          svg: '<path d="M12 2.5l1.9 4.8 4.8 1.9-4.8 1.9L12 16l-1.9-4.9L5.3 9.2l4.8-1.9z"/><path d="M19 14l.9 2.3 2.3.9-2.3.9L19 21l-.9-2.3-2.3-.9 2.3-.9z"/>' }
+      ];
+      if (this.el.dockApps) {
+        apps.forEach(function (app, idx) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'lb-dock-app';
+          btn.setAttribute('data-tip', app.label);
+          btn.style.animation = 'lbDockIconIn 0.4s ' + (0.08 * idx) + 's cubic-bezier(0.34, 1.56, 0.64, 1) both';
+          btn.innerHTML = '<svg viewBox="0 0 24 24">' + app.svg + '</svg>';
+          btn.addEventListener('click', function () {
+            Kernel.log('点击应用「' + app.label + '」，触发事件 ' + app.event, 'cmd');
+            Kernel.runEvent(app.event).then(function (n) {
+              Kernel.notify(app.label + ' 操作成功');
+            }).catch(function (err) {
+              Kernel.notify(app.label + ' 操作失败：' + err.message, true);
+              Kernel.log(err.message, 'err');
+            });
+          });
+          self.el.dockApps.appendChild(btn);
+        });
+      }
 
       var setLauncher = function (open) {
         if (!self.el.launcher) return;
@@ -1811,6 +1579,103 @@
       }, isError ? 4200 : 2600);
     },
 
+    /* ---------- Windows 风格模态对话框 ---------- */
+    dialog: function (opts) {
+      var self = this;
+      var wrap = this.el.dialogWrap;
+      if (!wrap) return;
+      opts = opts || {};
+      var type = opts.type || 'info';
+      var title = opts.title || '提示';
+      var message = opts.message !== undefined ? opts.message : (opts.text !== undefined ? opts.text : '');
+      var btnText = opts.button || '确定';
+
+      var iconSvg = {
+        info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+        warn: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+        err: '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>'
+      };
+
+      var html =
+        '<div class="lb-dialog-mask"></div>' +
+        '<div class="lb-dialog" role="alertdialog" aria-modal="true">' +
+          '<div class="lb-dialog-head">' +
+            '<div class="lb-dialog-icon t-' + type + '"><svg viewBox="0 0 24 24">' + (iconSvg[type] || iconSvg.info) + '</svg></div>' +
+            '<div class="lb-dialog-titles">' +
+              '<div class="lb-dialog-title"></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="lb-dialog-body"></div>' +
+          '<div class="lb-dialog-foot">' +
+            '<button class="lb-dialog-btn primary" type="button"></button>' +
+          '</div>' +
+        '</div>';
+      wrap.innerHTML = html;
+      wrap.querySelector('.lb-dialog-title').textContent = title;
+      wrap.querySelector('.lb-dialog-body').textContent = message;
+      var btn = wrap.querySelector('.lb-dialog-btn');
+      btn.textContent = btnText;
+      wrap.classList.add('lb-show');
+
+      var close = function () {
+        wrap.classList.remove('lb-show');
+        setTimeout(function () { wrap.innerHTML = ''; }, 200);
+      };
+      btn.addEventListener('click', close);
+      wrap.querySelector('.lb-dialog-mask').addEventListener('click', close);
+      document.addEventListener('keydown', function onKey(e) {
+        if (e.key === 'Escape' || e.key === 'Enter') {
+          close();
+          document.removeEventListener('keydown', onKey);
+        }
+      });
+      setTimeout(function () { btn.focus(); }, 50);
+    },
+
+    /* ---------- Android 风格顶部通知 ---------- */
+    notif: function (opts) {
+      var self = this;
+      var box = this.el.notifs;
+      if (!box) return;
+      opts = opts || {};
+      var type = opts.type || 'info';
+      var title = opts.title || '通知';
+      var message = opts.message !== undefined ? opts.message : (opts.text !== undefined ? opts.text : '');
+      var duration = opts.duration !== undefined ? num(opts.duration, 3200) : 3200;
+
+      var iconSvg = {
+        info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+        warn: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+        err: '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+        ok: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+      };
+
+      var node = document.createElement('div');
+      node.className = 'lb-notif';
+      node.innerHTML =
+        '<div class="lb-notif-icon t-' + type + '"><svg viewBox="0 0 24 24">' + (iconSvg[type] || iconSvg.info) + '</svg></div>' +
+        '<div class="lb-notif-body">' +
+          '<div class="lb-notif-title"></div>' +
+          '<div class="lb-notif-msg"></div>' +
+        '</div>' +
+        '<button class="lb-notif-close" type="button" aria-label="关闭"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+      node.querySelector('.lb-notif-title').textContent = title;
+      node.querySelector('.lb-notif-msg').textContent = message;
+
+      var timer;
+      var remove = function () {
+        if (timer) clearTimeout(timer);
+        node.classList.add('lb-out');
+        setTimeout(function () {
+          if (node.parentNode) node.parentNode.removeChild(node);
+        }, 280);
+      };
+      node.querySelector('.lb-notif-close').addEventListener('click', remove);
+      if (duration > 0) timer = setTimeout(remove, duration);
+
+      box.appendChild(node);
+    },
+
     log: function (text, kind) {
       var list = this.el.logList;
       if (!list) return;
@@ -1831,7 +1696,7 @@
 
     dockAdd: function (win) {
       var self = this;
-      if (!this.el.dock || win.dockChip) return;
+      if (!this.el.dockWins || win.dockChip) return;
       var chip = document.createElement('button');
       chip.className = 'lb-dock-chip';
       chip.type = 'button';
@@ -1840,13 +1705,21 @@
       chip.addEventListener('click', function () {
         win.restore();
       });
-      this.el.dock.appendChild(chip);
+      this.el.dockWins.appendChild(chip);
       win.dockChip = chip;
+      this.updateDockSep();
     },
 
     dockRemove: function (win) {
       if (win.dockChip && win.dockChip.parentNode) win.dockChip.parentNode.removeChild(win.dockChip);
       win.dockChip = null;
+      this.updateDockSep();
+    },
+
+    updateDockSep: function () {
+      if (!this.el.dockSep) return;
+      var hasWins = this.el.dockWins && this.el.dockWins.children.length > 0;
+      this.el.dockSep.classList.toggle('lb-hide', !hasWins);
     }
   };
 
@@ -1866,7 +1739,6 @@
   global.ODHWindow = LBWindow;
   global.ODHPipeline = {
     Sources: Sources,
-    parseMarkup: parseMarkup,
     parseCommandText: parseCommandText,
     buildFrameDoc: buildFrameDoc
   };

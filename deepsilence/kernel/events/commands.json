@@ -1,11 +1,11 @@
 {
-  "id": "core.lbxevents",
-  "name": "OriginalDeepsilenceHeart (ODH) 基础指令集",
+  "id": "commands.json",
+  "name": "ODH 指令集",
   "version": 1,
-  "about": "OriginalDeepsilenceHeart（ODH）的指令定义。本文件定义“有哪些指令可用”，全局指令文件(.lbxscript)与排版文件中的 action 只能调用这里登记过的指令。builtin 指向引擎内置实现，run 则允许直接用一小段代码定义指令。",
+  "about": "定义有哪些指令可用。events.json 里的事件和 HTML 里的 runEvent() 只能调用这里登记过的指令。builtin 指向引擎内置实现，run 则用一小段代码自定义指令。",
   "instructions": {
     "window": {
-      "desc": "打开一个窗口，并遵循指定的排版文件",
+      "desc": "打开一个窗口，加载 layouts/ 下同名 .json 文件",
       "args": ["layout", "x", "y", "w", "h", "opacity"],
       "builtin": "window"
     },
@@ -39,18 +39,13 @@
       "args": ["id", "key", "value"],
       "builtin": "set"
     },
-    "setwall": {
-      "desc": "从图片链接设置桌面壁纸；留空则恢复默认背景",
-      "args": ["url"],
-      "builtin": "setwall"
-    },
     "notify": {
       "desc": "顶部轻提示",
       "args": ["text"],
       "builtin": "notify"
     },
     "log": {
-      "desc": "写入 ODH 日志",
+      "desc": "写入内核日志",
       "args": ["text"],
       "builtin": "log"
     },
@@ -59,10 +54,20 @@
       "args": ["text"],
       "builtin": "exec"
     },
-    "hello": {
-      "desc": "示例：用 run 代码在事件文件里自定义指令",
-      "args": ["name"],
-      "run": "kernel.notify('你好，' + (args.name || args.__pos[0] || '世界') + ' · 本指令由 core.lbxevents 的 run 代码实现');"
+    "setwall": {
+      "desc": "设置桌面壁纸；留空恢复默认",
+      "args": ["url"],
+      "builtin": "setwall"
+    },
+    "dialog": {
+      "desc": "弹出 Windows 风格模态对话框（type: info/warn/err）",
+      "args": ["message", "type", "title"],
+      "builtin": "dialog"
+    },
+    "notif": {
+      "desc": "弹出 Android 风格顶部通知（type: info/warn/err/ok，自动消失）",
+      "args": ["message", "type", "title", "duration"],
+      "builtin": "notif"
     }
   }
 }

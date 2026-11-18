@@ -1,0 +1,59 @@
+{
+  "id": "events.json",
+  "name": "ODH 事件定义",
+  "about": "每个事件是一段指令序列。root 事件在引擎启动时自动执行；其他事件可在 HTML 中通过 parent.ODH.runEvent('事件名') 调用，解析后转化为指令执行。",
+  "events": {
+    "root": [
+      "window(welcome)",
+      "notify('OriginalDeepsilenceHeart (ODH) 已就绪')"
+    ],
+    "openWelcome": [
+      "window(welcome)"
+    ],
+    "notifyDemo": [
+      "notify('来自 events.json 事件的通知')"
+    ],
+    "resetWallpaper": [
+      "setwall()"
+    ],
+
+    "openDesktop": [
+      "notif('应用桌面功能开发中，敬请期待', 'info', '应用桌面', 2600)"
+    ],
+    "openSettings": [
+      "dialog('系统设置面板尚未开放', 'info', '系统设置')"
+    ],
+    "openControl": [
+      "dialog('控制中心即将上线', 'warn', '控制中心')"
+    ],
+    "openBlog": [
+      "notif('博客社区正在建设中', 'info', '博客社区', 2600)"
+    ],
+    "openCustom": [
+      "dialog('自定义面板暂未启用', 'info', '自定义')"
+    ],
+
+    "dialogInfo": [
+      "dialog('这是一条普通提示信息。', 'info', '提示')"
+    ],
+    "dialogWarn": [
+      "dialog('请注意，此操作可能产生不可逆的影响。', 'warn', '警告')"
+    ],
+    "dialogErr": [
+      "dialog('操作失败，请稍后重试。', 'err', '错误')"
+    ],
+
+    "notifInfo": [
+      "notif('系统已完成更新', 'info', '系统通知')"
+    ],
+    "notifWarn": [
+      "notif('存储空间不足，建议清理', 'warn', '空间警告', 4000)"
+    ],
+    "notifErr": [
+      "notif('网络连接已断开', 'err', '网络错误', 5000)"
+    ],
+    "notifOk": [
+      "notif('文件保存成功', 'ok', '操作成功')"
+    ]
+  }
+}
